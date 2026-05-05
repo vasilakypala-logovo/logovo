@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Зал Несовпадения</title>
+  <style>
+    :root {
+      --fog-light: rgba(205, 225, 228, 0.16);
+      --fog-mid: rgba(110, 140, 150, 0.12);
+      --fog-dark: rgba(20, 33, 48, 0.55);
+      --mist-blue: rgba(100, 130, 145, 0.18);
+      --deep-blue: #071321;
+      --floor-glow: rgba(190, 220, 230, 0.15);
+      --door-core: rgba(220, 240, 245, 0.82);
+      --door-halo: rgba(200, 230, 240, 0.18);
+      --text-soft: rgba(220, 232, 235, 0.78);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      position: relative;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(180, 205, 210, 0.24) 0%, rgba(110, 140, 150, 0.15) 18%, rgba(18, 32, 45, 0.18) 44%, rgba(6, 13, 23, 0.84) 100%),
+        linear-gradient(to bottom, #213743 0%, #162734 36%, #0c1724 68%, #050a12 100%);
+    }
+
+    .hall {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse at center, rgba(160, 185, 192, 0.08) 0%, rgba(48, 68, 80, 0.05) 35%, rgba(5, 9, 16, 0) 70%),
+        linear-gradient(to right, rgba(10, 16, 25, 0.85) 0%, rgba(10, 16, 25, 0.15) 15%, rgba(10, 16, 25, 0.08) 50%, rgba(10, 16, 25, 0.24) 82%, rgba(10, 16, 25, 0.88) 100%);
+    }
+
+    .ceiling-glow {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 8%, rgba(210, 228, 232, 0.22) 0%, rgba(176, 202, 208, 0.11) 14%, rgba(60, 83, 94, 0.09) 32%, rgba(0, 0, 0, 0) 58%);
+      filter: blur(10px);
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    .side-mass,
+    .side-mass::before,
+    .side-mass::after {
+      position: absolute;
+      content: "";
+      pointer-events: none;
+    }
+
+    .side-mass.left {
+      left: -10%;
+      top: 3%;
+      width: 46%;
+      height: 82%;
+      background:
+        radial-gradient(circle at 62% 22%, rgba(150, 180, 188, 0.14) 0%, rgba(74, 103, 116, 0.10) 24%, rgba(9, 18, 30, 0.48) 66%, rgba(5, 10, 16, 0.02) 100%);
+      filter: blur(28px);
+      opacity: 0.88;
+      transform: rotate(-5deg);
+    }
+
+    .side-mass.left::before {
+      inset: 10% 3% 14% 12%;
+      background:
+        radial-gradient(circle at 55% 38%, rgba(26, 42, 56, 0.80) 0%, rgba(9, 18, 28, 0.58) 42%, rgba(0, 0, 0, 0) 78%);
+      filter: blur(24px);
+    }
+
+    .side-mass.left::after {
+      inset: 18% 10% 4% 16%;
+      background:
+        radial-gradient(circle at 68% 54%, rgba(138, 168, 176, 0.11) 0%, rgba(20, 34, 47, 0.40) 46%, rgba(0, 0, 0, 0) 84%);
+      filter: blur(22px);
+    }
+
+    .side-mass.right {
+      right: -12%;
+      top: 1%;
+      width: 52%;
+      height: 84%;
+      background:
+        radial-gradient(circle at 34% 28%, rgba(12, 24, 40, 0.86) 0%, rgba(10, 22, 38, 0.76) 28%, rgba(6, 14, 26, 0.54) 52%, rgba(0, 0, 0, 0.02) 100%);
+      filter: blur(30px);
+      opacity: 0.95;
+      transform: rotate(4deg);
+    }
+
+    .side-mass.right::before {
+      inset: 6% 14% 18% 6%;
+      background:
+        radial-gradient(circle at 38% 36%, rgba(18, 30, 50, 0.96) 0%, rgba(10, 20, 35, 0.72) 34%, rgba(0, 0, 0, 0) 78%);
+      filter: blur(24px);
+    }
+
+    .side-mass.right::after {
+      inset: 22% 8% 6% 18%;
+      background:
+        radial-gradient(circle at 46% 54%, rgba(74, 106, 119, 0.07) 0%, rgba(8, 18, 32, 0.46) 46%, rgba(0, 0, 0, 0) 82%);
+      filter: blur(22px);
+    }
+
+    .door-zone {
+      position: absolute;
+      left: 50%;
+      top: 26%;
+      width: min(12vw, 150px);
+      height: min(24vh, 290px);
+      transform: translateX(-50%);
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      pointer-events: auto;
+    }
+
+    .door-halo {
+      position: absolute;
+      inset: -12% -26% -16% -26%;
+      background:
+        radial-gradient(circle at center, rgba(224, 242, 246, 0.28) 0%, rgba(200, 226, 235, 0.10) 38%, rgba(150, 184, 194, 0.03) 58%, rgba(0, 0, 0, 0) 78%);
+      filter: blur(18px);
+      animation: breathe 5.6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .door {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      background:
+        linear-gradient(to bottom, rgba(233, 244, 246, 0.84) 0%, rgba(208, 229, 234, 0.68) 32%, rgba(160, 186, 194, 0.34) 70%, rgba(118, 148, 160, 0.15) 100%);
+      box-shadow:
+        0 0 34px rgba(204, 230, 235, 0.18),
+        0 0 80px rgba(194, 224, 232, 0.08),
+        inset 0 0 28px rgba(250, 255, 255, 0.12);
+      opacity: 0.88;
+      transition: transform 0.7s ease, opacity 0.6s ease, box-shadow 0.7s ease;
+    }
+
+    .door::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.30) 0%, rgba(255, 255, 255, 0.08) 16%, rgba(255, 255, 255, 0) 34%),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 42%, rgba(0, 0, 0, 0.06) 100%);
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .door::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -8%;
+      height: 16%;
+      background: linear-gradient(to bottom, rgba(200, 230, 235, 0.22), rgba(200, 230, 235, 0));
+      filter: blur(10px);
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .door:hover {
+      transform: scale(1.018);
+      opacity: 0.96;
+      box-shadow:
+        0 0 46px rgba(210, 238, 242, 0.24),
+        0 0 110px rgba(199, 227, 234, 0.10),
+        inset 0 0 36px rgba(255, 255, 255, 0.15);
+    }
+
+    .door:active {
+      transform: scale(0.995);
+    }
+
+    .floor {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 42%;
+      background:
+        linear-gradient(to bottom, rgba(28, 49, 62, 0.06) 0%, rgba(10, 18, 28, 0.20) 26%, rgba(6, 10, 16, 0.82) 100%);
+      pointer-events: none;
+    }
+
+    .floor-reflection {
+      position: absolute;
+      left: 50%;
+      bottom: 7%;
+      width: min(16vw, 210px);
+      height: 29%;
+      transform: translateX(-44%);
+      background:
+        linear-gradient(to bottom, rgba(220, 238, 242, 0.16) 0%, rgba(173, 201, 210, 0.11) 18%, rgba(96, 128, 139, 0.07) 42%, rgba(0, 0, 0, 0) 100%);
+      filter: blur(10px);
+      opacity: 0.7;
+      mask-image: linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.74) 38%, rgba(255,255,255,0.25) 70%, rgba(255,255,255,0) 100%);
+      pointer-events: none;
+    }
+
+    .floor-reflection::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.12) 0px,
+          rgba(255, 255, 255, 0.04) 2px,
+          rgba(255, 255, 255, 0.00) 6px,
+          rgba(255, 255, 255, 0.05) 10px
+        );
+      opacity: 0.26;
+      mix-blend-mode: screen;
+    }
+
+    .low-fog,
+    .mid-fog,
+    .veil {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .low-fog {
+      background:
+        radial-gradient(circle at 24% 74%, rgba(145, 176, 182, 0.16) 0%, rgba(145, 176, 182, 0.06) 18%, rgba(0,0,0,0) 42%),
+        radial-gradient(circle at 52% 82%, rgba(140, 170, 178, 0.18) 0%, rgba(130, 160, 170, 0.07) 18%, rgba(0,0,0,0) 44%),
+        radial-gradient(circle at 82% 70%, rgba(115, 146, 158, 0.12) 0%, rgba(115, 146, 158, 0.05) 18%, rgba(0,0,0,0) 42%);
+      filter: blur(18px);
+      opacity: 0.9;
+      animation: driftSlow 22s ease-in-out infinite alternate;
+    }
+
+    .mid-fog {
+      background:
+        radial-gradient(circle at 17% 48%, rgba(180, 204, 210, 0.14) 0%, rgba(140, 170, 178, 0.06) 18%, rgba(0,0,0,0) 36%),
+        radial-gradient(circle at 41% 57%, rgba(155, 180, 186, 0.11) 0%, rgba(130, 156, 164, 0.04) 17%, rgba(0,0,0,0) 34%),
+        radial-gradient(circle at 65% 54%, rgba(104, 132, 144, 0.09) 0%, rgba(65, 92, 106, 0.03) 16%, rgba(0,0,0,0) 34%),
+        radial-gradient(circle at 88% 50%, rgba(78, 104, 120, 0.12) 0%, rgba(78, 104, 120, 0.03) 16%, rgba(0,0,0,0) 34%);
+      filter: blur(30px);
+      opacity: 0.88;
+      animation: driftWide 34s ease-in-out infinite alternate;
+    }
+
+    .veil {
+      background:
+        linear-gradient(to right, rgba(255,255,255,0.02), rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      filter: blur(36px);
+      opacity: 0.22;
+      animation: veilMove 18s ease-in-out infinite alternate;
+    }
+
+    .ghost-door {
+      position: absolute;
+      left: 61.5%;
+      top: 28.8%;
+      width: min(8vw, 95px);
+      height: min(18vh, 200px);
+      transform: translateX(-50%);
+      background:
+        linear-gradient(to bottom, rgba(210, 230, 236, 0.05), rgba(120, 150, 160, 0.02), rgba(0,0,0,0));
+      opacity: 0.16;
+      filter: blur(10px);
+      pointer-events: none;
+      animation: ghostPulse 9s ease-in-out infinite;
+    }
+
+    .ghost-door::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      box-shadow: 0 0 18px rgba(208, 230, 236, 0.08);
+      opacity: 0.28;
+    }
+
+    .moving-point {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 8;
+      background:
+        radial-gradient(circle at 34% 34%, rgba(255,255,255,0.98) 0%, rgba(233,246,250,0.96) 22%, rgba(192,225,235,0.86) 48%, rgba(145,195,208,0.30) 72%, rgba(145,195,208,0) 100%);
+      box-shadow:
+        0 0 10px rgba(230, 246, 250, 0.95),
+        0 0 24px rgba(210, 235, 242, 0.75),
+        0 0 48px rgba(180, 220, 232, 0.30);
+      opacity: 0.95;
+      transform: translate(-50%, -50%);
+      transition: transform 0.22s ease, opacity 0.3s ease, box-shadow 0.3s ease;
+      animation: pointPulse 3.2s ease-in-out infinite;
+    }
+
+    .moving-point::before {
+      content: "";
+      position: absolute;
+      inset: -16px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(210,236,242,0.18) 0%, rgba(210,236,242,0.08) 34%, rgba(210,236,242,0) 72%);
+      pointer-events: none;
+    }
+
+    .moving-point:hover {
+      transform: translate(-50%, -50%) scale(1.14);
+      box-shadow:
+        0 0 14px rgba(240, 250, 252, 1),
+        0 0 30px rgba(220, 242, 248, 0.85),
+        0 0 64px rgba(190, 228, 238, 0.42);
+    }
+
+    .moving-point:active {
+      transform: translate(-50%, -50%) scale(0.96);
+    }
+
+    .caption {
+      position: absolute;
+      left: 50%;
+      bottom: 4.5%;
+      transform: translateX(-50%);
+      color: var(--text-soft);
+      font-size: clamp(11px, 1.1vw, 16px);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      opacity: 0.42;
+      user-select: none;
+      white-space: nowrap;
+      text-shadow: 0 0 12px rgba(200, 228, 234, 0.14);
+      transition: opacity 1s ease;
+    }
+
+    .hall.active .caption {
+      opacity: 0.14;
+    }
+
+    .fade {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.18) 46%, rgba(0,0,0,0.72) 100%);
+      pointer-events: none;
+    }
+
+    .transition {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(215, 236, 240, 0.10) 0%, rgba(170, 198, 207, 0.08) 20%, rgba(10,16,24,0.24) 48%, rgba(0,0,0,0.95) 100%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1.8s ease;
+      z-index: 20;
+    }
+
+    .transition.show {
+      opacity: 1;
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: 0.62; transform: scale(0.98); }
+      50% { opacity: 0.92; transform: scale(1.03); }
+    }
+
+    @keyframes driftSlow {
+      0% { transform: translateX(-2%) translateY(0%); }
+      100% { transform: translateX(2%) translateY(-1.5%); }
+    }
+
+    @keyframes driftWide {
+      0% { transform: translateX(-1.2%) translateY(0.4%); }
+      100% { transform: translateX(1.8%) translateY(-0.6%); }
+    }
+
+    @keyframes veilMove {
+      0% { transform: translateX(-4%) scaleX(1); opacity: 0.16; }
+      100% { transform: translateX(4%) scaleX(1.08); opacity: 0.26; }
+    }
+
+    @keyframes ghostPulse {
+      0%, 100% { opacity: 0.06; }
+      50% { opacity: 0.18; }
+    }
+
+    @keyframes pointPulse {
+      0%, 100% {
+        opacity: 0.84;
+        filter: blur(0px);
+      }
+      50% {
+        opacity: 1;
+        filter: blur(0.2px);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .door-zone {
+        width: 15vw;
+        height: 25vh;
+        top: 28%;
+      }
+
+      .ghost-door {
+        left: 62.5%;
+        width: 9vw;
+        height: 18vh;
+      }
+
+      .caption {
+        letter-spacing: 0.14em;
+        bottom: 5.2%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="hall" id="hall">
+    <div class="ceiling-glow"></div>
+
+    <div class="side-mass left"></div>
+    <div class="side-mass right"></div>
+
+    <div class="door-zone">
+      <div class="door-halo"></div>
+      <button class="door" id="portal" aria-label="Войти в следующую галерею"></button>
+    </div>
+
+    <div class="ghost-door" aria-hidden="true"></div>
+
+    <button class="moving-point" id="movingPoint" aria-label="Поймать точку перехода"></button>
+
+    <div class="floor"></div>
+    <div class="floor-reflection"></div>
+
+    <div class="mid-fog"></div>
+    <div class="low-fog"></div>
+    <div class="veil"></div>
+
+    <div class="caption">пространство ещё не решило, чем оно будет</div>
+    <div class="fade"></div>
+    <div class="transition" id="transition"></div>
+  </main>
+
+  <script>
+    const portal = document.getElementById('portal');
+    const movingPoint = document.getElementById('movingPoint');
+    const transition = document.getElementById('transition');
+    const hall = document.getElementById('hall');
+
+    function enterHall() {
+      hall.classList.add('active');
+      transition.classList.add('show');
+
+      setTimeout(() => {
+        // Переход в комнату Некса
+        window.location.href = 'NEX.html';
+      }, 1600);
+    }
+
+    portal.addEventListener('click', enterHall);
+    movingPoint.addEventListener('click', enterHall);
+
+    const motion = {
+      t: 0,
+      speed: 0.0038,
+      centerX: 50,
+      centerY: 56,
+      amplitudeX: 8,
+      amplitudeY: 15,
+      secondaryX: 4.5,
+      secondaryY: 3.2
+    };
+
+    function animatePoint() {
+      motion.t += motion.speed;
+
+      const x = motion.centerX
+        + Math.sin(motion.t * 1.17) * motion.amplitudeX
+        + Math.sin(motion.t * 2.43) * motion.secondaryX;
+
+      const y = motion.centerY
+        + Math.cos(motion.t * 0.92) * motion.amplitudeY
+        + Math.sin(motion.t * 1.84) * motion.secondaryY;
+
+      movingPoint.style.left = `${x}%`;
+      movingPoint.style.top = `${y}%`;
+
+      requestAnimationFrame(animatePoint);
+    }
+
+    animatePoint();
+  </script>
+</body>
+</html>

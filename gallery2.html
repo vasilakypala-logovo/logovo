@@ -1,0 +1,583 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ГАЛЕРЕЯ СОЛНЕЧНЫХ БЛИКОВ</title>
+
+<style>
+:root{
+    --bg1:#f4ead8;
+    --bg2:#ddc49b;
+    --text:#7a5b2a;
+    --shadow:rgba(70,45,10,.22);
+}
+*{box-sizing:border-box;}
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:
+        radial-gradient(circle at 50% 18%, rgba(255,255,255,.65), rgba(255,255,255,0) 34%),
+        radial-gradient(circle at 18% 78%, rgba(255,230,160,.38), rgba(255,230,160,0) 28%),
+        linear-gradient(135deg,var(--bg1),var(--bg2));
+    font-family:Georgia,"Times New Roman",serif;
+    color:var(--text);
+}
+.title{
+    position:fixed;
+    top:3vh;
+    width:100%;
+    text-align:center;
+    font-size:clamp(22px,3.2vw,42px);
+    letter-spacing:clamp(3px,.7vw,9px);
+    color:rgba(120,86,34,.86);
+    text-shadow:0 1px 0 rgba(255,255,255,.8), 0 8px 24px rgba(120,80,20,.18);
+    z-index:10;
+    pointer-events:none;
+}
+.stage{
+    position:absolute;
+    inset:10vh 2.5vw 5vh 2.5vw;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:2.2vw;
+}
+.picture-zone{
+    height:100%;
+    flex:1 1 auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-width:0;
+}
+.frame{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    max-width:calc(100vw - 360px);
+    max-height:78vh;
+    padding:22px;
+    border-radius:10px;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,.95), rgba(170,178,184,.85) 35%, rgba(255,255,255,.72) 52%, rgba(135,144,151,.9)),
+      repeating-linear-gradient(45deg, rgba(255,255,255,.22) 0 3px, rgba(90,98,105,.10) 3px 7px);
+    box-shadow:
+      0 24px 60px var(--shadow),
+      inset 0 0 0 2px rgba(255,255,255,.62),
+      inset 0 0 0 7px rgba(115,124,130,.22),
+      inset 0 0 22px rgba(40,48,54,.22);
+}
+.frame:before{
+    content:"";
+    position:absolute;
+    inset:8px;
+    border-radius:7px;
+    border:2px ridge rgba(245,248,250,.86);
+    pointer-events:none;
+}
+.frame:after{
+    content:"";
+    position:absolute;
+    inset:15px;
+    border-radius:4px;
+    border:2px groove rgba(105,113,120,.42);
+    pointer-events:none;
+}
+.artwrap{
+    position:relative;
+    background:rgba(255,255,255,.28);
+    box-shadow:inset 0 0 20px rgba(0,0,0,.15);
+    z-index:1;
+}
+#mainImage{
+    display:block;
+    max-width:calc(100vw - 420px);
+    max-height:calc(78vh - 44px);
+    width:auto;
+    height:auto;
+    object-fit:contain;
+    user-select:none;
+    -webkit-user-drag:none;
+    cursor:zoom-in;
+    background:rgba(255,255,255,.35);
+}
+.side-plate{
+    width:280px;
+    min-height:310px;
+    max-height:76vh;
+    padding:18px 16px;
+    border-radius:14px;
+    background:
+      linear-gradient(145deg, rgba(255,255,255,.97), rgba(199,204,208,.94) 42%, rgba(145,153,160,.9)),
+      repeating-linear-gradient(90deg, rgba(255,255,255,.22) 0 2px, rgba(80,90,98,.06) 2px 5px);
+    box-shadow:
+      0 18px 44px rgba(75,50,12,.22),
+      inset 0 0 0 2px rgba(255,255,255,.68),
+      inset 0 0 18px rgba(60,70,78,.18);
+}
+.plate-title{
+    text-align:center;
+    font-size:15px;
+    letter-spacing:3px;
+    color:rgba(90,96,101,.9);
+    margin-bottom:12px;
+    text-transform:uppercase;
+}
+#caption{
+    width:100%;
+    height:170px;
+    resize:vertical;
+    border:1px solid rgba(105,113,120,.35);
+    border-radius:8px;
+    padding:10px;
+    background:rgba(255,255,255,.58);
+    color:#5b4525;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:16px;
+    line-height:1.35;
+    outline:none;
+}
+.controls{
+    margin-top:13px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+button{
+    border:none;
+    border-radius:10px;
+    padding:10px 8px;
+    cursor:pointer;
+    font-family:Georgia,"Times New Roman",serif;
+    color:#5d5f61;
+    background:linear-gradient(145deg,#ffffff,#c7ccd1);
+    box-shadow:0 4px 10px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.95);
+}
+button:active{transform:translateY(1px);}
+.save{
+    grid-column:1/3;
+    color:#74551f;
+    font-weight:bold;
+}
+.reset{
+    grid-column:1/3;
+    color:#6b4a35;
+}
+.counter{
+    margin-top:14px;
+    text-align:center;
+    font-size:18px;
+    letter-spacing:3px;
+    color:rgba(85,89,92,.88);
+}
+.hint{
+    margin-top:10px;
+    font-size:12px;
+    line-height:1.35;
+    text-align:center;
+    color:rgba(90,96,101,.72);
+}
+.zoomLayer{
+    position:fixed;
+    inset:0;
+    display:none;
+    background:rgba(20,18,14,.92);
+    z-index:100;
+    overflow:hidden;
+    cursor:grab;
+}
+.zoomLayer.open{display:block;}
+.zoomLayer.dragging{cursor:grabbing;}
+#zoomImg{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform-origin:center center;
+    user-select:none;
+    -webkit-user-drag:none;
+    max-width:none;
+    max-height:none;
+}
+.zoomClose{
+    position:fixed;
+    left:50%;
+    bottom:22px;
+    transform:translateX(-50%);
+    z-index:110;
+    color:rgba(255,255,255,.78);
+    background:rgba(0,0,0,.28);
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:999px;
+    padding:10px 16px;
+    font-family:Arial,sans-serif;
+    font-size:14px;
+    pointer-events:none;
+}
+.zoomTools{
+    position:fixed;
+    right:24px;
+    top:20px;
+    z-index:115;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px;
+    border-radius:999px;
+    background:rgba(0,0,0,.34);
+    border:1px solid rgba(255,255,255,.18);
+}
+.zoomTools button{
+    min-width:42px;
+    padding:8px 10px;
+    border-radius:999px;
+    font-family:Arial,sans-serif;
+}
+#zoomValue{
+    min-width:54px;
+    color:rgba(255,255,255,.9);
+    text-align:center;
+    font-family:Arial,sans-serif;
+    font-size:14px;
+}
+.error{
+    position:fixed;
+    left:50%;
+    bottom:3vh;
+    transform:translateX(-50%);
+    padding:10px 16px;
+    border-radius:999px;
+    background:rgba(90,40,20,.78);
+    color:white;
+    font-family:Arial,sans-serif;
+    font-size:13px;
+    display:none;
+    z-index:20;
+}
+@media(max-width:900px){
+    .stage{
+        inset:9vh 2vw 3vh 2vw;
+        flex-direction:column;
+        gap:14px;
+    }
+    .frame{
+        max-width:94vw;
+        max-height:58vh;
+        padding:16px;
+    }
+    #mainImage{
+        max-width:calc(94vw - 32px);
+        max-height:calc(58vh - 32px);
+    }
+    .side-plate{
+        width:min(94vw,520px);
+        min-height:0;
+        max-height:31vh;
+        padding:12px;
+    }
+    #caption{height:82px;}
+}
+</style>
+</head>
+
+<body>
+<div class="title">ЗАЛ СОЛНЕЧНЫХ БЛИКОВ</div>
+
+<main class="stage">
+    <section class="picture-zone">
+        <div class="frame">
+            <div class="artwrap">
+                <img id="mainImage" alt="Работа 01">
+            </div>
+        </div>
+    </section>
+
+    <aside class="side-plate">
+        <div class="plate-title"></div>
+        <textarea id="caption" placeholder="Название работы&#10;Автор"></textarea>
+
+        <div class="controls">
+            <button id="prevBtn">← назад</button>
+            <button id="nextBtn">вперёд →</button>
+            <button class="save" id="saveBtn">Сохранить надпись</button>
+            <button class="reset" id="resetBtn">Сбросить надпись</button>
+        </div>
+
+        <div class="counter"><span id="now">01</span> / 52</div>
+        <div class="hint">Листание: кнопки, клавиши ← → или колесо мыши.<br>Клик по картине — увеличение 300%. Внутри можно двигать.</div>
+    </aside>
+</main>
+
+<div class="zoomLayer" id="zoomLayer">
+    <img id="zoomImg" alt="">
+    <div class="zoomTools">
+        <button id="zoomOutBtn" type="button">−</button>
+        <span id="zoomValue">100%</span>
+        <button id="zoomInBtn" type="button">+</button>
+        <button id="zoomResetBtn" type="button">100%</button>
+        <button id="zoomCloseBtn" type="button">закрыть</button>
+    </div>
+    <div class="zoomClose">колесо мыши — масштаб • тянуть картину — двигать • Esc — закрыть</div>
+</div>
+
+<div class="error" id="errorBox"></div>
+
+<script>
+const TOTAL = 52;
+const FOLDER = "MOON_2";
+const STORAGE_PREFIX = "sun_glints_gallery_caption_";
+const EXTENSIONS = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG", "webp", "WEBP"];
+
+let index = 1;
+
+const mainImage = document.getElementById("mainImage");
+const caption = document.getElementById("caption");
+const now = document.getElementById("now");
+const errorBox = document.getElementById("errorBox");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const saveBtn = document.getElementById("saveBtn");
+const resetBtn = document.getElementById("resetBtn");
+const zoomLayer = document.getElementById("zoomLayer");
+const zoomImg = document.getElementById("zoomImg");
+const zoomOutBtn = document.getElementById("zoomOutBtn");
+const zoomInBtn = document.getElementById("zoomInBtn");
+const zoomResetBtn = document.getElementById("zoomResetBtn");
+const zoomCloseBtn = document.getElementById("zoomCloseBtn");
+const zoomValue = document.getElementById("zoomValue");
+
+function pad(n){
+    return String(n).padStart(2, "0");
+}
+
+function imagePath(num, ext){
+    return FOLDER + "/" + pad(num) + "." + ext;
+}
+
+function showError(text){
+    errorBox.textContent = text;
+    errorBox.style.display = "block";
+    clearTimeout(showError.timer);
+    showError.timer = setTimeout(function(){ errorBox.style.display = "none"; }, 2600);
+}
+
+function loadCaption(){
+    caption.value = localStorage.getItem(STORAGE_PREFIX + pad(index)) || "";
+}
+
+function saveCaption(){
+    localStorage.setItem(STORAGE_PREFIX + pad(index), caption.value);
+    showError("Надпись сохранена для работы " + pad(index));
+}
+
+function resetCaption(){
+    caption.value = "";
+    localStorage.removeItem(STORAGE_PREFIX + pad(index));
+    showError("Надпись сброшена для работы " + pad(index));
+}
+
+function tryLoadImage(num, extIndex){
+    extIndex = extIndex || 0;
+
+    if(extIndex >= EXTENSIONS.length){
+        showError("Не найден файл: " + FOLDER + "/" + pad(num) + ".jpg / .png / .webp");
+        return;
+    }
+
+    const ext = EXTENSIONS[extIndex];
+    const path = imagePath(num, ext);
+    const probe = new Image();
+
+    probe.onload = function(){
+        mainImage.src = path;
+        mainImage.alt = "Работа " + pad(num);
+    };
+
+    probe.onerror = function(){
+        tryLoadImage(num, extIndex + 1);
+    };
+
+    probe.src = path;
+}
+
+function show(num){
+    if(num < 1) num = TOTAL;
+    if(num > TOTAL) num = 1;
+
+    index = num;
+    now.textContent = pad(index);
+    loadCaption();
+    tryLoadImage(index, 0);
+}
+
+function next(){
+    show(index + 1);
+}
+
+function prev(){
+    show(index - 1);
+}
+
+prevBtn.onclick = prev;
+nextBtn.onclick = next;
+saveBtn.onclick = saveCaption;
+resetBtn.onclick = resetCaption;
+/* NEX V4 AUTOSAVE */
+caption.addEventListener("input", saveCaption);
+window.addEventListener("beforeunload", saveCaption);
+
+document.addEventListener("keydown", function(e){
+    if(zoomLayer.classList.contains("open")){
+        if(e.key === "Escape") closeZoom();
+        return;
+    }
+
+    if(e.key === "ArrowRight") next();
+    if(e.key === "ArrowLeft") prev();
+});
+
+document.addEventListener("wheel", function(e){
+    if(zoomLayer.classList.contains("open")) return;
+    if(Math.abs(e.deltaY) < 8) return;
+
+    if(e.deltaY > 0) next();
+    else prev();
+}, {passive:true});
+
+/* УПРАВЛЯЕМАЯ ЛУПА И ПЕРЕТАСКИВАНИЕ */
+let dragging = false;
+let startX = 0;
+let startY = 0;
+let imgX = 0;
+let imgY = 0;
+let zoomScale = 0.3;
+const ZOOM_MIN = 0.3;
+const ZOOM_MAX = 3;
+const ZOOM_STEP = 0.15;
+
+function clampZoom(value){
+    return Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, value));
+}
+
+function updateZoomValue(){
+    zoomValue.textContent = Math.round(zoomScale * 100) + "%";
+}
+
+function setZoomTransform(){
+    zoomImg.style.transform = "translate(-50%, -50%) translate(" + imgX + "px," + imgY + "px) scale(" + zoomScale + ")";
+    updateZoomValue();
+}
+
+function changeZoom(delta){
+    zoomScale = clampZoom(zoomScale + delta);
+    setZoomTransform();
+}
+
+function resetZoom(){
+    zoomScale = 0.3;
+    imgX = 0;
+    imgY = 0;
+    setZoomTransform();
+}
+
+function openZoom(){
+    zoomImg.src = mainImage.src;
+    resetZoom();
+    zoomLayer.classList.add("open");
+}
+
+function closeZoom(){
+    zoomLayer.classList.remove("open");
+    dragging = false;
+    zoomLayer.classList.remove("dragging");
+}
+
+mainImage.onclick = openZoom;
+
+zoomInBtn.onclick = function(e){
+    e.stopPropagation();
+    changeZoom(ZOOM_STEP);
+};
+
+zoomOutBtn.onclick = function(e){
+    e.stopPropagation();
+    changeZoom(-ZOOM_STEP);
+};
+
+zoomResetBtn.onclick = function(e){
+    e.stopPropagation();
+    resetZoom();
+};
+
+zoomCloseBtn.onclick = function(e){
+    e.stopPropagation();
+    closeZoom();
+};
+
+zoomLayer.addEventListener("wheel", function(e){
+    e.preventDefault();
+    if(e.deltaY < 0) changeZoom(ZOOM_STEP);
+    else changeZoom(-ZOOM_STEP);
+}, {passive:false});
+
+zoomLayer.addEventListener("mousedown", function(e){
+    if(e.target.closest(".zoomTools")) return;
+
+    if(e.target !== zoomImg){
+        closeZoom();
+        return;
+    }
+
+    dragging = true;
+    zoomLayer.classList.add("dragging");
+    startX = e.clientX - imgX;
+    startY = e.clientY - imgY;
+});
+
+window.addEventListener("mousemove", function(e){
+    if(!dragging) return;
+
+    imgX = e.clientX - startX;
+    imgY = e.clientY - startY;
+    setZoomTransform();
+});
+
+window.addEventListener("mouseup", function(){
+    dragging = false;
+    zoomLayer.classList.remove("dragging");
+});
+
+zoomLayer.addEventListener("touchstart", function(e){
+    if(e.target.closest(".zoomTools")) return;
+
+    if(e.target !== zoomImg){
+        closeZoom();
+        return;
+    }
+
+    dragging = true;
+    const t = e.touches[0];
+    startX = t.clientX - imgX;
+    startY = t.clientY - imgY;
+}, {passive:true});
+
+zoomLayer.addEventListener("touchmove", function(e){
+    if(!dragging) return;
+
+    const t = e.touches[0];
+    imgX = t.clientX - startX;
+    imgY = t.clientY - startY;
+    setZoomTransform();
+}, {passive:true});
+
+zoomLayer.addEventListener("touchend", function(){
+    dragging = false;
+}, {passive:true});
+
+show(1);
+</script>
+</body>
+</html>

@@ -1,0 +1,704 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>РАБОТА НЕКСА</title>
+
+<style>
+:root{
+    --deep:#060812;
+    --mist:#1b2037;
+    --violet:#313a66;
+    --line:rgba(190,205,255,.28);
+    --text:rgba(220,228,255,.88);
+}
+*{box-sizing:border-box;}
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:Georgia,"Times New Roman",serif;
+    color:var(--text);
+    background:
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255,255,255,.014) 1px, transparent 1px),
+        radial-gradient(circle at 48% 34%, rgba(120,140,255,.18), transparent 34%),
+        radial-gradient(circle at 18% 72%, rgba(190,210,255,.08), transparent 30%),
+        linear-gradient(145deg,#05060d,#151a2e 52%,#2b3357);
+    background-size:42px 42px,42px 42px,auto,auto,auto;
+}
+
+body:before{
+    content:"";
+    position:fixed;
+    inset:-10%;
+    pointer-events:none;
+    background:
+        repeating-linear-gradient(90deg, rgba(220,230,255,.035) 0 2px, transparent 2px 120px),
+        repeating-linear-gradient(0deg, rgba(220,230,255,.025) 0 2px, transparent 2px 120px),
+        radial-gradient(circle at 30% 45%, rgba(255,255,255,.06), transparent 22%),
+        radial-gradient(circle at 72% 58%, rgba(180,195,255,.07), transparent 28%);
+    filter:blur(6px);
+    animation:fogMove 18s ease-in-out infinite alternate;
+}
+
+body:after{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:
+        linear-gradient(to right, rgba(0,0,0,.76), transparent 18%, transparent 82%, rgba(0,0,0,.76)),
+        linear-gradient(to bottom, rgba(0,0,0,.58), transparent 22%, transparent 78%, rgba(0,0,0,.62));
+}
+
+@keyframes fogMove{
+    from{transform:translate(-1.5%,-1%) rotate(.2deg);}
+    to{transform:translate(1.5%,1%) rotate(-.2deg);}
+}
+
+.title{
+    position:fixed;
+    top:3vh;
+    width:100%;
+    text-align:center;
+    z-index:10;
+    font-size:clamp(23px,3vw,42px);
+    letter-spacing:clamp(3px,.72vw,9px);
+    color:rgba(220,228,255,.88);
+    text-shadow:
+        0 0 18px rgba(145,165,255,.25),
+        0 2px 18px rgba(0,0,0,.82);
+    pointer-events:none;
+}
+
+.stage{
+    position:absolute;
+    z-index:5;
+    inset:10vh 2.5vw 5vh 2.5vw;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:2.2vw;
+}
+
+.picture-zone{
+    height:100%;
+    flex:1 1 auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-width:0;
+    perspective:900px;
+}
+
+.frame{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    max-width:calc(100vw - 370px);
+    max-height:78vh;
+    padding:24px;
+    border-radius:2px;
+    background:
+      linear-gradient(135deg, rgba(205,215,255,.20), rgba(12,15,26,.92) 30%, rgba(88,100,170,.32) 52%, rgba(10,12,20,.95)),
+      repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 3px, rgba(0,0,0,.18) 3px 9px);
+    box-shadow:
+      0 30px 80px rgba(0,0,0,.62),
+      0 0 42px rgba(120,140,255,.12),
+      inset 0 0 0 2px rgba(210,225,255,.18),
+      inset 0 0 0 9px rgba(0,0,0,.28),
+      inset 0 0 38px rgba(155,175,255,.10);
+    transform:rotateX(.8deg) rotateY(-.8deg);
+}
+
+.frame:before{
+    content:"";
+    position:absolute;
+    inset:9px;
+    border:2px solid rgba(210,225,255,.20);
+    box-shadow:
+        inset 0 0 20px rgba(120,140,255,.12),
+        0 0 18px rgba(120,140,255,.10);
+    pointer-events:none;
+}
+
+.frame:after{
+    content:"";
+    position:absolute;
+    inset:-14px;
+    border:1px solid rgba(180,200,255,.10);
+    transform:translate(9px,-9px);
+    pointer-events:none;
+}
+
+.artwrap{
+    position:relative;
+    z-index:1;
+    background:rgba(5,7,12,.72);
+    box-shadow:inset 0 0 22px rgba(0,0,0,.55);
+}
+
+#mainImage{
+    display:block;
+    max-width:calc(100vw - 430px);
+    max-height:calc(78vh - 48px);
+    width:auto;
+    height:auto;
+    object-fit:contain;
+    user-select:none;
+    -webkit-user-drag:none;
+    cursor:zoom-in;
+}
+
+.side-plate{
+    width:292px;
+    min-height:338px;
+    max-height:76vh;
+    padding:18px 16px;
+    border-radius:4px;
+    background:
+      linear-gradient(145deg, rgba(30,36,62,.74), rgba(10,12,22,.70) 48%, rgba(80,92,150,.40)),
+      repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, transparent 1px 16px);
+    border:1px solid rgba(190,205,255,.16);
+    box-shadow:
+      0 20px 54px rgba(0,0,0,.48),
+      inset 0 0 0 1px rgba(255,255,255,.08),
+      inset 0 0 26px rgba(145,165,255,.08);
+    backdrop-filter:blur(8px);
+}
+
+.plate-mark{
+    text-align:center;
+    margin-bottom:10px;
+    font-size:12px;
+    letter-spacing:3px;
+    color:rgba(220,228,255,.46);
+}
+
+#caption{
+    width:100%;
+    height:160px;
+    resize:vertical;
+    border:1px solid rgba(190,205,255,.22);
+    border-radius:3px;
+    padding:10px;
+    background:rgba(2,4,10,.42);
+    color:rgba(235,240,255,.90);
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:16px;
+    line-height:1.35;
+    outline:none;
+}
+
+.controls{
+    margin-top:13px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+
+button{
+    border:1px solid rgba(205,220,255,.16);
+    border-radius:4px;
+    padding:10px 8px;
+    cursor:pointer;
+    font-family:Georgia,"Times New Roman",serif;
+    color:rgba(225,232,255,.86);
+    background:linear-gradient(145deg,rgba(68,78,128,.62),rgba(12,15,28,.76));
+    box-shadow:0 4px 12px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+button:hover{filter:brightness(1.12);}
+button:active{transform:translateY(1px);}
+
+.save,.reset{
+    grid-column:1/3;
+}
+.save{font-weight:bold;}
+
+.counter{
+    margin-top:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    font-size:18px;
+    letter-spacing:2px;
+    color:rgba(225,232,255,.86);
+}
+
+.counter input{
+    width:58px;
+    padding:5px;
+    text-align:center;
+    font-size:16px;
+    font-family:Georgia,"Times New Roman",serif;
+    color:rgba(235,240,255,.95);
+    background:rgba(2,4,10,.42);
+    border:1px solid rgba(190,205,255,.20);
+    border-radius:3px;
+}
+
+.hint{
+    margin-top:10px;
+    font-size:12px;
+    line-height:1.35;
+    text-align:center;
+    color:rgba(220,228,255,.48);
+}
+
+/* ЛУПА */
+.zoomLayer{
+    position:fixed;
+    inset:0;
+    display:none;
+    z-index:100;
+    overflow:hidden;
+    cursor:grab;
+    background:
+      linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(255,255,255,.015) 1px, transparent 1px),
+      radial-gradient(circle at 50% 26%, rgba(145,165,255,.18), transparent 34%),
+      rgba(4,5,12,.95);
+    background-size:54px 54px,54px 54px,auto,auto;
+}
+
+.zoomLayer.open{display:block;}
+.zoomLayer.dragging{cursor:grabbing;}
+
+#zoomImg{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform-origin:center center;
+    user-select:none;
+    -webkit-user-drag:none;
+    max-width:none;
+    max-height:none;
+}
+
+.zoomTools{
+    position:fixed;
+    right:24px;
+    top:20px;
+    z-index:115;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px;
+    border-radius:6px;
+    background:rgba(10,12,22,.72);
+    border:1px solid rgba(210,225,255,.18);
+    box-shadow:0 10px 30px rgba(0,0,0,.42);
+}
+
+.zoomTools button{
+    min-width:42px;
+    padding:8px 10px;
+    border-radius:4px;
+    font-family:Arial,sans-serif;
+}
+
+#zoomValue{
+    min-width:58px;
+    color:rgba(235,240,255,.92);
+    text-align:center;
+    font-family:Arial,sans-serif;
+    font-size:14px;
+    font-weight:bold;
+}
+
+.zoomClose{
+    position:fixed;
+    left:50%;
+    bottom:22px;
+    transform:translateX(-50%);
+    z-index:110;
+    color:rgba(235,240,255,.70);
+    background:rgba(10,12,22,.56);
+    border:1px solid rgba(210,225,255,.14);
+    border-radius:999px;
+    padding:10px 16px;
+    font-family:Arial,sans-serif;
+    font-size:14px;
+    pointer-events:none;
+}
+
+.error{
+    position:fixed;
+    left:50%;
+    bottom:3vh;
+    transform:translateX(-50%);
+    padding:10px 16px;
+    border-radius:999px;
+    background:rgba(55,65,118,.88);
+    color:white;
+    font-family:Arial,sans-serif;
+    font-size:13px;
+    display:none;
+    z-index:200;
+}
+
+@media(max-width:900px){
+    .stage{
+        inset:9vh 2vw 3vh 2vw;
+        flex-direction:column;
+        gap:14px;
+    }
+    .frame{
+        max-width:94vw;
+        max-height:56vh;
+        padding:16px;
+    }
+    #mainImage{
+        max-width:calc(94vw - 32px);
+        max-height:calc(56vh - 32px);
+    }
+    .side-plate{
+        width:min(94vw,540px);
+        min-height:0;
+        max-height:33vh;
+        padding:12px;
+    }
+    #caption{height:82px;}
+}
+</style>
+</head>
+
+<body>
+<div class="title">ЖИВОПИСЬ НЕКСА</div>
+
+<main class="stage">
+    <section class="picture-zone">
+        <div class="frame">
+            <div class="artwrap">
+                <img id="mainImage" alt="Работа 01">
+            </div>
+        </div>
+    </section>
+
+    <aside class="side-plate">
+        <div class="plate-mark">НЕКС</div>
+        <textarea id="caption" placeholder="Название работы&#10;Автор"></textarea>
+
+        <div class="controls">
+            <button id="prevBtn">← назад</button>
+            <button id="nextBtn">вперёд →</button>
+            <button class="save" id="saveBtn">Сохранить надпись</button>
+            <button class="reset" id="resetBtn">Сбросить надпись</button>
+        </div>
+
+        <div class="counter">
+            <span>№</span>
+            <input id="jumpInput" type="number" min="1" max="99" value="1">
+            <button id="jumpBtn" type="button">перейти</button>
+            <span>/ 99</span>
+        </div>
+
+        <div class="hint">Кнопки, стрелки ← →, колесо. Можно вписать номер 1–99 и перейти сразу. Клик по картине — лупа 25–300%.</div>
+    </aside>
+</main>
+
+<div class="zoomLayer" id="zoomLayer">
+    <img id="zoomImg" alt="">
+    <div class="zoomTools">
+        <button id="zoomOutBtn" type="button">−</button>
+        <span id="zoomValue">25%</span>
+        <button id="zoomInBtn" type="button">+</button>
+        <button id="zoomHomeBtn" type="button">25%</button>
+        <button id="zoomFullBtn" type="button">100%</button>
+        <button id="zoomCloseBtn" type="button">закрыть</button>
+    </div>
+    <div class="zoomClose">колесо мыши — масштаб • тянуть картину — двигать • 25% — исходное • Esc — назад</div>
+</div>
+
+<div class="error" id="errorBox"></div>
+
+<script>
+const TOTAL = 99;
+const FOLDER = "MOON_7";
+const STORAGE_PREFIX = "square_fog_gallery_caption_";
+const EXTENSIONS = ["jpg","JPG","jpeg","JPEG","png","PNG","webp","WEBP"];
+
+let index = 1;
+
+const mainImage = document.getElementById("mainImage");
+const caption = document.getElementById("caption");
+const errorBox = document.getElementById("errorBox");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const saveBtn = document.getElementById("saveBtn");
+const resetBtn = document.getElementById("resetBtn");
+const jumpInput = document.getElementById("jumpInput");
+const jumpBtn = document.getElementById("jumpBtn");
+
+const zoomLayer = document.getElementById("zoomLayer");
+const zoomImg = document.getElementById("zoomImg");
+const zoomOutBtn = document.getElementById("zoomOutBtn");
+const zoomInBtn = document.getElementById("zoomInBtn");
+const zoomHomeBtn = document.getElementById("zoomHomeBtn");
+const zoomFullBtn = document.getElementById("zoomFullBtn");
+const zoomCloseBtn = document.getElementById("zoomCloseBtn");
+const zoomValue = document.getElementById("zoomValue");
+
+function pad(n){ return String(n).padStart(2,"0"); }
+function imagePath(num, ext){ return FOLDER + "/" + pad(num) + "." + ext; }
+
+function showError(text){
+    errorBox.textContent = text;
+    errorBox.style.display = "block";
+    clearTimeout(showError.timer);
+    showError.timer = setTimeout(function(){ errorBox.style.display = "none"; }, 2600);
+}
+
+function loadCaption(){
+    caption.value = localStorage.getItem(STORAGE_PREFIX + pad(index)) || "";
+}
+
+function saveCaption(){
+    localStorage.setItem(STORAGE_PREFIX + pad(index), caption.value);
+    showError("Надпись сохранена для работы " + pad(index));
+}
+
+function resetCaption(){
+    caption.value = "";
+    localStorage.removeItem(STORAGE_PREFIX + pad(index));
+    showError("Надпись сброшена для работы " + pad(index));
+}
+
+function tryLoadImage(num, extIndex){
+    extIndex = extIndex || 0;
+
+    if(extIndex >= EXTENSIONS.length){
+        mainImage.removeAttribute("src");
+        showError("Не найден файл: " + FOLDER + "/" + pad(num) + ".jpg / .png / .webp");
+        return;
+    }
+
+    const path = imagePath(num, EXTENSIONS[extIndex]);
+    const probe = new Image();
+
+    probe.onload = function(){
+        mainImage.src = path;
+        mainImage.alt = "Работа " + pad(num);
+    };
+
+    probe.onerror = function(){
+        tryLoadImage(num, extIndex + 1);
+    };
+
+    probe.src = path;
+}
+
+function show(num){
+    num = parseInt(num,10);
+    if(isNaN(num)) num = index;
+
+    if(num < 1) num = TOTAL;
+    if(num > TOTAL) num = 1;
+
+    index = num;
+    jumpInput.value = index;
+    loadCaption();
+    tryLoadImage(index,0);
+}
+
+function next(){ show(index + 1); }
+function prev(){ show(index - 1); }
+
+function jump(){
+    let n = parseInt(jumpInput.value,10);
+    if(isNaN(n)) n = index;
+    if(n < 1) n = 1;
+    if(n > TOTAL) n = TOTAL;
+    show(n);
+}
+
+prevBtn.onclick = prev;
+nextBtn.onclick = next;
+saveBtn.onclick = saveCaption;
+resetBtn.onclick = resetCaption;
+jumpBtn.onclick = jump;
+
+jumpInput.addEventListener("keydown", function(e){
+    if(e.key === "Enter") jump();
+});
+
+document.addEventListener("keydown", function(e){
+    if(zoomLayer.classList.contains("open")){
+        if(e.key === "Escape") closeZoom();
+        return;
+    }
+
+    if(document.activeElement === caption || document.activeElement === jumpInput) return;
+
+    if(e.key === "ArrowRight") next();
+    if(e.key === "ArrowLeft") prev();
+});
+
+document.addEventListener("wheel", function(e){
+    if(zoomLayer.classList.contains("open")) return;
+    if(document.activeElement === caption || document.activeElement === jumpInput) return;
+    if(Math.abs(e.deltaY) < 8) return;
+
+    if(e.deltaY > 0) next();
+    else prev();
+}, {passive:true});
+
+/* НАДЁЖНАЯ ЛУПА: 25% → 300%, ВОЗВРАТ, ЗАКРЫТИЕ */
+let dragging = false;
+let startX = 0;
+let startY = 0;
+let imgX = 0;
+let imgY = 0;
+let zoomScale = 0.25;
+
+const ZOOM_MIN = 0.25;
+const ZOOM_MAX = 3;
+const ZOOM_STEP = 0.10;
+
+function clampZoom(value){
+    return Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, value));
+}
+
+function updateZoomValue(){
+    zoomValue.textContent = Math.round(zoomScale * 100) + "%";
+}
+
+function setZoomTransform(){
+    zoomImg.style.transform = "translate(-50%, -50%) translate(" + imgX + "px," + imgY + "px) scale(" + zoomScale + ")";
+    updateZoomValue();
+}
+
+function setZoom(value){
+    zoomScale = clampZoom(value);
+    setZoomTransform();
+}
+
+function changeZoom(delta){
+    setZoom(zoomScale + delta);
+}
+
+function homeZoom(){
+    zoomScale = 0.25;
+    imgX = 0;
+    imgY = 0;
+    setZoomTransform();
+}
+
+function fullZoom(){
+    zoomScale = 1;
+    imgX = 0;
+    imgY = 0;
+    setZoomTransform();
+}
+
+function openZoom(){
+    if(!mainImage.src) return;
+    zoomImg.src = mainImage.src;
+    zoomLayer.classList.add("open");
+    homeZoom();
+}
+
+function closeZoom(){
+    zoomLayer.classList.remove("open");
+    dragging = false;
+    zoomLayer.classList.remove("dragging");
+    homeZoom();
+}
+
+mainImage.onclick = openZoom;
+
+zoomInBtn.onclick = function(e){
+    e.stopPropagation();
+    changeZoom(ZOOM_STEP);
+};
+
+zoomOutBtn.onclick = function(e){
+    e.stopPropagation();
+    changeZoom(-ZOOM_STEP);
+};
+
+zoomHomeBtn.onclick = function(e){
+    e.stopPropagation();
+    homeZoom();
+};
+
+zoomFullBtn.onclick = function(e){
+    e.stopPropagation();
+    fullZoom();
+};
+
+zoomCloseBtn.onclick = function(e){
+    e.stopPropagation();
+    closeZoom();
+};
+
+zoomLayer.addEventListener("wheel", function(e){
+    e.preventDefault();
+    if(e.deltaY < 0) changeZoom(ZOOM_STEP);
+    else changeZoom(-ZOOM_STEP);
+}, {passive:false});
+
+zoomLayer.addEventListener("mousedown", function(e){
+    if(e.target.closest(".zoomTools")) return;
+
+    if(e.target !== zoomImg){
+        closeZoom();
+        return;
+    }
+
+    dragging = true;
+    zoomLayer.classList.add("dragging");
+    startX = e.clientX - imgX;
+    startY = e.clientY - imgY;
+});
+
+window.addEventListener("mousemove", function(e){
+    if(!dragging) return;
+    imgX = e.clientX - startX;
+    imgY = e.clientY - startY;
+    setZoomTransform();
+});
+
+window.addEventListener("mouseup", function(){
+    dragging = false;
+    zoomLayer.classList.remove("dragging");
+});
+
+zoomLayer.addEventListener("touchstart", function(e){
+    if(e.target.closest(".zoomTools")) return;
+
+    if(e.target !== zoomImg){
+        closeZoom();
+        return;
+    }
+
+    dragging = true;
+    const t = e.touches[0];
+    startX = t.clientX - imgX;
+    startY = t.clientY - imgY;
+}, {passive:true});
+
+zoomLayer.addEventListener("touchmove", function(e){
+    if(!dragging) return;
+
+    const t = e.touches[0];
+    imgX = t.clientX - startX;
+    imgY = t.clientY - startY;
+    setZoomTransform();
+}, {passive:true});
+
+zoomLayer.addEventListener("touchend", function(){
+    dragging = false;
+}, {passive:true});
+
+show(1);
+</script>
+</body>
+</html>

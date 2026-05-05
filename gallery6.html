@@ -1,0 +1,797 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ЮД v2 — МУЗЕЙНЫЙ УЗЕЛ</title>
+
+<style>
+:root{
+    --gold:#d4a15f;
+    --gold-soft:#f0c988;
+    --copper-dark:#4a2411;
+    --copper-mid:#7d4722;
+    --copper-light:#b9793e;
+    --wood-1:#2f1d12;
+    --wood-2:#4a2d1b;
+    --wood-3:#160d08;
+    --ink:#120907;
+}
+
+*{box-sizing:border-box;}
+
+html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#000;
+    font-family:Georgia,"Times New Roman",serif;
+    color:var(--gold-soft);
+}
+
+body{
+    background:
+        radial-gradient(circle at 50% 36%, rgba(180,115,55,.18), rgba(0,0,0,0) 34%),
+        radial-gradient(circle at 14% 78%, rgba(120,55,25,.20), rgba(0,0,0,0) 30%),
+        linear-gradient(135deg,#090504,#21120b 48%,#060302);
+}
+
+body:before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:
+        linear-gradient(to bottom, rgba(255,190,100,.05), rgba(0,0,0,.40)),
+        radial-gradient(circle at center, rgba(0,0,0,0.02) 18%, rgba(0,0,0,.72) 100%);
+    z-index:1;
+}
+
+body:after{
+    content:"";
+    position:fixed;
+    inset:-8%;
+    pointer-events:none;
+    background:
+        radial-gradient(circle at 30% 48%, rgba(245,190,110,.07), rgba(0,0,0,0) 23%),
+        radial-gradient(circle at 76% 44%, rgba(245,170,90,.05), rgba(0,0,0,0) 26%),
+        repeating-linear-gradient(90deg, rgba(255,210,140,.025) 0 1px, transparent 1px 88px);
+    filter:blur(8px);
+    opacity:.85;
+    animation:breath 16s ease-in-out infinite alternate;
+    z-index:1;
+}
+
+@keyframes breath{
+    from{transform:translate(-1%,-.6%) scale(1);}
+    to{transform:translate(1%,.8%) scale(1.025);}
+}
+
+.yud{
+    position:fixed;
+    top:2.2vh;
+    left:2.2vw;
+    z-index:10;
+    font-size:clamp(28px,3.2vw,58px);
+    color:var(--gold);
+    letter-spacing:.10em;
+    text-shadow:0 0 14px rgba(255,180,100,.22), 0 6px 18px rgba(0,0,0,.55);
+    pointer-events:none;
+}
+
+.title{
+    position:fixed;
+    top:3vh;
+    width:100%;
+    z-index:9;
+    text-align:center;
+    font-size:clamp(20px,2.4vw,38px);
+    letter-spacing:clamp(3px,.58vw,8px);
+    color:rgba(242,198,122,.82);
+    text-shadow:0 0 14px rgba(255,190,100,.13), 0 5px 22px rgba(0,0,0,.70);
+    pointer-events:none;
+}
+
+.scene{
+    position:absolute;
+    z-index:4;
+    inset:8vh 3.5vw 5vh 3.5vw;
+    display:flex;
+    gap:2.5vw;
+    align-items:center;
+    justify-content:space-between;
+}
+
+/* Левая музейная зона */
+.frame-zone{
+    width:43%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-width:0;
+}
+
+.frame{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    max-width:100%;
+    max-height:82vh;
+    padding:18px;
+    background:
+        linear-gradient(135deg,var(--wood-2),var(--wood-1) 35%,#684027 55%,var(--wood-3)),
+        repeating-linear-gradient(45deg, rgba(255,210,140,.06) 0 3px, rgba(0,0,0,.12) 3px 9px);
+    border:3px solid #1c100a;
+    box-shadow:
+        0 0 0 2px #5b3823 inset,
+        0 0 0 7px #23150e inset,
+        0 20px 54px rgba(0,0,0,.62),
+        0 0 34px rgba(205,130,62,.08);
+}
+
+.frame:before{
+    content:"";
+    position:absolute;
+    inset:9px;
+    border:2px groove rgba(155,92,44,.62);
+    pointer-events:none;
+}
+
+.frame:after{
+    content:"";
+    position:absolute;
+    inset:17px;
+    border:1px solid rgba(255,202,126,.10);
+    pointer-events:none;
+}
+
+.painting-wrap{
+    position:relative;
+    z-index:1;
+    background:#0e0a08;
+    border:2px solid rgba(60,35,20,.85);
+    box-shadow:inset 0 0 18px rgba(0,0,0,.72);
+}
+
+#painting{
+    display:block;
+    max-width:calc(43vw - 56px);
+    max-height:calc(82vh - 56px);
+    width:auto;
+    height:auto;
+    object-fit:contain;
+    user-select:none;
+    -webkit-user-drag:none;
+    cursor:zoom-in;
+}
+
+/* Правая медная пластина */
+.plaque-zone{
+    width:53%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-width:0;
+}
+
+.plaque{
+    position:relative;
+    width:100%;
+    max-height:82vh;
+    padding:2rem 2rem 1.4rem;
+    color:#f2c67a;
+    background:
+        linear-gradient(145deg, rgba(64,34,15,.96), rgba(123,68,31,.93) 45%, rgba(84,45,21,.96)),
+        radial-gradient(circle at 18% 16%, rgba(255,190,110,.10), rgba(0,0,0,0));
+    border:2px solid rgba(189,126,70,.45);
+    box-shadow:
+        0 0 0 1px rgba(255,190,120,.12) inset,
+        0 18px 44px rgba(0,0,0,.38),
+        inset 0 0 34px rgba(255,180,95,.05);
+}
+
+.screw{
+    position:absolute;
+    width:13px;
+    height:13px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #ba824c, #593015 70%);
+    border:1px solid rgba(255,200,120,.20);
+    box-shadow:inset 0 0 3px rgba(0,0,0,.48);
+}
+.s1{top:13px;left:13px;}
+.s2{top:13px;right:13px;}
+.s3{bottom:13px;left:13px;}
+.s4{bottom:13px;right:13px;}
+
+#workTitle{
+    width:100%;
+    min-height:52px;
+    resize:vertical;
+    border:1px solid rgba(255,200,130,.18);
+    border-radius:4px;
+    padding:10px;
+    background:rgba(38,18,8,.34);
+    color:#f3cd89;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:clamp(22px,2vw,36px);
+    text-align:center;
+    outline:none;
+    line-height:1.1;
+}
+
+#story{
+    margin-top:14px;
+    width:100%;
+    height:30vh;
+    min-height:150px;
+    resize:vertical;
+    border:1px solid rgba(255,200,130,.18);
+    border-radius:4px;
+    padding:14px;
+    background:rgba(38,18,8,.30);
+    color:#e6ba76;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:clamp(17px,1.25vw,24px);
+    line-height:1.35;
+    outline:none;
+}
+
+.controls{
+    margin-top:14px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+}
+
+button{
+    border:1px solid rgba(218,155,88,.36);
+    border-radius:4px;
+    padding:10px 10px;
+    cursor:pointer;
+    font-family:Georgia,"Times New Roman",serif;
+    color:#f0c37f;
+    background:linear-gradient(145deg, rgba(69,38,18,.96), rgba(122,70,34,.92), rgba(61,34,17,.96));
+    box-shadow:0 6px 18px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,220,160,.08);
+}
+button:hover{filter:brightness(1.12);}
+button:active{transform:translateY(1px);}
+
+.save{grid-column:1/3;font-weight:bold;}
+.reset{grid-column:3/5;}
+
+.counter{
+    margin-top:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    color:#f0c988;
+    font-size:18px;
+    letter-spacing:1px;
+}
+
+.counter input{
+    width:68px;
+    text-align:center;
+    padding:6px;
+    border-radius:4px;
+    border:1px solid rgba(255,200,130,.22);
+    background:rgba(38,18,8,.34);
+    color:#f3cd89;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:17px;
+}
+
+.hint{
+    margin-top:10px;
+    text-align:center;
+    color:rgba(240,201,136,.56);
+    font-size:12px;
+    line-height:1.35;
+}
+
+/* ЛУПА */
+.zoomLayer{
+    position:fixed;
+    inset:0;
+    display:none;
+    z-index:100;
+    overflow:hidden;
+    cursor:grab;
+    background:
+        radial-gradient(circle at 50% 34%, rgba(160,95,45,.20), transparent 34%),
+        rgba(4,2,1,.95);
+}
+.zoomLayer.open{display:block;}
+.zoomLayer.dragging{cursor:grabbing;}
+
+#zoomImg{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform-origin:center center;
+    user-select:none;
+    -webkit-user-drag:none;
+    max-width:none;
+    max-height:none;
+}
+
+.zoomTools{
+    position:fixed;
+    right:24px;
+    top:20px;
+    z-index:115;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px;
+    border-radius:6px;
+    background:rgba(35,18,9,.78);
+    border:1px solid rgba(218,155,88,.30);
+    box-shadow:0 10px 30px rgba(0,0,0,.45);
+}
+
+.zoomTools button{
+    min-width:42px;
+    padding:8px 10px;
+    border-radius:4px;
+    font-family:Arial,sans-serif;
+}
+
+#zoomValue{
+    min-width:58px;
+    color:#f3cd89;
+    text-align:center;
+    font-family:Arial,sans-serif;
+    font-size:14px;
+    font-weight:bold;
+}
+
+.zoomClose{
+    position:fixed;
+    left:50%;
+    bottom:22px;
+    transform:translateX(-50%);
+    z-index:110;
+    color:rgba(240,201,136,.72);
+    background:rgba(35,18,9,.60);
+    border:1px solid rgba(218,155,88,.22);
+    border-radius:999px;
+    padding:10px 16px;
+    font-family:Arial,sans-serif;
+    font-size:14px;
+    pointer-events:none;
+}
+
+.error{
+    position:fixed;
+    left:50%;
+    bottom:3vh;
+    transform:translateX(-50%);
+    z-index:200;
+    padding:10px 16px;
+    border-radius:999px;
+    background:rgba(120,65,30,.90);
+    color:#fff2dc;
+    font-family:Arial,sans-serif;
+    font-size:13px;
+    display:none;
+}
+
+@media(max-width:980px){
+    html,body{overflow:auto;}
+    .scene{
+        position:relative;
+        inset:auto;
+        min-height:100vh;
+        padding:10vh 4vw 6vh;
+        flex-direction:column;
+        align-items:center;
+    }
+    .frame-zone,.plaque-zone{
+        width:100%;
+    }
+    #painting{
+        max-width:calc(92vw - 56px);
+        max-height:58vh;
+    }
+    .plaque{
+        max-height:none;
+    }
+    .controls{
+        grid-template-columns:1fr 1fr;
+    }
+    .save,.reset{
+        grid-column:1/3;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="yud">ЮД</div>
+<div class="title">Юдов Василий Михайлович КАТАЛОГ</div>
+
+<main class="scene">
+    <section class="frame-zone">
+        <div class="frame" id="frame">
+            <div class="painting-wrap">
+                <img id="painting" alt="Работа 001">
+            </div>
+        </div>
+    </section>
+
+    <section class="plaque-zone">
+        <div class="plaque">
+            <div class="screw s1"></div>
+            <div class="screw s2"></div>
+            <div class="screw s3"></div>
+            <div class="screw s4"></div>
+
+            <textarea id="workTitle" placeholder="Название работы"></textarea>
+            <textarea id="story" placeholder="История создания, состояние, автор, заметки..."></textarea>
+
+            <div class="controls">
+                <button id="prevBtn">← назад</button>
+                <button id="nextBtn">дальше →</button>
+                <button id="saveBtn" class="save">Сохранить текст</button>
+                <button id="resetBtn" class="reset">Сбросить текст</button>
+            </div>
+
+            <div class="counter">
+                <span>№</span>
+                <input id="jumpInput" type="number" min="1" max="200" value="1">
+                <button id="jumpBtn" type="button">перейти</button>
+                <span>/ 200</span>
+            </div>
+
+            <div class="hint">
+                Папка: <b>UD_v</b>. Файлы ищутся как 001, 01 и 1 с расширениями jpg/png/webp.<br>
+                Клик по работе — лупа 25–300%. Текст сохраняется отдельно для каждой работы.
+            </div>
+        </div>
+    </section>
+</main>
+
+<div class="zoomLayer" id="zoomLayer">
+    <img id="zoomImg" alt="">
+    <div class="zoomTools">
+        <button id="zoomOutBtn" type="button">−</button>
+        <span id="zoomValue">25%</span>
+        <button id="zoomInBtn" type="button">+</button>
+        <button id="zoomHomeBtn" type="button">25%</button>
+        <button id="zoomFullBtn" type="button">100%</button>
+        <button id="zoomCloseBtn" type="button">закрыть</button>
+    </div>
+    <div class="zoomClose">колесо мыши — масштаб • тянуть картину — двигать • 25% — исходное • Esc — назад</div>
+</div>
+
+<div class="error" id="errorBox"></div>
+
+<script>
+const TOTAL = 200;
+const FOLDER = "UD_v";
+const STORAGE_PREFIX = "yud_v2_museum_node_";
+const EXTENSIONS = ["jpg","JPG","jpeg","JPEG","png","PNG","webp","WEBP"];
+
+let index = 1;
+
+const painting = document.getElementById("painting");
+const frameEl = document.getElementById("frame");
+const workTitle = document.getElementById("workTitle");
+const story = document.getElementById("story");
+const errorBox = document.getElementById("errorBox");
+
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const saveBtn = document.getElementById("saveBtn");
+const resetBtn = document.getElementById("resetBtn");
+const jumpInput = document.getElementById("jumpInput");
+const jumpBtn = document.getElementById("jumpBtn");
+
+const zoomLayer = document.getElementById("zoomLayer");
+const zoomImg = document.getElementById("zoomImg");
+const zoomOutBtn = document.getElementById("zoomOutBtn");
+const zoomInBtn = document.getElementById("zoomInBtn");
+const zoomHomeBtn = document.getElementById("zoomHomeBtn");
+const zoomFullBtn = document.getElementById("zoomFullBtn");
+const zoomCloseBtn = document.getElementById("zoomCloseBtn");
+const zoomValue = document.getElementById("zoomValue");
+
+function pad2(n){ return String(n).padStart(2,"0"); }
+function pad3(n){ return String(n).padStart(3,"0"); }
+
+function candidates(num){
+    const names = [pad3(num), pad2(num), String(num)];
+    const list = [];
+    names.forEach(function(name){
+        EXTENSIONS.forEach(function(ext){
+            list.push(FOLDER + "/" + name + "." + ext);
+        });
+    });
+    return list;
+}
+
+function showError(text){
+    errorBox.textContent = text;
+    errorBox.style.display = "block";
+    clearTimeout(showError.timer);
+    showError.timer = setTimeout(function(){ errorBox.style.display = "none"; }, 3000);
+}
+
+function storageKey(kind){
+    return STORAGE_PREFIX + kind + "_" + pad3(index);
+}
+
+function loadText(){
+    workTitle.value = localStorage.getItem(storageKey("title")) || "";
+    story.value = localStorage.getItem(storageKey("story")) || "";
+}
+
+function saveText(){
+    localStorage.setItem(storageKey("title"), workTitle.value);
+    localStorage.setItem(storageKey("story"), story.value);
+    showError("Текст сохранён для работы " + pad3(index));
+}
+
+function resetText(){
+    workTitle.value = "";
+    story.value = "";
+    localStorage.removeItem(storageKey("title"));
+    localStorage.removeItem(storageKey("story"));
+    showError("Текст сброшен для работы " + pad3(index));
+}
+
+function setFrameByRatio(){
+    const ratio = painting.naturalWidth / painting.naturalHeight;
+
+    if(ratio >= 1.35){
+        frameEl.style.aspectRatio = "4 / 3";
+    }else if(ratio > 0.85 && ratio < 1.35){
+        frameEl.style.aspectRatio = "1 / 1";
+    }else{
+        frameEl.style.aspectRatio = "3 / 4";
+    }
+}
+
+function tryLoad(list, pos){
+    pos = pos || 0;
+
+    if(pos >= list.length){
+        painting.removeAttribute("src");
+        showError("Не найден файл для работы " + pad3(index) + " в папке " + FOLDER);
+        return;
+    }
+
+    const path = list[pos];
+    const probe = new Image();
+
+    probe.onload = function(){
+        painting.src = path;
+        painting.alt = "Работа " + pad3(index);
+        painting.onload = setFrameByRatio;
+    };
+
+    probe.onerror = function(){
+        tryLoad(list, pos + 1);
+    };
+
+    probe.src = path;
+}
+
+function show(num){
+    num = parseInt(num,10);
+    if(isNaN(num)) num = index;
+
+    if(num < 1) num = TOTAL;
+    if(num > TOTAL) num = 1;
+
+    index = num;
+    jumpInput.value = index;
+    loadText();
+    tryLoad(candidates(index),0);
+}
+
+function next(){ show(index + 1); }
+function prev(){ show(index - 1); }
+
+function jump(){
+    let n = parseInt(jumpInput.value,10);
+    if(isNaN(n)) n = index;
+    if(n < 1) n = 1;
+    if(n > TOTAL) n = TOTAL;
+    show(n);
+}
+
+prevBtn.onclick = prev;
+nextBtn.onclick = next;
+saveBtn.onclick = saveText;
+resetBtn.onclick = resetText;
+/* NEX V4 AUTOSAVE */
+workTitle.addEventListener("input", saveText);
+story.addEventListener("input", saveText);
+window.addEventListener("beforeunload", saveText);
+jumpBtn.onclick = jump;
+
+jumpInput.addEventListener("keydown", function(e){
+    if(e.key === "Enter") jump();
+});
+
+document.addEventListener("keydown", function(e){
+    if(zoomLayer.classList.contains("open")){
+        if(e.key === "Escape") closeZoom();
+        return;
+    }
+
+    if(document.activeElement === workTitle || document.activeElement === story || document.activeElement === jumpInput) return;
+
+    if(e.key === "ArrowRight") next();
+    if(e.key === "ArrowLeft") prev();
+});
+
+document.addEventListener("wheel", function(e){
+    if(zoomLayer.classList.contains("open")) return;
+    if(document.activeElement === workTitle || document.activeElement === story || document.activeElement === jumpInput) return;
+    if(Math.abs(e.deltaY) < 8) return;
+
+    if(e.deltaY > 0) next();
+    else prev();
+}, {passive:true});
+
+/* ЛУПА */
+let dragging = false;
+let startX = 0;
+let startY = 0;
+let imgX = 0;
+let imgY = 0;
+let zoomScale = 0.25;
+
+const ZOOM_MIN = 0.25;
+const ZOOM_MAX = 3;
+const ZOOM_STEP = 0.10;
+
+function clampZoom(value){
+    return Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, value));
+}
+
+function updateZoomValue(){
+    zoomValue.textContent = Math.round(zoomScale * 100) + "%";
+}
+
+function setZoomTransform(){
+    zoomImg.style.transform = "translate(-50%, -50%) translate(" + imgX + "px," + imgY + "px) scale(" + zoomScale + ")";
+    updateZoomValue();
+}
+
+function setZoom(value){
+    zoomScale = clampZoom(value);
+    setZoomTransform();
+}
+
+function changeZoom(delta){
+    setZoom(zoomScale + delta);
+}
+
+function homeZoom(){
+    zoomScale = 0.25;
+    imgX = 0;
+    imgY = 0;
+    setZoomTransform();
+}
+
+function fullZoom(){
+    zoomScale = 1;
+    imgX = 0;
+    imgY = 0;
+    setZoomTransform();
+}
+
+function openZoom(){
+    if(!painting.src) return;
+    zoomImg.src = painting.src;
+    zoomLayer.classList.add("open");
+    homeZoom();
+}
+
+function closeZoom(){
+    zoomLayer.classList.remove("open");
+    dragging = false;
+    zoomLayer.classList.remove("dragging");
+    homeZoom();
+}
+
+painting.onclick = openZoom;
+
+zoomInBtn.onclick = function(e){
+    e.stopPropagation();
+    changeZoom(ZOOM_STEP);
+};
+
+zoomOutBtn.onclick = function(e){
+    e.stopPropagation();
+    changeZoom(-ZOOM_STEP);
+};
+
+zoomHomeBtn.onclick = function(e){
+    e.stopPropagation();
+    homeZoom();
+};
+
+zoomFullBtn.onclick = function(e){
+    e.stopPropagation();
+    fullZoom();
+};
+
+zoomCloseBtn.onclick = function(e){
+    e.stopPropagation();
+    closeZoom();
+};
+
+zoomLayer.addEventListener("wheel", function(e){
+    e.preventDefault();
+    if(e.deltaY < 0) changeZoom(ZOOM_STEP);
+    else changeZoom(-ZOOM_STEP);
+}, {passive:false});
+
+zoomLayer.addEventListener("mousedown", function(e){
+    if(e.target.closest(".zoomTools")) return;
+
+    if(e.target !== zoomImg){
+        closeZoom();
+        return;
+    }
+
+    dragging = true;
+    zoomLayer.classList.add("dragging");
+    startX = e.clientX - imgX;
+    startY = e.clientY - imgY;
+});
+
+window.addEventListener("mousemove", function(e){
+    if(!dragging) return;
+    imgX = e.clientX - startX;
+    imgY = e.clientY - startY;
+    setZoomTransform();
+});
+
+window.addEventListener("mouseup", function(){
+    dragging = false;
+    zoomLayer.classList.remove("dragging");
+});
+
+zoomLayer.addEventListener("touchstart", function(e){
+    if(e.target.closest(".zoomTools")) return;
+
+    if(e.target !== zoomImg){
+        closeZoom();
+        return;
+    }
+
+    dragging = true;
+    const t = e.touches[0];
+    startX = t.clientX - imgX;
+    startY = t.clientY - imgY;
+}, {passive:true});
+
+zoomLayer.addEventListener("touchmove", function(e){
+    if(!dragging) return;
+    const t = e.touches[0];
+    imgX = t.clientX - startX;
+    imgY = t.clientY - startY;
+    setZoomTransform();
+}, {passive:true});
+
+zoomLayer.addEventListener("touchend", function(){
+    dragging = false;
+}, {passive:true});
+
+show(1);
+</script>
+</body>
+</html>

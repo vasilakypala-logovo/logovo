@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ГАЛЕРЕЯ ТИХИХ ЛУН</title>
+<style>
+  :root {
+    --bg: #030303;
+    --silver: rgba(230, 235, 244, 0.92);
+    --silver-soft: rgba(220, 228, 238, 0.60);
+    --wood-dark: #180b05;
+    --wood-mid: #45210f;
+    --wood-light: #74401d;
+    --copper: #b56b31;
+    --copper-light: #e3a762;
+    --copper-dark: #4d210b;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: white;
+    font-family: "Times New Roman", Georgia, serif;
+  }
+
+  body {
+    position: relative;
+    background:
+      radial-gradient(circle at 50% 18%, rgba(220,225,255,0.08), rgba(255,255,255,0) 28%),
+      radial-gradient(circle at 18% 70%, rgba(95,105,150,0.07), rgba(255,255,255,0) 31%),
+      radial-gradient(circle at 82% 62%, rgba(80,75,120,0.07), rgba(255,255,255,0) 33%),
+      linear-gradient(to bottom, rgba(21,21,29,0.72), rgba(0,0,0,0.12) 30%, rgba(0,0,0,0.78) 100%),
+      #030303;
+  }
+
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 18;
+  }
+
+  body::before {
+    background:
+      linear-gradient(to right,
+        rgba(0,0,0,0.96) 0%,
+        rgba(0,0,0,0.42) 7%,
+        rgba(0,0,0,0.02) 18%,
+        rgba(0,0,0,0.02) 82%,
+        rgba(0,0,0,0.42) 93%,
+        rgba(0,0,0,0.96) 100%);
+  }
+
+  body::after {
+    background:
+      linear-gradient(to bottom,
+        rgba(0,0,0,0.88) 0%,
+        rgba(0,0,0,0.18) 17%,
+        rgba(0,0,0,0.00) 35%,
+        rgba(0,0,0,0.02) 72%,
+        rgba(0,0,0,0.34) 89%,
+        rgba(0,0,0,0.78) 100%);
+  }
+
+  .top-title {
+    position: fixed;
+    top: 3.8vh;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 26;
+    padding: 0.25em 0.9em;
+    text-transform: uppercase;
+    letter-spacing: clamp(4px, 0.75vw, 11px);
+    font-size: clamp(19px, 2.15vw, 36px);
+    color: var(--silver);
+    text-shadow:
+      0 0 3px rgba(255,255,255,0.22),
+      0 0 18px rgba(210,220,245,0.20),
+      0 0 34px rgba(190,205,235,0.14);
+    white-space: nowrap;
+    pointer-events: none;
+    animation: titleBreath 7s ease-in-out infinite;
+  }
+
+  .hint {
+    position: fixed;
+    bottom: 2.7vh;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 26;
+    padding: 8px 15px;
+    border-radius: 999px;
+    background: rgba(8, 8, 10, 0.42);
+    border: 1px solid rgba(200, 210, 230, 0.10);
+    color: var(--silver-soft);
+    font-size: clamp(11px, 0.95vw, 14px);
+    letter-spacing: 1px;
+    backdrop-filter: blur(4px);
+    pointer-events: none;
+  }
+
+  .gallery-shell {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    z-index: 5;
+    padding: 10vh 7vw 8vh;
+  }
+
+  .moon-stage {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) minmax(250px, 330px);
+    gap: clamp(18px, 2.7vw, 42px);
+    align-items: center;
+    justify-items: center;
+  }
+
+  .frame-wrap {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .frame {
+    position: relative;
+    width: min(100%, 760px);
+    height: min(100%, 560px);
+    padding: clamp(14px, 1.65vw, 28px);
+    border-radius: 18px;
+    background:
+      radial-gradient(circle at 16% 18%, rgba(255,205,130,0.18), transparent 13%),
+      radial-gradient(circle at 85% 82%, rgba(255,205,130,0.13), transparent 15%),
+      repeating-linear-gradient(38deg, rgba(255,210,155,0.07) 0 7px, transparent 8px 22px),
+      linear-gradient(140deg, #130904, var(--wood-mid) 34%, #120704 62%, var(--wood-light));
+    box-shadow:
+      0 34px 90px rgba(0,0,0,0.74),
+      inset 0 0 0 2px rgba(255,205,140,0.08),
+      inset 0 0 0 10px rgba(0,0,0,0.30),
+      inset 0 0 28px rgba(0,0,0,0.72),
+      0 0 55px rgba(150,170,220,0.08);
+    transition: width 0.28s ease, height 0.28s ease;
+  }
+
+  .frame::before,
+  .frame::after {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border-radius: 14px;
+    pointer-events: none;
+  }
+
+  .frame::before {
+    border: 7px ridge rgba(119,62,25,0.72);
+    box-shadow: inset 0 0 22px rgba(0,0,0,0.82);
+  }
+
+  .frame::after {
+    inset: 21px;
+    border: 2px solid rgba(233,180,105,0.16);
+    background:
+      linear-gradient(90deg, transparent 0 8%, rgba(255,220,160,0.055) 9%, transparent 10% 90%, rgba(255,220,160,0.055) 91%, transparent 92%),
+      linear-gradient(0deg, transparent 0 8%, rgba(255,220,160,0.045) 9%, transparent 10% 90%, rgba(255,220,160,0.045) 91%, transparent 92%);
+  }
+
+  .art {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    border-radius: 7px;
+    overflow: hidden;
+    background: #020202;
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,0.08),
+      inset 0 0 46px rgba(0,0,0,0.68);
+    cursor: zoom-in;
+  }
+
+  .art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+    background: #020202;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+
+  .art.loading img { opacity: 0.18; transform: scale(0.985); }
+
+  .missing {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    color: rgba(235,235,245,0.58);
+    letter-spacing: 1px;
+    background: radial-gradient(circle at 50% 40%, rgba(220,230,255,0.08), transparent 26%), #050505;
+  }
+
+  .art.no-image .missing { display: flex; }
+
+  .nav {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 28;
+    width: 58px;
+    height: 88px;
+    border: 1px solid rgba(230,210,180,0.20);
+    border-radius: 999px;
+    background: rgba(15,10,8,0.42);
+    color: rgba(245,235,220,0.78);
+    font-size: 42px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 12px 34px rgba(0,0,0,0.42), inset 0 0 18px rgba(255,210,140,0.05);
+  }
+
+  .nav:hover { background: rgba(70,38,18,0.50); color: white; }
+  .nav.prev { left: 2.8vw; }
+  .nav.next { right: 2.8vw; }
+
+  .plaque {
+    position: relative;
+    z-index: 29;
+    width: 100%;
+    max-width: 330px;
+    min-height: 265px;
+    padding: 34px 24px 24px;
+    border-radius: 18px 7px 18px 7px;
+    color: #1c0e05;
+    background:
+      radial-gradient(circle at 20% 16%, rgba(255,232,170,0.60), transparent 8%),
+      radial-gradient(circle at 76% 72%, rgba(80,31,6,0.26), transparent 16%),
+      repeating-linear-gradient(105deg, rgba(255,255,255,0.10) 0 3px, rgba(0,0,0,0.025) 4px 11px),
+      linear-gradient(145deg, var(--copper-light), var(--copper) 44%, #8a481f 66%, var(--copper-dark));
+    box-shadow:
+      0 18px 42px rgba(0,0,0,0.58),
+      inset 0 1px 0 rgba(255,238,190,0.54),
+      inset 0 -4px 10px rgba(55,20,4,0.40),
+      inset 0 0 0 2px rgba(73,28,8,0.45);
+  }
+
+  .plaque::before,
+  .plaque::after {
+    content: "";
+    position: absolute;
+    top: 18px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #3a1605 0 25%, #d18a43 30% 55%, #4b1f08 70% 100%);
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.35), 0 1px 3px rgba(0,0,0,0.45);
+  }
+  .plaque::before { left: 22px; }
+  .plaque::after { right: 22px; }
+
+  .plaque-label {
+    margin: 5px 0 8px;
+    font-size: 12px;
+    letter-spacing: 1.7px;
+    text-transform: uppercase;
+    opacity: 0.58;
+  }
+
+  .editable {
+    width: 100%;
+    min-height: 34px;
+    padding: 7px 8px;
+    border-radius: 9px;
+    outline: none;
+    background: rgba(255,240,190,0.08);
+    border: 1px solid rgba(55,22,8,0.16);
+    box-shadow: inset 0 1px 0 rgba(255,245,205,0.18);
+  }
+
+  .editable:focus {
+    background: rgba(255,247,210,0.19);
+    border-color: rgba(55,22,8,0.42);
+  }
+
+  .plaque-title {
+    font-size: clamp(21px, 2vw, 31px);
+    line-height: 1.14;
+    letter-spacing: 1.1px;
+    font-weight: bold;
+    text-shadow: 0 1px 0 rgba(255,222,158,0.36);
+  }
+
+  .plaque-author {
+    margin-top: 2px;
+    font-size: clamp(15px, 1.12vw, 18px);
+    line-height: 1.24;
+    letter-spacing: 0.7px;
+    opacity: 0.84;
+  }
+
+  .edit-tools {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+
+  .small-btn {
+    border: 1px solid rgba(45,20,8,0.45);
+    border-radius: 999px;
+    padding: 8px 12px;
+    background: rgba(255,228,170,0.20);
+    color: #211006;
+    font-family: Georgia, serif;
+    cursor: pointer;
+  }
+
+  .small-btn:hover { background: rgba(255,238,190,0.42); }
+
+  .save-note {
+    min-height: 18px;
+    margin-top: 9px;
+    font-size: 12px;
+    opacity: 0.64;
+  }
+
+  .counter {
+    position: fixed;
+    right: 3.1vw;
+    top: 14vh;
+    z-index: 27;
+    color: rgba(226,232,241,0.68);
+    letter-spacing: 2px;
+    font-size: 14px;
+    background: rgba(5,5,7,0.28);
+    border: 1px solid rgba(215,225,240,0.08);
+    border-radius: 999px;
+    padding: 10px 13px;
+    pointer-events: none;
+  }
+
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: blur(5px);
+  }
+
+  .lightbox.open { display: flex; }
+
+  .zoom-stage {
+    position: relative;
+    width: 96vw;
+    height: 92vh;
+    overflow: hidden;
+    border: clamp(10px, 1.4vw, 20px) solid #1b0d06;
+    box-shadow: 0 0 0 2px rgba(211,151,80,0.22), 0 26px 90px rgba(0,0,0,0.88);
+    background: #020202;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .zoom-stage.dragging { cursor: grabbing; }
+
+  .zoom-stage img {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    max-width: none;
+    max-height: none;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+    will-change: transform;
+  }
+
+  .zoom-help {
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    z-index: 56;
+    padding: 7px 13px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.45);
+    border: 1px solid rgba(255,255,255,0.14);
+    color: rgba(255,255,255,0.72);
+    font-size: 13px;
+    letter-spacing: 1px;
+    pointer-events: none;
+  }
+
+  .close-lightbox {
+    position: fixed;
+    top: 22px;
+    right: 26px;
+    z-index: 55;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.20);
+    background: rgba(0,0,0,0.38);
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+  }
+
+  .fog {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 12;
+    background:
+      radial-gradient(circle at 20% 24%, rgba(235,240,255,0.045), rgba(235,240,255,0) 22%),
+      radial-gradient(circle at 80% 34%, rgba(235,240,255,0.035), rgba(235,240,255,0) 24%),
+      radial-gradient(circle at 52% 60%, rgba(255,255,255,0.025), rgba(255,255,255,0) 28%);
+    opacity: 0.88;
+    animation: fogFloat 18s ease-in-out infinite alternate;
+  }
+
+  @keyframes titleBreath {
+    0%, 100% { filter: brightness(0.94); }
+    50% { filter: brightness(1.14); }
+  }
+
+  @keyframes fogFloat {
+    from { transform: translate3d(-1.5%, -1%, 0) scale(1); }
+    to { transform: translate3d(1.2%, 1%, 0) scale(1.03); }
+  }
+
+  @media (max-width: 900px) {
+    .gallery-shell { padding: 9vh 6vw 7vh; }
+    .moon-stage {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr auto;
+      gap: 14px;
+    }
+    .plaque {
+      max-width: min(88vw, 620px);
+      min-height: 120px;
+      padding: 26px 18px 16px;
+    }
+    .edit-tools { margin-top: 10px; }
+    .nav { width: 44px; height: 66px; font-size: 32px; }
+    .nav.prev { left: 1.4vw; }
+    .nav.next { right: 1.4vw; }
+    .hint { display: none; }
+    .counter { top: auto; bottom: 2.1vh; right: 3vw; }
+  }
+</style>
+</head>
+<body>
+  <div class="fog"></div>
+
+  <div class="top-title">ГАЛЕРЕЯ ТИХИХ ЛУН</div>
+  <div class="hint">← → листать • клик по картине увеличить • табличка редактируется и сохраняется</div>
+
+  <button class="nav prev" id="prevBtn" aria-label="Предыдущая картина">‹</button>
+  <button class="nav next" id="nextBtn" aria-label="Следующая картина">›</button>
+
+  <main class="gallery-shell">
+    <section class="moon-stage" id="moonStage">
+      <div class="frame-wrap" id="frameWrap">
+        <div class="frame" id="frame">
+          <div class="art" id="artBox" title="Нажмите, чтобы рассмотреть ближе">
+            <img id="moonImage" alt="Картина галереи тихих лун" draggable="false" />
+            <div class="missing" id="missingText"></div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="plaque" id="plaque">
+        <div class="plaque-label">название</div>
+        <div class="editable plaque-title" id="plaqueTitle" contenteditable="true" spellcheck="false"></div>
+        <div class="plaque-label">автор</div>
+        <div class="editable plaque-author" id="plaqueAuthor" contenteditable="true" spellcheck="false"></div>
+        <div class="edit-tools">
+          <button class="small-btn" id="saveBtn">Сохранить</button>
+          <button class="small-btn" id="resetBtn">Сбросить</button>
+        </div>
+        <div class="save-note" id="saveNote">Правьте текст прямо на табличке.</div>
+      </aside>
+    </section>
+  </main>
+
+  <div class="counter"><span id="counterNow">01</span> / <span id="counterAll">52</span></div>
+
+  <section class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="close-lightbox" id="closeLightbox" aria-label="Закрыть">×</button>
+    <div class="zoom-stage" id="zoomStage" title="Тащите картину мышью, чтобы рассматривать фрагменты">
+      <img id="bigImage" alt="Увеличенная картина" draggable="false" />
+    </div>
+    <div class="zoom-help">увеличение 300% • тащите картину мышью • Esc закрыть</div>
+  </section>
+
+<script>
+  const TOTAL = 52;
+  const FOLDER = 'MOON_1/';
+  const STORAGE_KEY = 'gallery_tihih_lun_captions_v2';
+  const EXTENSIONS = ['', 'jpg', 'jpeg', 'png', 'webp', 'gif'];
+
+  const frame = document.getElementById('frame');
+  const frameWrap = document.getElementById('frameWrap');
+  const moonImage = document.getElementById('moonImage');
+  const artBox = document.getElementById('artBox');
+  const missingText = document.getElementById('missingText');
+  const plaqueTitle = document.getElementById('plaqueTitle');
+  const plaqueAuthor = document.getElementById('plaqueAuthor');
+  const saveNote = document.getElementById('saveNote');
+  const counterNow = document.getElementById('counterNow');
+  const counterAll = document.getElementById('counterAll');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const lightbox = document.getElementById('lightbox');
+  const bigImage = document.getElementById('bigImage');
+  const zoomStage = document.getElementById('zoomStage');
+  const closeLightbox = document.getElementById('closeLightbox');
+
+  let current = 1;
+  let activeSrc = '';
+  let naturalRatio = 4 / 3;
+  let captions = loadCaptions();
+  let zoomX = 0;
+  let zoomY = 0;
+  let zoomDragging = false;
+  let zoomStartX = 0;
+  let zoomStartY = 0;
+  let zoomBaseX = 0;
+  let zoomBaseY = 0;
+
+  counterAll.textContent = String(TOTAL).padStart(2, '0');
+
+  function pad(n) {
+    return String(n).padStart(2, '0');
+  }
+
+  function defaultCaption(index) {
+    return {
+      title: `Тихая луна ${pad(index)}`,
+      author: 'Василий Михайлович'
+    };
+  }
+
+  function loadCaptions() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveCaptions() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(captions));
+  }
+
+  function getCaption(index) {
+    return captions[pad(index)] || defaultCaption(index);
+  }
+
+  function setCaption(index, title, author) {
+    captions[pad(index)] = {
+      title: cleanText(title) || defaultCaption(index).title,
+      author: cleanText(author) || defaultCaption(index).author
+    };
+    saveCaptions();
+  }
+
+  function cleanText(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function imageCandidates(index) {
+    const name = pad(index);
+    return EXTENSIONS.map(ext => ext ? `${FOLDER}${name}.${ext}` : `${FOLDER}${name}`);
+  }
+
+  function fitFrame() {
+    const wrapRect = frameWrap.getBoundingClientRect();
+    const padding = parseFloat(getComputedStyle(frame).paddingLeft) * 2;
+    const maxInnerW = Math.max(160, wrapRect.width - padding - 6);
+    const maxInnerH = Math.max(160, wrapRect.height - padding - 6);
+
+    let innerW = maxInnerW;
+    let innerH = innerW / naturalRatio;
+
+    if (innerH > maxInnerH) {
+      innerH = maxInnerH;
+      innerW = innerH * naturalRatio;
+    }
+
+    frame.style.width = `${Math.round(innerW + padding)}px`;
+    frame.style.height = `${Math.round(innerH + padding)}px`;
+  }
+
+  function loadImage(index) {
+    const candidates = imageCandidates(index);
+    let attempt = 0;
+    activeSrc = '';
+    artBox.classList.add('loading');
+    artBox.classList.remove('no-image');
+    missingText.textContent = '';
+
+    function tryNext() {
+      if (attempt >= candidates.length) {
+        activeSrc = '';
+        moonImage.removeAttribute('src');
+        artBox.classList.remove('loading');
+        artBox.classList.add('no-image');
+        missingText.textContent = `Не найден файл ${pad(index)} в папке MOON_1`;
+        naturalRatio = 4 / 3;
+        fitFrame();
+        return;
+      }
+
+      const src = candidates[attempt++];
+      moonImage.onload = () => {
+        activeSrc = src;
+        naturalRatio = moonImage.naturalWidth / moonImage.naturalHeight || 4 / 3;
+        fitFrame();
+        artBox.classList.remove('loading');
+      };
+      moonImage.onerror = tryNext;
+      moonImage.src = src;
+    }
+
+    tryNext();
+  }
+
+  function render() {
+    const c = getCaption(current);
+    plaqueTitle.textContent = c.title;
+    plaqueAuthor.textContent = c.author;
+    counterNow.textContent = pad(current);
+    saveNote.textContent = 'Правьте текст прямо на табличке.';
+    loadImage(current);
+  }
+
+  function go(delta) {
+    current += delta;
+    if (current < 1) current = TOTAL;
+    if (current > TOTAL) current = 1;
+    render();
+  }
+
+  function saveCurrentCaption() {
+    setCaption(current, plaqueTitle.textContent, plaqueAuthor.textContent);
+    saveNote.textContent = `Сохранено для картины ${pad(current)}.`;
+    setTimeout(() => {
+      if (saveNote.textContent.startsWith('Сохранено')) saveNote.textContent = 'Правьте текст прямо на табличке.';
+    }, 1500);
+  }
+
+  function resetCurrentCaption() {
+    delete captions[pad(current)];
+    saveCaptions();
+    render();
+    saveNote.textContent = `Табличка ${pad(current)} сброшена.`;
+  }
+
+  function applyZoomTransform() {
+    bigImage.style.transform = `translate(calc(-50% + ${zoomX}px), calc(-50% + ${zoomY}px))`;
+  }
+
+  function prepareZoomImage() {
+    const stageRect = zoomStage.getBoundingClientRect();
+    const fitScale = Math.min(
+      stageRect.width / bigImage.naturalWidth,
+      stageRect.height / bigImage.naturalHeight
+    );
+    const zoomScale = fitScale * 3;
+    bigImage.style.width = `${Math.round(bigImage.naturalWidth * zoomScale)}px`;
+    bigImage.style.height = `${Math.round(bigImage.naturalHeight * zoomScale)}px`;
+    zoomX = 0;
+    zoomY = 0;
+    applyZoomTransform();
+  }
+
+  function openLightbox() {
+    if (!activeSrc) return;
+    lightbox.classList.add('open');
+    lightbox.setAttribute('aria-hidden', 'false');
+    bigImage.onload = prepareZoomImage;
+    bigImage.src = activeSrc;
+    if (bigImage.complete && bigImage.naturalWidth) prepareZoomImage();
+  }
+
+  function closeBig() {
+    lightbox.classList.remove('open');
+    lightbox.setAttribute('aria-hidden', 'true');
+    zoomStage.classList.remove('dragging');
+    zoomDragging = false;
+    bigImage.removeAttribute('src');
+    bigImage.removeAttribute('style');
+  }
+
+  prevBtn.addEventListener('click', () => go(-1));
+  nextBtn.addEventListener('click', () => go(1));
+  saveBtn.addEventListener('click', saveCurrentCaption);
+  resetBtn.addEventListener('click', resetCurrentCaption);
+  artBox.addEventListener('click', openLightbox);
+  closeLightbox.addEventListener('click', closeBig);
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeBig(); });
+
+  zoomStage.addEventListener('pointerdown', (e) => {
+    if (!lightbox.classList.contains('open')) return;
+    e.preventDefault();
+    zoomDragging = true;
+    zoomStage.classList.add('dragging');
+    zoomStartX = e.clientX;
+    zoomStartY = e.clientY;
+    zoomBaseX = zoomX;
+    zoomBaseY = zoomY;
+    zoomStage.setPointerCapture(e.pointerId);
+  });
+
+  zoomStage.addEventListener('pointermove', (e) => {
+    if (!zoomDragging) return;
+    zoomX = zoomBaseX + (e.clientX - zoomStartX);
+    zoomY = zoomBaseY + (e.clientY - zoomStartY);
+    applyZoomTransform();
+  });
+
+  zoomStage.addEventListener('pointerup', (e) => {
+    zoomDragging = false;
+    zoomStage.classList.remove('dragging');
+    try { zoomStage.releasePointerCapture(e.pointerId); } catch (err) {}
+  });
+
+  zoomStage.addEventListener('pointercancel', () => {
+    zoomDragging = false;
+    zoomStage.classList.remove('dragging');
+  });
+
+  window.addEventListener('resize', () => {
+    fitFrame();
+    if (lightbox.classList.contains('open') && bigImage.naturalWidth) prepareZoomImage();
+  });
+
+  [plaqueTitle, plaqueAuthor].forEach(el => {
+    el.addEventListener('input', () => {
+      setCaption(current, plaqueTitle.textContent, plaqueAuthor.textContent);
+      saveNote.textContent = 'Запись сохранена в памяти.';
+    });
+
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveCurrentCaption();
+        el.blur();
+      }
+    });
+  });
+
+  window.addEventListener('beforeunload', saveCurrentCaption);
+
+  window.addEventListener('keydown', (e) => {
+    if (lightbox.classList.contains('open')) {
+      if (e.key === 'Escape') closeBig();
+      return;
+    }
+    if (document.activeElement === plaqueTitle || document.activeElement === plaqueAuthor) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        saveCurrentCaption();
+      }
+      return;
+    }
+    if (e.key === 'ArrowRight') go(1);
+    if (e.key === 'ArrowLeft') go(-1);
+  });
+
+  let touchX = null;
+  window.addEventListener('pointerdown', (e) => { touchX = e.clientX; });
+  window.addEventListener('pointerup', (e) => {
+    if (touchX === null) return;
+    const dx = e.clientX - touchX;
+    touchX = null;
+    if (Math.abs(dx) > 80 && !lightbox.classList.contains('open')) go(dx < 0 ? 1 : -1);
+  });
+
+  render();
+</script>
+</body>
+</html>

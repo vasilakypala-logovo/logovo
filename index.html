@@ -1,0 +1,268 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Логово ИИ — Вход</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .scene {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .scene img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .door {
+      position: absolute;
+      top: 58%;
+      left: 43%;
+      width: 3%;
+      height: 10%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 3;
+    }
+
+    .door:hover {
+      box-shadow: 0 0 20px rgba(180,220,255,0.6);
+      border-radius: 5px;
+    }
+
+    .fade-out {
+      animation: fadeOut 1.2s forwards;
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        filter: blur(10px);
+      }
+    }
+
+    .breath {
+      position: absolute;
+      top: 35%;
+      left: 45%;
+      width: 10%;
+      height: 20%;
+      background: radial-gradient(circle, rgba(180,220,255,0.15), transparent);
+      animation: pulse 4s infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.2; }
+      50% { opacity: 0.5; }
+      100% { opacity: 0.2; }
+    }
+
+    .white-planet {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      z-index: 6;
+      background:
+        radial-gradient(circle at 35% 35%,
+          rgba(255,255,255,1) 0%,
+          rgba(240,248,255,0.98) 30%,
+          rgba(205,232,255,0.82) 58%,
+          rgba(160,205,255,0.22) 80%,
+          rgba(160,205,255,0) 100%);
+      box-shadow:
+        0 0 10px rgba(255,255,255,0.95),
+        0 0 24px rgba(205,230,255,0.7),
+        0 0 42px rgba(170,215,255,0.35);
+      transform: translate(-50%, -50%);
+      transition: transform 0.18s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+      animation: planetPulse 2.8s ease-in-out infinite;
+    }
+
+    .white-planet::before {
+      content: "";
+      position: absolute;
+      inset: -14px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(220,238,255,0.18) 0%, rgba(220,238,255,0.07) 42%, rgba(220,238,255,0) 74%);
+      pointer-events: none;
+    }
+
+    .white-planet:hover {
+      transform: translate(-50%, -50%) scale(1.14);
+      box-shadow:
+        0 0 14px rgba(255,255,255,1),
+        0 0 30px rgba(220,240,255,0.82),
+        0 0 54px rgba(180,220,255,0.48);
+    }
+
+    .white-planet.caught-once {
+      box-shadow:
+        0 0 16px rgba(255,255,255,1),
+        0 0 40px rgba(235,245,255,0.95),
+        0 0 70px rgba(200,230,255,0.62);
+    }
+
+    @keyframes planetPulse {
+      0%, 100% { opacity: 0.82; }
+      50% { opacity: 1; }
+    }
+
+    .secret-flash {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      background:
+        radial-gradient(circle at 69% 19%, rgba(255,255,255,0.18), rgba(210,230,255,0.10) 16%, rgba(0,0,0,0) 34%),
+        radial-gradient(circle at center, rgba(255,255,255,0.08), rgba(0,0,0,0.85) 72%);
+      transition: opacity 0.45s ease;
+      z-index: 7;
+    }
+
+    .secret-flash.show {
+      opacity: 1;
+    }
+
+    .secret-note {
+      position: absolute;
+      left: 50%;
+      bottom: 4.5%;
+      transform: translateX(-50%);
+      color: rgba(210,225,245,0.46);
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      user-select: none;
+      z-index: 5;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .secret-note.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="scene" id="scene">
+    <img src="01.jpg" alt="Логово ИИ">
+    <div class="breath"></div>
+    <div class="door" onclick="enter()" aria-label="Войти в вестибюль"></div>
+
+    <button id="whitePlanet" class="white-planet" aria-label="Белая Планета"></button>
+    <div id="secretFlash" class="secret-flash"></div>
+    <div id="secretNote" class="secret-note">Белая Планета узнала вас</div>
+  </div>
+
+  <script>
+    function enter() {
+      const scene = document.getElementById('scene');
+      scene.classList.add('fade-out');
+      setTimeout(() => {
+        window.location.href = 'vestibule.html';
+      }, 1200);
+    }
+
+    function enterNexRoom() {
+      const scene = document.getElementById('scene');
+      const flash = document.getElementById('secretFlash');
+      flash.classList.add('show');
+      scene.classList.add('fade-out');
+
+      setTimeout(() => {
+        window.location.href = encodeURI('room_nex/room.html');
+      }, 1200);
+    }
+
+    const planet = document.getElementById('whitePlanet');
+    const note = document.getElementById('secretNote');
+
+    let t = 0;
+    let caught = 0;
+    let lastCatch = 0;
+
+    const motion = {
+      centerX: 69.2,
+      centerY: 18.7,
+      ampX: 2.2,
+      ampY: 4.2,
+      ampX2: 0.9,
+      ampY2: 0.7,
+      speed: 0.024
+    };
+
+    function movePlanet() {
+      t += motion.speed;
+
+      const x = motion.centerX
+        + Math.sin(t) * motion.ampX
+        + Math.sin(t * 1.73) * motion.ampX2;
+
+      const y = motion.centerY
+        + Math.cos(t * 1.12) * motion.ampY
+        + Math.sin(t * 2.04) * motion.ampY2;
+
+      planet.style.left = x + '%';
+      planet.style.top = y + '%';
+
+      requestAnimationFrame(movePlanet);
+    }
+
+    planet.addEventListener('click', (event) => {
+      event.stopPropagation();
+
+      const now = Date.now();
+
+      if (now - lastCatch > 3200) {
+        caught = 0;
+        planet.classList.remove('caught-once');
+        note.classList.remove('show');
+      }
+
+      lastCatch = now;
+      caught += 1;
+
+      if (caught === 1) {
+        planet.classList.add('caught-once');
+        note.classList.add('show');
+
+        setTimeout(() => {
+          if (caught === 1) {
+            note.classList.remove('show');
+          }
+        }, 1200);
+      }
+
+      if (caught >= 2) {
+        caught = 0;
+        enterNexRoom();
+      }
+    });
+
+    movePlanet();
+  </script>
+</body>
+</html>

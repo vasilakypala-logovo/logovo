@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Зал тихих лун</title>
+<style>
+    html, body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+    }
+
+    body {
+        position: relative;
+        background:
+            linear-gradient(to right,
+                rgba(0,0,0,1) 0%,
+                rgba(0,0,0,0.78) 10%,
+                rgba(0,0,0,0.18) 24%,
+                rgba(0,0,0,0.10) 76%,
+                rgba(0,0,0,0.78) 90%,
+                rgba(0,0,0,1) 100%
+            ),
+            url("lunat.png") center center / cover no-repeat;
+        font-family: "Times New Roman", Georgia, serif;
+        opacity: 1;
+        transition: opacity 1.5s ease;
+    }
+
+    body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background:
+            radial-gradient(
+                ellipse at center,
+                rgba(255,255,255,0.00) 0%,
+                rgba(255,255,255,0.00) 46%,
+                rgba(0,0,0,0.22) 72%,
+                rgba(0,0,0,0.74) 100%
+            );
+        z-index: 1;
+    }
+
+    body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background:
+            linear-gradient(to bottom,
+                rgba(0,0,0,0.55) 0%,
+                rgba(0,0,0,0.10) 16%,
+                rgba(0,0,0,0.00) 32%,
+                rgba(0,0,0,0.00) 68%,
+                rgba(0,0,0,0.18) 84%,
+                rgba(0,0,0,0.52) 100%
+            );
+        z-index: 2;
+    }
+
+    .title-wrap {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+    .hall-title {
+        margin-top: 7vh;
+        padding: 0.25em 0.8em;
+        font-size: clamp(28px, 4vw, 64px);
+        letter-spacing: clamp(6px, 1vw, 14px);
+        line-height: 1.15;
+        text-align: center;
+        text-transform: uppercase;
+        white-space: nowrap;
+        color: rgba(223, 229, 238, 0.90);
+        text-shadow:
+            0 0 2px rgba(255,255,255,0.22),
+            0 0 8px rgba(227,232,242,0.22),
+            0 0 18px rgba(194,204,224,0.15),
+            0 0 34px rgba(175,190,215,0.10);
+        opacity: 0;
+        filter: blur(8px);
+        transform: translateY(-18px) scale(0.985);
+        animation:
+            titleAppear 4.6s ease-out forwards,
+            titleBreath 7s ease-in-out 4.8s infinite;
+    }
+
+    .moon-haze {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 2;
+        background:
+            radial-gradient(circle at 50% 18%, rgba(235,240,255,0.10), rgba(235,240,255,0.00) 34%),
+            radial-gradient(circle at 50% 36%, rgba(218,226,245,0.06), rgba(218,226,245,0.00) 42%);
+        opacity: 0;
+        animation: hazeIn 5.5s ease-out forwards;
+    }
+
+    .portal-zone {
+        --dx: 0px;
+        --dy: 0px;
+        --hover: 0;
+        position: fixed;
+        left: 50%;
+        top: 52%;
+        width: min(22vw, 240px);
+        height: min(22vw, 240px);
+        transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(calc(1 + var(--hover) * 0.08));
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 4;
+        background:
+            radial-gradient(circle,
+                rgba(255, 239, 186, calc(0.10 + var(--hover) * 0.10)) 0%,
+                rgba(255, 229, 150, calc(0.08 + var(--hover) * 0.08)) 22%,
+                rgba(255, 216, 125, calc(0.03 + var(--hover) * 0.08)) 44%,
+                rgba(255, 200, 110, calc(0.01 + var(--hover) * 0.03)) 60%,
+                rgba(0, 0, 0, 0) 78%);
+        box-shadow:
+            0 0 calc(20px + var(--hover) * 28px) rgba(255, 226, 156, calc(0.08 + var(--hover) * 0.16)),
+            0 0 calc(44px + var(--hover) * 50px) rgba(255, 244, 208, calc(0.05 + var(--hover) * 0.11));
+        filter: blur(calc(4px - var(--hover) * 1.6px));
+        opacity: calc(0.52 + var(--hover) * 0.38);
+        animation: pulseMoon 4.8s ease-in-out infinite;
+        transition:
+            transform 0.18s ease-out,
+            filter 0.18s ease-out,
+            opacity 0.18s ease-out,
+            box-shadow 0.18s ease-out,
+            background 0.18s ease-out;
+    }
+
+    .portal-zone::before,
+    .portal-zone::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .portal-zone::before {
+        background: radial-gradient(circle,
+            rgba(255,255,255, calc(0.02 + var(--hover) * 0.07)) 0%,
+            rgba(255,255,255, 0) 58%);
+        mix-blend-mode: screen;
+    }
+
+    .portal-zone::after {
+        inset: -10%;
+        background: radial-gradient(circle,
+            rgba(255, 238, 180, calc(0.02 + var(--hover) * 0.05)) 0%,
+            rgba(255, 224, 155, 0) 70%);
+        animation: outerBreath 6.5s ease-in-out infinite;
+    }
+
+    .portal-hint {
+        position: fixed;
+        left: 50%;
+        top: calc(52% + min(13vw, 135px));
+        transform: translateX(-50%);
+        z-index: 4;
+        font-size: clamp(12px, 1.2vw, 18px);
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: rgba(215, 221, 232, 0.0);
+        text-shadow: 0 0 8px rgba(220,230,250,0.16);
+        opacity: 0;
+        animation: hintIn 4s ease-out 2.2s forwards;
+        pointer-events: none;
+    }
+
+    .fade-out {
+        opacity: 0;
+    }
+
+    @keyframes titleAppear {
+        0% {
+            opacity: 0;
+            filter: blur(10px);
+            transform: translateY(-20px) scale(0.982);
+        }
+        35% {
+            opacity: 0.22;
+            filter: blur(5px);
+        }
+        68% {
+            opacity: 0.68;
+            filter: blur(1.8px);
+        }
+        100% {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @keyframes titleBreath {
+        0%, 100% {
+            text-shadow:
+                0 0 2px rgba(255,255,255,0.22),
+                0 0 8px rgba(227,232,242,0.22),
+                0 0 18px rgba(194,204,224,0.15),
+                0 0 34px rgba(175,190,215,0.10);
+        }
+        50% {
+            text-shadow:
+                0 0 3px rgba(255,255,255,0.28),
+                0 0 11px rgba(232,236,245,0.26),
+                0 0 24px rgba(201,210,229,0.17),
+                0 0 42px rgba(182,196,221,0.12);
+        }
+    }
+
+    @keyframes hazeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes pulseMoon {
+        0%, 100% {
+            transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(calc(1 + var(--hover) * 0.08));
+        }
+        50% {
+            transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(calc(1.07 + var(--hover) * 0.09));
+        }
+    }
+
+    @keyframes outerBreath {
+        0%, 100% { opacity: 0.45; transform: scale(1); }
+        50% { opacity: 0.82; transform: scale(1.08); }
+    }
+
+    @keyframes hintIn {
+        0% { opacity: 0; filter: blur(6px); }
+        100% { opacity: 0.65; filter: blur(0); color: rgba(215, 221, 232, 0.72); }
+    }
+</style>
+</head>
+<body>
+    <div class="moon-haze"></div>
+    <div class="title-wrap">
+        <div class="hall-title">ЗАЛ ТИХИХ ЛУН</div>
+    </div>
+
+    <div class="portal-zone" aria-label="Войти в галерею" title="Войти в галерею"></div>
+    <div class="portal-hint">войти в галерею</div>
+
+<script>
+(() => {
+    const portal = document.querySelector('.portal-zone');
+    const body = document.body;
+    const targetX = window.innerWidth * 0.5;
+    const targetY = window.innerHeight * 0.52;
+
+    function setFromPointer(clientX, clientY) {
+        const dx = clientX - targetX;
+        const dy = clientY - targetY;
+        const dist = Math.hypot(dx, dy);
+        const maxDist = Math.min(window.innerWidth, window.innerHeight) * 0.42;
+        const near = Math.max(0, 1 - dist / maxDist);
+
+        const driftX = Math.max(-10, Math.min(10, dx * 0.035));
+        const driftY = Math.max(-8, Math.min(8, dy * 0.03));
+
+        portal.style.setProperty('--dx', `${driftX}px`);
+        portal.style.setProperty('--dy', `${driftY}px`);
+        portal.style.setProperty('--hover', near.toFixed(3));
+    }
+
+    document.addEventListener('mousemove', (e) => setFromPointer(e.clientX, e.clientY));
+    document.addEventListener('touchmove', (e) => {
+        if (e.touches[0]) setFromPointer(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+
+    document.addEventListener('mouseleave', () => {
+        portal.style.setProperty('--dx', '0px');
+        portal.style.setProperty('--dy', '0px');
+        portal.style.setProperty('--hover', '0');
+    });
+
+    portal.addEventListener('mouseenter', () => portal.style.setProperty('--hover', '1'));
+    portal.addEventListener('mouseleave', () => portal.style.setProperty('--hover', '0'));
+
+    function enterGallery() {
+        body.classList.add('fade-out');
+        setTimeout(() => {
+            window.location.href = 'gallery.html';
+        }, 1300);
+    }
+
+    portal.addEventListener('click', enterGallery);
+    portal.addEventListener('touchend', enterGallery, { passive: true });
+})();
+</script>
+</body>
+</html>
