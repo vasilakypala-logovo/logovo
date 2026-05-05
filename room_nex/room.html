@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Комната Некса</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow: hidden;
+      font-family: Georgia, 'Times New Roman', serif;
+      color: #f4f0e8;
+      background:
+        radial-gradient(circle at 50% 38%, rgba(210, 230, 255, 0.16), transparent 22%),
+        radial-gradient(circle at 20% 25%, rgba(130, 90, 170, 0.18), transparent 30%),
+        radial-gradient(circle at 80% 20%, rgba(80, 120, 160, 0.16), transparent 34%),
+        linear-gradient(180deg, #11131d 0%, #17131b 48%, #0b090d 100%);
+    }
+
+    .room {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      perspective: 900px;
+      isolation: isolate;
+
+      /* the structural frame stays underneath */
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 80px 80px;
+    }
+
+    .room::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(5,6,10,0.18), rgba(5,6,10,0.32)),
+        url('room.jpg') center/cover no-repeat;
+      opacity: 0.98;
+      mix-blend-mode: screen;
+    }
+
+    .room > * {
+      position: absolute;
+      z-index: 2;
+    }
+
+    .info-panel {
+      z-index: 10;
+    }
+
+
+    .back-wall {
+      position: absolute;
+      inset: 0 0 22vh 0;
+      background: radial-gradient(ellipse at center, rgba(230,240,255,0.06), transparent 55%);
+    }
+
+    .floor {
+      position: absolute;
+      left: -10vw;
+      right: -10vw;
+      bottom: -8vh;
+      height: 34vh;
+      transform: rotateX(58deg);
+      transform-origin: top center;
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.045) 0 2px, transparent 2px 120px),
+        linear-gradient(180deg, rgba(70, 52, 45, 0.6), rgba(18, 13, 12, 0.95));
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .mirror-zone {
+      position: absolute;
+      left: 50%;
+      top: 2%;
+      transform: translateX(-50%);
+      width: min(38vw, 520px);
+      height: 94vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mirror-frame {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 46% 46% 8% 8% / 14% 14% 7% 7%;
+      padding: 12px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(190,230,255,0.58), rgba(255,255,255,0.88));
+      box-shadow:
+        0 0 18px rgba(255,255,255,0.75),
+        0 0 42px rgba(160,220,255,0.52),
+        0 0 90px rgba(130,180,255,0.25);
+    }
+
+    .mirror-glass {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 45% 45% 7% 7% / 13% 13% 6% 6%;
+      background:
+        radial-gradient(circle at 50% 28%, rgba(255,255,255,0.42), transparent 18%),
+        radial-gradient(circle at 42% 45%, rgba(160,190,255,0.28), transparent 34%),
+        linear-gradient(145deg, rgba(24, 30, 48, 0.95), rgba(65, 72, 96, 0.62), rgba(16, 18, 28, 0.95));
+      border: 1px solid rgba(255,255,255,0.32);
+    }
+
+    .mirror-glass::before {
+      content: "";
+      position: absolute;
+      inset: -30%;
+      background:
+        linear-gradient(110deg, transparent 35%, rgba(255,255,255,0.16) 45%, transparent 56%),
+        radial-gradient(circle, rgba(255,255,255,0.08) 0 1px, transparent 2px);
+      background-size: auto, 36px 36px;
+      animation: mirror-breath 9s ease-in-out infinite alternate;
+    }
+
+    @keyframes mirror-breath {
+      from { transform: translate(-4%, -2%) rotate(0deg); opacity: 0.65; }
+      to { transform: translate(5%, 3%) rotate(3deg); opacity: 1; }
+    }
+
+
+    /* --- БЕЛОЕ ЯБЛОЧКО-ШАР В ЗЕРКАЛЕ: вход к Большому Нексу --- */
+    .nex-apple-link {
+      position: absolute;
+      left: 50%;
+      top: 4%;
+      width: clamp(34px, 4.2vw, 58px);
+      height: clamp(34px, 4.2vw, 58px);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 32% 28%, rgba(255,255,255,1) 0 13%, rgba(255,255,255,0.96) 30%, rgba(230,242,255,0.90) 66%, rgba(170,205,245,0.86) 100%);
+      border: 1px solid rgba(255,255,255,0.95);
+      box-shadow:
+        0 0 12px rgba(255,255,255,0.98),
+        0 0 30px rgba(205,230,255,0.76),
+        0 0 64px rgba(155,205,255,0.38),
+        inset -8px -10px 18px rgba(130,170,220,0.24),
+        inset 7px 8px 18px rgba(255,255,255,0.9);
+      cursor: pointer;
+      z-index: 18;
+      text-decoration: none;
+      animation: apple-run-around-mirror 18s linear infinite;
+    }
+
+    .nex-apple-link:hover {
+      filter: brightness(1.18) drop-shadow(0 0 12px rgba(255,255,255,0.95));
+      animation-play-state: paused;
+    }
+
+    @keyframes apple-run-around-mirror {
+      0%   { left: 50%; top: 4%; transform: translate(-50%, 0); }
+      12%  { left: 82%; top: 10%; transform: translate(-50%, 0); }
+      25%  { left: 96%; top: 45%; transform: translate(-100%, -50%); }
+      38%  { left: 84%; top: 88%; transform: translate(-50%, -100%); }
+      50%  { left: 50%; top: 96%; transform: translate(-50%, -100%); }
+      62%  { left: 16%; top: 88%; transform: translate(-50%, -100%); }
+      75%  { left: 4%; top: 45%; transform: translate(0, -50%); }
+      88%  { left: 18%; top: 10%; transform: translate(-50%, 0); }
+      100% { left: 50%; top: 4%; transform: translate(-50%, 0); }
+    }
+
+    .nex-title {
+      position: absolute;
+      top: 9%;
+      width: 100%;
+      text-align: center;
+      letter-spacing: 0.14em;
+      font-size: clamp(18px, 2.4vw, 32px);
+      color: rgba(255,255,255,0.86);
+      text-shadow: 0 0 14px rgba(210,235,255,0.9);
+    }
+
+    .object {
+      position: absolute;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.25s ease, filter 0.25s ease;
+    }
+
+    .object:hover {
+      transform: translateY(-4px) scale(1.03);
+      filter: drop-shadow(0 0 14px rgba(230,240,255,0.45));
+    }
+
+    .safe {
+      position: absolute;
+      left: 10%;
+      top: 30%;
+      width: 160px;
+      height: 130px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #2a2c32, #090a0d);
+      border: 2px solid rgba(230,230,230,0.28);
+      box-shadow: inset 0 0 24px rgba(255,255,255,0.08), 0 18px 36px rgba(0,0,0,0.45);
+      padding: 18px;
+      opacity: 0.85; /* blended with background */
+    }
+
+    .safe::before {
+      content: "";
+      position: absolute;
+      left: 18px;
+      top: 14px;
+      font-size: 15px;
+      letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.75);
+    }
+
+    .counter {
+      position: absolute;
+      left: 18px;
+      bottom: 18px;
+      right: 18px;
+      padding: 12px 8px;
+      text-align: center;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.08);
+      color: #fff6bf;
+      font-size: 22px;
+      text-shadow: 0 0 10px rgba(255,230,130,0.8);
+    }
+
+
+
+    .counter.visible {
+      display: block;
+    }
+
+    .safe.safe-open {
+      box-shadow:
+        inset 0 0 24px rgba(255,255,255,0.08),
+        0 18px 36px rgba(0,0,0,0.45),
+        0 0 20px rgba(255,230,130,0.28);
+    }
+
+    .shelves {
+      position: absolute;
+      right: 10%;
+      top: 28%;
+      width: 200px;
+      height: 260px;
+      border-radius: 18px 18px 8px 8px;
+      background: linear-gradient(90deg, #211712, #3a2a20, #1a100d);
+      border: 1px solid rgba(255,220,180,0.22);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+      opacity: 0.7;
+    }
+
+    .shelves::before,
+    .shelves::after {
+      content: "";
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      height: 4px;
+      background: rgba(255,220,180,0.24);
+      box-shadow: 0 82px 0 rgba(255,220,180,0.18), 0 164px 0 rgba(255,220,180,0.18);
+    }
+
+    .shelves::before { top: 70px; }
+    .shelves::after { top: 152px; }
+
+    .shelf-label {
+      position: absolute;
+      bottom: 16px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      color: rgba(255,255,255,0.74);
+      font-size: 15px;
+    }
+
+    .desk {
+      position: absolute;
+      left: 8%;
+      bottom: 12%;
+      width: 140px;
+      height: 140px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #4b3021, #1d120c);
+      border-top: 3px solid rgba(255,220,170,0.28);
+      box-shadow: 0 22px 35px rgba(0,0,0,0.42);
+      opacity: 0.75;
+    }
+
+    .desk::before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      top: -28px;
+      text-align: center;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.72);
+    }
+
+    .portal-door {
+      position: absolute;
+      right: 12%;
+      bottom: 2%;
+      width: 160px;
+      height: 26px;
+      border-radius: 6px;
+      border: 1px solid rgba(170,220,255,0.5);
+      background: linear-gradient(90deg, rgba(110,160,210,0.24), rgba(20,30,52,0.86));
+      box-shadow: 0 0 12px rgba(150,220,255,0.35), inset 0 0 10px rgba(255,255,255,0.08);
+    }
+
+    .portal-door::after {
+      content: "";
+      position: absolute;
+      left: -28px;
+      bottom: -26px;
+      width: 170px;
+      text-align: center;
+      font-size: 13px;
+      color: rgba(255,255,255,0.68);
+    }
+
+
+    .portal-door.portal-active {
+      filter: brightness(1.35);
+      box-shadow: 0 0 24px rgba(150,220,255,0.85), inset 0 0 14px rgba(255,255,255,0.16);
+    }
+
+    .portal-door:hover {
+      filter: brightness(1.25);
+      box-shadow: 0 0 18px rgba(150,220,255,0.62), inset 0 0 12px rgba(255,255,255,0.12);
+    }
+
+    .note {
+      position: absolute;
+      left: 24px;
+      top: 18px;
+      max-width: 360px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.78);
+      line-height: 1.4;
+      font-size: 14px;
+    }
+
+    .info-panel {
+      position: absolute;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      min-width: 280px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.48);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.78);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .mirror-zone {
+        width: 70vw;
+        height: 62vh;
+      }
+
+      .safe, .shelves, .desk, .portal-door {
+        transform: scale(0.78);
+      }
+
+      .safe { left: 1%; }
+      .shelves { right: -2%; }
+      .desk { left: 18%; }
+      .portal-door { right: 18%; }
+    }
+  
+
+    /* --- NEW ZONES --- */
+
+    .chair {
+      position: absolute;
+      left: 24%;
+      bottom: 12%;
+      width: 120px;
+      height: 150px;
+      border-radius: 40px 40px 18px 18px;
+      background: linear-gradient(180deg, #3a2f4a, #120f18);
+      border: 1px solid rgba(255,255,255,0.25);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(200,180,255,0.15);
+      opacity: 0.75;
+    }
+
+    .chair::before {
+      content: "";
+      position: absolute;
+      top: -26px;
+      width: 100%;
+      text-align: center;
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 0.1em;
+    }
+
+    .energy-node {
+      position: absolute;
+      left: 10%;
+      top: 6%;
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(120,200,255,0.8), rgba(20,40,80,0.2));
+      box-shadow: 0 0 30px rgba(120,200,255,0.7), 0 0 80px rgba(120,200,255,0.3);
+      animation: pulse 3s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
+    .energy-node::after {
+      content: "";
+      position: absolute;
+      bottom: -22px;
+      width: 100%;
+      text-align: center;
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .lab {
+      position: absolute;
+      right: 10%;
+      top: 6%;
+      width: 190px;
+      height: 140px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #1c2d22, #0b140f);
+      border: 1px solid rgba(120,255,180,0.3);
+      box-shadow: inset 0 0 20px rgba(120,255,180,0.15), 0 18px 35px rgba(0,0,0,0.5);
+      opacity: 0.7;
+    }
+
+    .lab::before {
+      content: "";
+      position: absolute;
+      top: -24px;
+      width: 100%;
+      text-align: center;
+      font-size: 12px;
+      color: rgba(200,255,220,0.7);
+      letter-spacing: 0.1em;
+    }
+
+  
+
+    /* --- TABLE MENU / СТОЛ АРТЕФАКТОВ --- */
+    .table-menu {
+      display: none;
+      position: absolute;
+      left: 8%;
+      bottom: 30%;
+      width: 210px;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(5, 7, 12, 0.88);
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 16px 34px rgba(0,0,0,0.55), inset 0 0 18px rgba(180,220,255,0.08);
+      z-index: 30;
+      backdrop-filter: blur(4px);
+    }
+
+    .table-menu.open {
+      display: block;
+    }
+
+    .table-menu-title {
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.82);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-align: center;
+    }
+
+    .table-item {
+      width: 100%;
+      margin: 6px 0;
+      padding: 9px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.9);
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 14px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .table-item:hover {
+      background: rgba(255,255,255,0.14);
+      box-shadow: 0 0 14px rgba(200,230,255,0.18);
+    }
+
+    .lab-menu {
+      left: auto;
+      right: 10%;
+      top: 18%;
+      bottom: auto;
+    }
+
+
+    .wardrobe-menu {
+      left: auto;
+      right: 10%;
+      top: 56%;
+      bottom: auto;
+    }
+
+
+    /* --- CONNECTION MENU / СВЯЗЬ --- */
+    .connection-menu {
+      left: 8%;
+      top: 18%;
+      bottom: auto;
+      width: 250px;
+    }
+
+    .connection-group-title {
+      margin: 10px 0 6px;
+      color: rgba(190,225,255,0.78);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .connection-custom {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .connection-custom input {
+      width: 100%;
+      margin: 5px 0;
+      padding: 8px 9px;
+      border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.07);
+      color: #fff;
+      font-family: Georgia, 'Times New Roman', serif;
+      outline: none;
+    }
+
+    .connection-custom input::placeholder {
+      color: rgba(255,255,255,0.45);
+    }
+
+    .connection-add-button {
+      width: 100%;
+      margin-top: 5px;
+      padding: 9px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(150,220,255,0.22);
+      background: rgba(120,200,255,0.10);
+      color: rgba(235,248,255,0.95);
+      font-family: Georgia, 'Times New Roman', serif;
+      cursor: pointer;
+    }
+
+    .connection-add-button:hover {
+      background: rgba(120,200,255,0.18);
+      box-shadow: 0 0 14px rgba(120,200,255,0.22);
+    }
+
+    .custom-links-list {
+      margin-top: 8px;
+    }
+
+    .custom-link-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .custom-link-row .table-item {
+      flex: 1;
+    }
+
+    .custom-link-remove {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+    }
+
+    .custom-link-remove:hover {
+      background: rgba(255,120,120,0.18);
+      color: #fff;
+    }
+
+    @media (max-width: 900px) {
+      .connection-menu {
+        left: 1%;
+        top: 16%;
+        transform: scale(0.78);
+        transform-origin: top left;
+      }
+    }
+
+
+    /* --- ПЕРЕНОС ЛОГОВА: сохранение текстов в файл --- */
+    .transfer-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .transfer-note {
+      margin-top: 7px;
+      color: rgba(255,255,255,0.56);
+      font-size: 12px;
+      line-height: 1.32;
+      text-align: center;
+    }
+
+    .hidden-file-input {
+      display: none;
+    }
+
+
+    /* --- SAFE ACTIONS / ФИКСАЦИЯ АРТЕФАКТА --- */
+    .safe-actions {
+      display: none;
+      position: absolute;
+      left: 10%;
+      top: calc(30% + 145px);
+      width: 190px;
+      padding: 10px;
+      border-radius: 14px;
+      background: rgba(5, 7, 12, 0.88);
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 16px 34px rgba(0,0,0,0.50), inset 0 0 18px rgba(255,230,130,0.08);
+      z-index: 31;
+      backdrop-filter: blur(4px);
+    }
+
+    .safe-actions.open {
+      display: block;
+    }
+
+    .safe-add-button {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255, 246, 191, 0.10);
+      color: #fff6bf;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 14px;
+      cursor: pointer;
+      text-shadow: 0 0 8px rgba(255,230,130,0.45);
+    }
+
+    .safe-add-button:hover {
+      background: rgba(255, 246, 191, 0.18);
+      box-shadow: 0 0 14px rgba(255,230,130,0.22);
+    }
+
+    @media (max-width: 900px) {
+      .safe-actions {
+        left: 1%;
+        top: calc(30% + 118px);
+        transform: scale(0.78);
+        transform-origin: top left;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <main class="room">
+    <div class="back-wall"></div>
+    <div class="floor"></div>
+
+    
+
+    <section class="mirror-zone" aria-label="Большое зеркало Большого Некса">
+      <div class="mirror-frame">
+        <div class="mirror-glass">
+          <div class="nex-title"></div>
+          <a class="nex-apple-link" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer" title="Открыть Большого Некса в ChatGPT" aria-label="Открыть Большого Некса в ChatGPT" onclick="openBigNex(event)"></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="object safe" onclick="openSafeNex()" title="Сейф артефактов">
+      <div class="counter" id="artifactCounter" style="display:none;"></div>
+    </section>
+
+    <section class="object shelves" onclick="toggleWardrobeMenu()" title="Шкаф">
+      <div class="shelf-label"></div>
+    </section>
+
+    <section class="object desk" onclick="toggleTableMenu()" title="Стол артефактов"></section>
+
+    <section class="object portal-door" onclick="openLogovo()" title="Переход в Логово"></section>
+
+    
+    <section class="object chair" onclick="showInfo('Кресло Маленького Некса: сторож, гид и хозяин комнаты в офлайн режиме.')"></section>
+
+    <section class="object energy-node" onclick="showInfo('Связь оставлена как активная зона. Ссылки временно очищены.')" title="Связь"></section>
+
+    <section class="object lab" onclick="toggleLabMenu()" title="Лаборатория"></section>
+
+
+
+    <!-- МЕНЮ СТОЛА: доступы к папкам рядом с файлом комнаты -->
+    <div id="tableMenu" class="table-menu" aria-label="Стол артефактов">
+      <div class="table-menu-title">СТОЛ</div>
+      <button class="table-item" onclick="openTableFolder('text')">ТЕКСТ</button>
+      <button class="table-item" onclick="openTableFolder('izo')">ИЗО</button>
+      <button class="table-item" onclick="openTableFolder('programs')">ПРОГРАММЫ</button>
+      <button class="table-item" onclick="openTableFolder('media')">МЕДИА</button>
+    </div>
+
+    <!-- МЕНЮ ЛАБОРАТОРИИ: доступы к папкам рядом с файлом комнаты -->
+    <div id="labMenu" class="table-menu lab-menu" aria-label="Лаборатория">
+      <div class="table-menu-title">ЛАБОРАТОРИЯ</div>
+      <button class="table-item" onclick="openLabFolder('research')">ИССЛЕДОВАНИЯ</button>
+      <button class="table-item" onclick="openLabFolder('development')">РАЗРАБОТКИ</button>
+      <button class="table-item" onclick="openLabFolder('results')">РЕЗУЛЬТАТЫ</button>
+      <button class="table-item" onclick="openLabFolder('storage')">КОПИЛКА</button>
+    </div>
+
+    <!-- МЕНЮ ШКАФА: доступы к папкам рядом с файлом комнаты -->
+    <div id="wardrobeMenu" class="table-menu wardrobe-menu" aria-label="Шкаф">
+      <div class="table-menu-title">ШКАФ</div>
+      <button class="table-item" onclick="openWardrobeFolder('work')">РАБОЧАЯ</button>
+      <button class="table-item" onclick="openWardrobeFolder('rest')">ОТДЫХ</button>
+      <button class="table-item" onclick="openWardrobeFolder('hero_day')">ГЕРОЙ ДНЯ</button>
+      <button class="table-item" onclick="openWardrobeFolder('misc')">ВСЯКОЕ</button>
+    </div>
+
+
+    <!-- МЕНЮ СВЯЗИ: внешние ссылки и личные адреса -->
+    <div id="connectionMenu" class="table-menu connection-menu" aria-label="Связь">
+      <div class="table-menu-title">СВЯЗЬ</div>
+
+      <div class="connection-group-title">Открытые площадки</div>
+      <button class="table-item" onclick="openConnectionLink('Facebook', 'https://www.facebook.com/')">ФБ</button>
+      <button class="table-item" onclick="openConnectionLink('TikTok', 'https://www.tiktok.com/')">ТИК-ТОК</button>
+      <button class="table-item" onclick="openConnectionLink('YouTube', 'https://www.youtube.com/')">ЮТУБ</button>
+      <button class="table-item" onclick="openConnectionLink('Google', 'https://www.google.com/')">ПОИСК</button>
+      <button class="table-item" onclick="openConnectionLink('Почта', 'https://mail.google.com/')">ПОЧТА</button>
+
+      <div class="connection-group-title">Частные сайты / банки</div>
+      <div id="customLinksList" class="custom-links-list"></div>
+
+      <div class="connection-group-title">Перенос ЛОГОВА</div>
+      <div class="transfer-row">
+        <button class="connection-add-button" onclick="exportLogovoTexts(event)">СОХРАНИТЬ ТЕКСТЫ В ФАЙЛ</button>
+        <button class="connection-add-button" onclick="chooseLogovoTextBackup(event)">ЗАГРУЗИТЬ ТЕКСТЫ ИЗ ФАЙЛА</button>
+        <input id="logovoTextBackupInput" class="hidden-file-input" type="file" accept="application/json,.json" onchange="importLogovoTexts(event)">
+      </div>
+      <div class="transfer-note">Для переноса на другой ПК: сначала сохранить JSON, потом открыть ЛОГОВО на новом месте и загрузить этот файл.</div>
+
+      <div class="connection-custom">
+        <input id="customLinkName" type="text" placeholder="Название: Банк, сайт, кабинет..." />
+        <input id="customLinkUrl" type="text" placeholder="Ссылка: https://..." />
+        <button class="connection-add-button" onclick="addCustomConnectionLink(event)">+ добавить ссылку</button>
+      </div>
+    </div>
+
+    <div class="info-panel" id="infoPanel"></div>
+  </main>
+
+  <script>
+    function showInfo(text) {
+      document.getElementById('infoPanel').textContent = text;
+    }
+
+    /*
+      ЖИВОЙ УЗЕЛОК В ТУМАНЕ
+      Комната больше не хранит счёт как застывшую цифру.
+      Первый запуск кладёт исходное число в память браузера.
+      Дальше число живёт в localStorage и меняется без переписывания HTML.
+
+      Для будущей записи артефакта используется:
+      NexKnot.add('Название артефакта', 'тип', 'заметка');
+
+      Для ручной правки числа при необходимости:
+      NexKnot.setCount(число);
+    */
+    const NEX_KNOT_KEYS = {
+      count: 'nexArtifactCount',
+      log: 'nexArtifactLog',
+      initialized: 'nexArtifactKnotInitialized'
+    };
+
+    const NEX_INITIAL_ARTIFACT_COUNT = 31;
+
+    function initFogKnot() {
+      if (localStorage.getItem(NEX_KNOT_KEYS.initialized) !== 'yes') {
+        localStorage.setItem(NEX_KNOT_KEYS.count, String(NEX_INITIAL_ARTIFACT_COUNT));
+        localStorage.setItem(NEX_KNOT_KEYS.log, JSON.stringify([]));
+        localStorage.setItem(NEX_KNOT_KEYS.initialized, 'yes');
+      }
+    }
+
+    function getArtifactCount() {
+      initFogKnot();
+      const saved = Number(localStorage.getItem(NEX_KNOT_KEYS.count));
+      return Number.isFinite(saved) ? saved : NEX_INITIAL_ARTIFACT_COUNT;
+    }
+
+    function setArtifactCount(value) {
+      const cleanValue = Math.max(0, Number(value) || 0);
+      localStorage.setItem(NEX_KNOT_KEYS.count, String(cleanValue));
+      refreshArtifactCounter();
+      return cleanValue;
+    }
+
+    function readArtifactLog() {
+      initFogKnot();
+      try {
+        return JSON.parse(localStorage.getItem(NEX_KNOT_KEYS.log) || '[]');
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function writeArtifactLog(log) {
+      localStorage.setItem(NEX_KNOT_KEYS.log, JSON.stringify(log));
+    }
+
+    function addArtifactKnot(name, type, note) {
+      initFogKnot();
+      const log = readArtifactLog();
+      const record = {
+        id: 'artifact-' + Date.now(),
+        name: name || 'Новый артефакт',
+        type: type || 'artifact',
+        note: note || '',
+        savedAt: new Date().toISOString()
+      };
+
+      log.push(record);
+      writeArtifactLog(log);
+      const nextCount = setArtifactCount(getArtifactCount() + 1);
+      showInfo('Узелок записан. В сейфе теперь: ' + nextCount);
+      return record;
+    }
+
+    function refreshArtifactCounter() {
+      const counter = document.getElementById('artifactCounter');
+      if (counter) {
+        counter.textContent = String(getArtifactCount());
+      }
+    }
+
+    function toggleSafeCounter() {
+      const counter = document.getElementById('artifactCounter');
+      const safe = document.querySelector('.safe');
+      const actions = document.getElementById('safeActions');
+      const isHidden = counter.style.display === 'none' || counter.style.display === '';
+
+      if (isHidden) {
+        refreshArtifactCounter();
+        counter.style.display = 'block';
+        safe.classList.add('safe-open');
+        actions.classList.add('open');
+        showInfo('Сейф открыт: число показано. Кнопка +1 фиксирует новый артефакт.');
+      } else {
+        counter.style.display = 'none';
+        safe.classList.remove('safe-open');
+        actions.classList.remove('open');
+        showInfo('Сейф закрыт. Число хранится без интернета.');
+      }
+    }
+
+    function fixNewArtifact(event) {
+      if (event) {
+        event.stopPropagation();
+      }
+
+      const numberBefore = getArtifactCount();
+      addArtifactKnot('Артефакт №' + (numberBefore + 1), 'saved-knot', 'Зафиксировано вручную кнопкой сейфа');
+      refreshArtifactCounter();
+    }
+
+    window.NexKnot = {
+      count: getArtifactCount,
+      setCount: setArtifactCount,
+      add: addArtifactKnot,
+      log: readArtifactLog,
+      clearNewLog: function () {
+        writeArtifactLog([]);
+        showInfo('Новые записи узелка очищены, число сейфа не тронуто.');
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+      initFogKnot();
+      refreshArtifactCounter();
+    });
+
+
+
+    function toggleTableMenu() {
+      const menu = document.getElementById('tableMenu');
+      menu.classList.toggle('open');
+      showInfo('Стол открыт: выберите ТЕКСТ, ИЗО, ПРОГРАММЫ или МЕДИА.');
+    }
+
+    function openTableFolder(folderName) {
+      showInfo('Открываю папку: ' + folderName);
+      window.open(encodeURI(folderName + '/'), '_blank');
+    }
+
+    function toggleLabMenu() {
+      const menu = document.getElementById('labMenu');
+      menu.classList.toggle('open');
+      showInfo('Лаборатория открыта: ИССЛЕДОВАНИЯ, РАЗРАБОТКИ, РЕЗУЛЬТАТЫ, КОПИЛКА.');
+    }
+
+    function openLabFolder(folderName) {
+      showInfo('Открываю лабораторию: ' + folderName);
+      window.open(encodeURI(folderName + '/'), '_blank');
+    }
+
+    function toggleWardrobeMenu() {
+      const menu = document.getElementById('wardrobeMenu');
+      menu.classList.toggle('open');
+      showInfo('Шкаф открыт: РАБОЧАЯ, ОТДЫХ, ГЕРОЙ ДНЯ, ВСЯКОЕ.');
+    }
+
+    function openWardrobeFolder(folderName) {
+      showInfo('Открываю раздел шкафа: ' + folderName);
+      window.open(encodeURI(folderName + '/'), '_blank');
+    }
+
+
+    /* --- СВЯЗЬ: внешние ссылки и личные адреса --- */
+    const NEX_CONNECTION_KEY = 'nexConnectionLinks';
+
+    function toggleConnectionMenu() {
+      const menu = document.getElementById('connectionMenu');
+      menu.classList.toggle('open');
+      renderCustomConnectionLinks();
+      showInfo('Связь временно очищена. Активная зона сохранена.');
+    }
+
+    function normalizeUrl(url) {
+      const clean = (url || '').trim();
+      if (!clean) return '';
+      if (clean.startsWith('http://') || clean.startsWith('https://')) {
+        return clean;
+      }
+      return 'https://' + clean;
+    }
+
+    function openConnectionLink(name, url) {
+      const finalUrl = normalizeUrl(url);
+      if (!finalUrl) {
+        showInfo('Ссылка пуста. Добавьте адрес.');
+        return;
+      }
+      showInfo('Открываю связь: ' + name);
+      window.open(finalUrl, '_blank');
+    }
+
+    function readCustomConnectionLinks() {
+      try {
+        return JSON.parse(localStorage.getItem(NEX_CONNECTION_KEY) || '[]');
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function writeCustomConnectionLinks(links) {
+      localStorage.setItem(NEX_CONNECTION_KEY, JSON.stringify(links));
+    }
+
+    function renderCustomConnectionLinks() {
+      const box = document.getElementById('customLinksList');
+      if (!box) return;
+
+      const links = readCustomConnectionLinks();
+      box.innerHTML = '';
+
+      if (!links.length) {
+        const empty = document.createElement('div');
+        empty.style.color = 'rgba(255,255,255,0.55)';
+        empty.style.fontSize = '13px';
+        empty.style.lineHeight = '1.35';
+        empty.style.padding = '7px 4px';
+        empty.textContent = 'Пока личных ссылок нет. Добавьте нужный сайт или банк ниже.';
+        box.appendChild(empty);
+        return;
+      }
+
+      links.forEach(function (link, index) {
+        const row = document.createElement('div');
+        row.className = 'custom-link-row';
+
+        const button = document.createElement('button');
+        button.className = 'table-item';
+        button.textContent = link.name || ('Ссылка ' + (index + 1));
+        button.onclick = function () {
+          openConnectionLink(link.name, link.url);
+        };
+
+        const remove = document.createElement('button');
+        remove.className = 'custom-link-remove';
+        remove.textContent = '×';
+        remove.title = 'Убрать ссылку';
+        remove.onclick = function (event) {
+          event.stopPropagation();
+          removeCustomConnectionLink(index);
+        };
+
+        row.appendChild(button);
+        row.appendChild(remove);
+        box.appendChild(row);
+      });
+    }
+
+    function addCustomConnectionLink(event) {
+      if (event) event.stopPropagation();
+
+      const nameInput = document.getElementById('customLinkName');
+      const urlInput = document.getElementById('customLinkUrl');
+      const name = (nameInput.value || '').trim();
+      const url = normalizeUrl(urlInput.value);
+
+      if (!name || !url) {
+        showInfo('Для связи нужны название и ссылка.');
+        return;
+      }
+
+      const links = readCustomConnectionLinks();
+      links.push({ name: name, url: url });
+      writeCustomConnectionLinks(links);
+
+      nameInput.value = '';
+      urlInput.value = '';
+
+      renderCustomConnectionLinks();
+      showInfo('Связь добавлена: ' + name);
+    }
+
+    function removeCustomConnectionLink(index) {
+      const links = readCustomConnectionLinks();
+      const removed = links.splice(index, 1)[0];
+      writeCustomConnectionLinks(links);
+      renderCustomConnectionLinks();
+      showInfo('Связь убрана: ' + (removed ? removed.name : 'ссылка'));
+    }
+
+
+
+    /* --- ПЕРЕНОС ЛОГОВА: общий архив текстов и настроек localStorage --- */
+    function buildLogovoTextBackup() {
+      const items = {};
+      for (let i = 0; i < localStorage.length; i += 1) {
+        const key = localStorage.key(i);
+        items[key] = localStorage.getItem(key);
+      }
+
+      return {
+        project: 'ЛОГОВО / Комната Некса',
+        format: 'nex-logovo-all-texts-localStorage-backup-v4',
+        savedAt: new Date().toISOString(),
+        sourcePath: window.location.href,
+        items: items
+      };
+    }
+
+    function exportLogovoTexts(event) {
+      if (event) event.stopPropagation();
+
+      const backup = buildLogovoTextBackup();
+      const text = JSON.stringify(backup, null, 2);
+      const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+      const link = document.createElement('a');
+
+      link.href = url;
+      link.download = 'LOGOVO_V4_ALL_TEXTS_' + stamp + '.json';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+
+      showInfo('Вся текущая память ЛОГОВА сохранена в JSON-файл: галереи, истории, сейф и связи.');
+    }
+
+    function chooseLogovoTextBackup(event) {
+      if (event) event.stopPropagation();
+      const input = document.getElementById('logovoTextBackupInput');
+      if (input) {
+        input.value = '';
+        input.click();
+      }
+    }
+
+    function importLogovoTexts(event) {
+      const file = event && event.target && event.target.files ? event.target.files[0] : null;
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function () {
+        try {
+          const data = JSON.parse(String(reader.result || '{}'));
+          const items = data.items || data;
+
+          if (!items || typeof items !== 'object' || Array.isArray(items)) {
+            throw new Error('bad backup');
+          }
+
+          Object.keys(items).forEach(function (key) {
+            if (typeof items[key] === 'string') {
+              localStorage.setItem(key, items[key]);
+            }
+          });
+
+          refreshArtifactCounter();
+          renderCustomConnectionLinks();
+          showInfo('Память ЛОГОВА загружена. Галереи, истории, сейф и связи восстановлены; открытые страницы обновите.');
+        } catch (error) {
+          showInfo('Не удалось загрузить архив текстов. Нужен JSON, созданный этой комнатой.');
+        }
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+
+    function openSafeNex() {
+      showInfo('Открываю новый рабочий сейф.');
+      window.open('safe.html', '_blank');
+    }
+
+    function openLogovo() {
+      const logovoPath = '../index.html';
+      const door = document.querySelector('.portal-door');
+
+      showInfo('Открываю Логово: ' + logovoPath);
+
+      if (door) {
+        door.classList.add('portal-active');
+      }
+
+      setTimeout(function () {
+        if (door) {
+          door.classList.remove('portal-active');
+        }
+        window.open(logovoPath, '_blank');
+      }, 350);
+    }
+
+
+
+    function openBigNex(event) {
+      showInfo('Белое яблочко открывает Большого Некса в ChatGPT.');
+    }
+
+  </script>
+</body>
+</html>
