@@ -1,0 +1,236 @@
+<html>
+<head>
+<title>СЕЙФ АРТЕФАКТОВ НЕКСА</title>
+<HTA:APPLICATION
+  ID="NexSafe"
+  APPLICATIONNAME="СЕЙФ АРТЕФАКТОВ НЕКСА"
+  BORDER="thin"
+  CAPTION="yes"
+  SHOWINTASKBAR="yes"
+  SINGLEINSTANCE="yes"
+  SYSMENU="yes"
+  WINDOWSTATE="normal"
+  SCROLL="no"
+/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style>
+  body {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    background: #18201d;
+    color: #f1ead0;
+  }
+  .wrap { padding: 18px; }
+  h1 {
+    margin: 0 0 6px 0;
+    text-align: center;
+    font-size: 24px;
+    font-weight: normal;
+    letter-spacing: 1px;
+  }
+  .hint {
+    text-align: center;
+    color: #cfc5a5;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  .counter {
+    text-align: center;
+    padding: 10px;
+    margin: 10px 0 14px 0;
+    border: 1px solid #9f925d;
+    background: #26312d;
+    font-size: 22px;
+  }
+  .buttons {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  button {
+    margin: 4px;
+    padding: 8px 12px;
+    border: 1px solid #b7a76b;
+    background: #313b36;
+    color: #f1ead0;
+    cursor: hand;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 14px;
+  }
+  button:hover { background: #455047; }
+  #list {
+    border-top: 1px solid #6e6544;
+    padding-top: 8px;
+    height: 330px;
+    overflow-y: auto;
+  }
+  .item {
+    padding: 8px;
+    margin: 6px 0;
+    border: 1px solid #60583b;
+    background: #202925;
+  }
+  .name {
+    font-size: 15px;
+    margin-bottom: 6px;
+    word-break: break-all;
+  }
+  .meta {
+    font-size: 12px;
+    color: #c2b78e;
+    margin-bottom: 6px;
+  }
+  .smallBtn {
+    padding: 5px 9px;
+    font-size: 12px;
+  }
+  .danger {
+    border-color: #b07868;
+    background: #4a2824;
+  }
+  .empty {
+    text-align: center;
+    color: #b9ad88;
+    padding: 35px 0;
+  }
+  .foot {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #b9ad88;
+    text-align: center;
+  }
+</style>
+<script language="javascript">
+var fso, shell, safeFolder, removedFolder;
+
+function init() {
+  try {
+    window.resizeTo(760, 590);
+    fso = new ActiveXObject("Scripting.FileSystemObject");
+    shell = new ActiveXObject("WScript.Shell");
+
+    var appPath = document.location.pathname;
+    appPath = decodeURIComponent(appPath);
+    if (appPath.charAt(0) == "/") appPath = appPath.substring(1);
+    appPath = appPath.replace(/\//g, "\\");
+    var appFolder = fso.GetParentFolderName(appPath);
+
+    safeFolder = appFolder + "\\PASSPORTS";
+    removedFolder = appFolder + "\\REMOVED_FROM_SAFE";
+
+    if (!fso.FolderExists(safeFolder)) fso.CreateFolder(safeFolder);
+    if (!fso.FolderExists(removedFolder)) fso.CreateFolder(removedFolder);
+
+    refreshList();
+  } catch(e) {
+    alert("Не удалось запустить сейф. Windows мог заблокировать HTA/ActiveX.\n\n" + e.message);
+  }
+}
+
+function refreshList() {
+  var html = "";
+  var count = 0;
+
+  try {
+    var folder = fso.GetFolder(safeFolder);
+    var files = new Enumerator(folder.Files);
+
+    for (; !files.atEnd(); files.moveNext()) {
+      var file = files.item();
+      count++;
+      html += "<div class='item'>";
+      html += "<div class='name'>" + count + ". " + esc(file.Name) + "</div>";
+      html += "<div class='meta'>" + formatSize(file.Size) + " · изменён: " + file.DateLastModified + "</div>";
+      html += "<button class='smallBtn' onclick='openFile(\"" + js(file.Path) + "\")'>Открыть</button>";
+      html += "<button class='smallBtn danger' onclick='removeFile(\"" + js(file.Path) + "\")'>Вынуть из сейфа</button>";
+      html += "</div>";
+    }
+
+    document.getElementById("count").innerText = count;
+
+    if (count == 0) {
+      html = "<div class='empty'>Сейф пуст. Положите паспорта в папку PASSPORTS.</div>";
+    }
+
+    document.getElementById("list").innerHTML = html;
+  } catch(e) {
+    alert("Ошибка чтения папки сейфа:\n" + e.message);
+  }
+}
+
+function openSafeFolder() {
+  shell.Run('explorer.exe "' + safeFolder + '"', 1, false);
+}
+
+function openRemovedFolder() {
+  shell.Run('explorer.exe "' + removedFolder + '"', 1, false);
+}
+
+function openFile(path) {
+  shell.Run('"' + path + '"', 1, false);
+}
+
+function removeFile(path) {
+  try {
+    var name = fso.GetFileName(path);
+    var target = removedFolder + "\\" + name;
+
+    if (fso.FileExists(target)) {
+      var dot = name.lastIndexOf(".");
+      var base = dot >= 0 ? name.substring(0, dot) : name;
+      var ext = dot >= 0 ? name.substring(dot) : "";
+      target = removedFolder + "\\" + base + "_" + timestamp() + ext;
+    }
+
+    fso.MoveFile(path, target);
+    refreshList();
+  } catch(e) {
+    alert("Не удалось вынуть файл:\n" + e.message);
+  }
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function js(s) {
+  return String(s).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + " байт";
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + " КБ";
+  return (bytes/1024/1024).toFixed(1) + " МБ";
+}
+
+function timestamp() {
+  var d = new Date();
+  return d.getFullYear() + "" + pad(d.getMonth()+1) + "" + pad(d.getDate()) + "_" + pad(d.getHours()) + "" + pad(d.getMinutes()) + "" + pad(d.getSeconds());
+}
+
+function pad(n) {
+  return n < 10 ? "0" + n : "" + n;
+}
+</script>
+</head>
+
+<body onload="init()">
+<div class="wrap">
+  <h1>СЕЙФ АРТЕФАКТОВ НЕКСА</h1>
+  <div class="hint">Файлы лежат реально в папке PASSPORTS. Сейф только смотрит внутрь и считает.</div>
+
+  <div class="counter">Паспортов в сейфе: <span id="count">0</span></div>
+
+  <div class="buttons">
+    <button onclick="openSafeFolder()">Открыть папку PASSPORTS</button>
+    <button onclick="refreshList()">Обновить счёт</button>
+    <button onclick="openRemovedFolder()">Открыть папку ВЫНУТО</button>
+  </div>
+
+  <div id="list"></div>
+
+  <div class="foot">
+    Чтобы добавить паспорт: нажмите «Открыть папку PASSPORTS» и положите туда файл. Потом нажмите «Обновить счёт».
+  </div>
+</div>
+</body>
+</html>
