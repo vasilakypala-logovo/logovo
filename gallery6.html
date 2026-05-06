@@ -508,13 +508,13 @@ function pad2(n){ return String(n).padStart(2,"0"); }
 function pad3(n){ return String(n).padStart(3,"0"); }
 
 function candidates(num){
-    const names = [pad3(num), pad2(num), String(num)];
     const list = [];
-    names.forEach(function(name){
-        EXTENSIONS.forEach(function(ext){
-            list.push(FOLDER + "/" + name + "." + ext);
-        });
+    const name = pad3(num);
+
+    EXTENSIONS.forEach(function(ext){
+        list.push(FOLDER + "/" + name + "." + ext);
     });
+
     return list;
 }
 
