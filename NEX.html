@@ -474,8 +474,12 @@ function resetCaption(){
 function tryLoadImage(num, extIndex){
     extIndex = extIndex || 0;
 
-    if(extIndex >= EXTENSIONS.length){
+    if(extIndex === 0){
         mainImage.removeAttribute("src");
+        mainImage.alt = "Загрузка работы " + pad(num);
+    }
+
+    if(extIndex >= EXTENSIONS.length){
         showError("Не найден файл: " + FOLDER + "/" + pad(num) + ".jpg / .png / .webp");
         return;
     }
