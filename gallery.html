@@ -801,17 +801,7 @@
     touchX = null;
     if (Math.abs(dx) > 80 && !lightbox.classList.contains('open')) go(dx < 0 ? 1 : -1);
   });
-
-function firstStart() {
-  render();
-
-  setTimeout(fitFrame, 50);
-  setTimeout(fitFrame, 150);
-  setTimeout(fitFrame, 350);
-  setTimeout(fitFrame, 700);
-}
-
-window.addEventListener('load', firstStart);
+render();
 </script>
 </body>
 </html>
