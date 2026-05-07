@@ -602,15 +602,15 @@ function resetText(){
 }
 
 function setFrameByRatio(){
-    const ratio = painting.naturalWidth / painting.naturalHeight;
+  const ratio = painting.naturalWidth / painting.naturalHeight;
 
-    if(ratio >= 1.35){
-        frameEl.style.aspectRatio = "4 / 3";
-    }else if(ratio > 0.85 && ratio < 1.35){
-        frameEl.style.aspectRatio = "1 / 1";
-    }else{
-        frameEl.style.aspectRatio = "3 / 4";
-    }
+  if(ratio >= 1.45){
+    frameEl.style.aspectRatio = "16 / 10";
+  }else if(ratio > 0.85 && ratio < 1.45){
+    frameEl.style.aspectRatio = "1 / 1";
+  }else{
+    frameEl.style.aspectRatio = "3 / 4";
+  }
 }
 
 function tryLoad(list, pos){
