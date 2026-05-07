@@ -600,23 +600,9 @@
   }
 
   function fitFrame() {
-    const wrapRect = frameWrap.getBoundingClientRect();
-    const padding = parseFloat(getComputedStyle(frame).paddingLeft) * 2;
-    const maxInnerW = Math.max(160, wrapRect.width - padding - 6);
-    const maxInnerH = Math.max(160, wrapRect.height - padding - 6);
-
-    let innerW = maxInnerW;
-    let innerH = innerW / naturalRatio;
-
-    if (innerH > maxInnerH) {
-      innerH = maxInnerH;
-      innerW = innerH * naturalRatio;
-    }
-
-    frame.style.width = `${Math.round(innerW + padding)}px`;
-    frame.style.height = `${Math.round(innerH + padding)}px`;
-  }
-
+  frame.style.width = '760px';
+  frame.style.height = '560px';
+}
   function loadImage(index) {
     const candidates = imageCandidates(index);
     let attempt = 0;
