@@ -599,7 +599,7 @@
     return EXTENSIONS.map(ext => ext ? `${FOLDER}${name}.${ext}` : `${FOLDER}${name}`);
   }
 
-  function fitFrame() {
+ function fitFrame() {
   const wrapRect = frameWrap.getBoundingClientRect();
   const padding = parseFloat(getComputedStyle(frame).paddingLeft) * 2;
   const maxInnerW = Math.max(160, wrapRect.width - padding - 6);
