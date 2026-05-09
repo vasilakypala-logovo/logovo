@@ -214,7 +214,7 @@ function render(){
   items.forEach(function(x){ total += x.size || 0; });
   byId("stat").textContent = "Файлов: " + items.length + " · Размер: " + sizeText(total);
   if(!list.length){
-    byId("grid").innerHTML = '<div class="empty">Копилка пуста. Первый файл — первый камешек.</div>';
+    byId("grid").innerHTML = '<div class="empty">Сейф пустой</div>';
     return;
   }
   var html = "";
