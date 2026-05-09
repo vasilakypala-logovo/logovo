@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="x-ua-compatible" content="IE=9">
+<meta charset="UTF-8">
+<title>КОПИЛКА НЕКСА — ШКАФ ЛОГОВА v4</title>
+<HTA:APPLICATION
+  ID="KopilkaNexa"
+  APPLICATIONNAME="Kopilka Nexa"
+  BORDER="thick"
+  CAPTION="yes"
+  SHOWINTASKBAR="yes"
+  SINGLEINSTANCE="yes"
+  SYSMENU="yes"
+  WINDOWSTATE="normal"
+  SCROLL="no"
+/>
+<style>
+html,body{
+  margin:0;width:100%;height:100%;overflow:hidden;
+  font-family:Georgia,"Times New Roman",serif;
+  background:#182319;color:#eef7e8;
+}
+#top{height:82px;padding:16px 20px 0;background:#182319;border-bottom:1px solid #4b3b20}
+h1{margin:0;color:#f1d681;font-size:28px;letter-spacing:1px}
+#sub{margin-top:5px;color:#c8d4c0;font:14px Arial}
+#wrap{position:absolute;left:14px;right:14px;top:96px;bottom:14px}
+#left{position:absolute;left:0;top:0;bottom:0;right:310px;background:#263827;border:1px solid #5b6d4c;padding:12px}
+#right{position:absolute;top:0;bottom:0;right:0;width:286px;background:#342819;border:1px solid #72562c;padding:12px}
+#scroller{position:absolute;left:12px;right:12px;top:12px;bottom:12px;overflow:auto}
+#list{width:100%;height:100%;background:#eee6c9;color:#211c10;border-collapse:collapse;font:14px Arial}
+#list th{background:#b99a4d;color:#201503;text-align:left;padding:7px;border-bottom:1px solid #6d531e}
+#list td{padding:6px 7px;border-bottom:1px solid #c5bc99}
+#list tr:hover td{background:#fff4c9}
+#list tr.sel td{background:#d8bd6b}
+button{
+  width:100%;margin:6px 0;padding:9px;border:1px solid #6b511f;
+  background:#d7b75e;color:#201503;font:bold 13px Georgia,"Times New Roman",serif;cursor:pointer
+}
+button:hover{background:#f0cf72}
+#info{
+  width:100%;height:195px;background:#111a12;color:#e8f1df;border:1px solid #59664f;
+  padding:8px;overflow:auto;font:13px Arial;line-height:1.35;box-sizing:border-box;margin-bottom:10px
+}
+.small{color:#c8d4c0;font:12px Arial;line-height:1.35;margin-top:10px}
+</style>
+<script language="javascript">
+var fso, shell;
+var base, dataDir, vaultDir, inboxDir, exportsDir;
+var selectedPath = "", selectedRow = null;
+
+function appBase(){
+  var p = decodeURIComponent(location.pathname);
+  p = p.replace(/^\/+/,"").replace(/\//g,"\\");
+  return fso.GetParentFolderName(p);
+}
+
+function init(){
+  try{
+    fso = new ActiveXObject("Scripting.FileSystemObject");
+    shell = new ActiveXObject("WScript.Shell");
+    base = appBase();
+
+    dataDir = fso.BuildPath(base, "kopilka_data");
+    vaultDir = fso.BuildPath(dataDir, "vault");
+    inboxDir = fso.BuildPath(dataDir, "inbox");
+    exportsDir = fso.BuildPath(dataDir, "exports");
+
+    if(!checkCabinet()) return;
+
+    absorbInbox();
+    refreshList();
+  }catch(e){
+    alert("Шкаф не открылся.\n\nПричина: " + e.message);
+  }
+}
+
+function checkCabinet(){
+  var missing = [];
+  if(!fso.FolderExists(dataDir)) missing.push("kopilka_data");
+  if(!fso.FolderExists(vaultDir)) missing.push("kopilka_data\\vault");
+  if(!fso.FolderExists(inboxDir)) missing.push("kopilka_data\\inbox");
+  if(!fso.FolderExists(exportsDir)) missing.push("kopilka_data\\exports");
+
+  if(missing.length){
+    alert(
+      "Шкаф повреждён. Не хватает полки:\n\n" +
+      missing.join("\n") +
+      "\n\nПрограмма ничего не будет создавать сама.\n" +
+      "Распакуйте архив заново целиком."
+    );
+    return false;
+  }
+  return true;
+}
+
+function htm(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function humanSize(n){
+  n=Number(n)||0;
+  if(n<1024)return n+" Б";
+  if(n<1024*1024)return(n/1024).toFixed(1)+" КБ";
+  if(n<1024*1024*1024)return(n/1024/1024).toFixed(1)+" МБ";
+  return(n/1024/1024/1024).toFixed(2)+" ГБ";
+}
+function uniqueDest(folder,name){
+  var dest=fso.BuildPath(folder,name);
+  if(!fso.FileExists(dest))return dest;
+  var b=fso.GetBaseName(name), e=fso.GetExtensionName(name), d=new Date();
+  var stamp=d.getFullYear()+"_"+(d.getMonth()+1)+"_"+d.getDate()+"_"+d.getHours()+"_"+d.getMinutes()+"_"+d.getSeconds();
+  return fso.BuildPath(folder,b+"_"+stamp+(e?"."+e:""));
+}
+function absorbInbox(){
+  var folder=fso.GetFolder(inboxDir);
+  var e=new Enumerator(folder.Files);
+  for(;!e.atEnd();e.moveNext()){
+    var file=e.item();
+    if(file.Name=="_POLKA_SHKAFA.txt")continue;
+    fso.MoveFile(file.Path, uniqueDest(vaultDir,file.Name));
+  }
+}
+function refreshList(){
+  selectedPath=""; selectedRow=null;
+  var folder=fso.GetFolder(vaultDir), e=new Enumerator(folder.Files);
+  var rows=[], total=0;
+  for(;!e.atEnd();e.moveNext()){
+    var file=e.item();
+    if(file.Name=="_POLKA_SHKAFA.txt")continue;
+    total+=Number(file.Size);
+    rows.push({name:file.Name,path:file.Path,size:Number(file.Size),date:file.DateLastModified});
+  }
+  rows.sort(function(a,b){return a.name.toLowerCase()>b.name.toLowerCase()?1:-1});
+  var html='<table id="list"><tr><th>Файл</th><th style="width:95px">Размер</th><th style="width:145px">Изменён</th></tr>';
+  for(var i=0;i<rows.length;i++){
+    html+='<tr onclick="selectRow(this,\''+rows[i].path.replace(/\\/g,"\\\\").replace(/'/g,"\\'")+'\')">';
+    html+='<td>'+htm(rows[i].name)+'</td><td>'+humanSize(rows[i].size)+'</td><td>'+rows[i].date+'</td></tr>';
+  }
+  html+='</table>';
+  document.getElementById("scroller").innerHTML=html;
+  document.getElementById("info").innerHTML=
+    "<b>ШКАФ ЛОГОВА v4</b><br><br>"+
+    "Файлов: "+rows.length+"<br>"+
+    "Общий вес: "+humanSize(total)+"<br><br>"+
+    "Рабочая полка:<br>"+htm(vaultDir)+"<br><br>"+
+    "Надёжный режим: программа не создаёт папки сама, а проверяет готовый шкаф.";
+}
+function selectRow(row,path){
+  if(selectedRow)selectedRow.className="";
+  selectedRow=row; selectedRow.className="sel"; selectedPath=path;
+}
+function openSelected(){
+  if(!selectedPath){alert("Выберите файл в шкафу.");return}
+  shell.Run('"'+selectedPath+'"',1,false);
+}
+function openVault(){shell.Run('explorer.exe "'+vaultDir+'"',1,false)}
+function openInbox(){shell.Run('explorer.exe "'+inboxDir+'"',1,false)}
+function openExports(){shell.Run('explorer.exe "'+exportsDir+'"',1,false)}
+function addFiles(){
+  alert("Откроется INBOX.\n\nСкопируйте туда файлы, затем нажмите «Обновить шкаф».");
+  openInbox();
+}
+function updateCabinet(){absorbInbox();refreshList()}
+function removeSelected(){
+  if(!selectedPath){alert("Выберите файл.");return}
+  if(confirm("Удалить файл из шкафа?\n\n"+selectedPath)){
+    fso.DeleteFile(selectedPath,true); refreshList();
+  }
+}
+function exportCase(){
+  var d=new Date();
+  var stamp=d.getFullYear()+"_"+(d.getMonth()+1)+"_"+d.getDate()+"_"+d.getHours()+"_"+d.getMinutes()+"_"+d.getSeconds();
+  var target=fso.BuildPath(exportsDir,"Kopilka_Nexa_CASE_"+stamp);
+  if(fso.FolderExists(target)){alert("Такой кейс уже есть.");return}
+  fso.CreateFolder(target);
+  var destVault=fso.BuildPath(target,"vault");
+  fso.CreateFolder(destVault);
+  var folder=fso.GetFolder(vaultDir), e=new Enumerator(folder.Files);
+  for(;!e.atEnd();e.moveNext()){
+    var file=e.item();
+    fso.CopyFile(file.Path,fso.BuildPath(destVault,file.Name),true);
+  }
+  var note=fso.CreateTextFile(fso.BuildPath(target,"README_CASE.txt"),true,true);
+  note.WriteLine("Кейс Копилки НЕКСА. Папка vault содержит файлы.");
+  note.Close();
+  openExports();
+  alert("Кейс собран папкой:\n\n"+target);
+}
+window.onload=init;
+</script>
+</head>
+<body>
+<div id="top">
+  <h1>КОПИЛКА НЕКСА</h1>
+  <div id="sub">Шкаф Логова v4: строгий надёжный режим. Папки не создаются самовольно.</div>
+</div>
+<div id="wrap">
+  <div id="left"><div id="scroller"></div></div>
+  <div id="right">
+    <div id="info"></div>
+    <button onclick="addFiles()">Положить файлы через INBOX</button>
+    <button onclick="updateCabinet()">Обновить шкаф</button>
+    <button onclick="openSelected()">Открыть выбранный файл</button>
+    <button onclick="openVault()">Открыть папку vault</button>
+    <button onclick="openInbox()">Открыть папку inbox</button>
+    <button onclick="openExports()">Открыть папку exports</button>
+    <button onclick="exportCase()">Собрать кейс для переноса</button>
+    <button onclick="removeSelected()">Удалить выбранный файл</button>
+    <button onclick="window.close()">Закрыть шкаф</button>
+    <div class="small">Если полка пропала — шкаф сообщит об этом и не будет плодить лишние папки.</div>
+  </div>
+</div>
+</body>
+</html>
