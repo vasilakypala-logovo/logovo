@@ -1031,16 +1031,14 @@
       };
       reader.readAsText(file, 'utf-8');
     }
-
-
-   function openSafeNex() {
+function openSafeNex() {
   const code = prompt("Введите код сейфа:");
 
   if (code === "777") {
-    showInfo('Код принят. Сейф открыт.');
-    window.open('safe.html', '_blank');
+    showInfo("Код принят. Открываю сейф.");
+    window.open("safe_storage/", "_blank");
   } else if (code !== null) {
-    showInfo('Неверный код.');
+    showInfo("Неверный код.");
     alert("Неверный код.");
   }
 }
