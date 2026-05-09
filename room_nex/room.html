@@ -1033,10 +1033,17 @@
     }
 
 
-    function openSafeNex() {
-      showInfo('Открываю новый рабочий сейф.');
-      window.open('safe.html', '_blank');
-    }
+   function openSafeNex() {
+  const code = prompt("Введите код сейфа:");
+
+  if (code === "777") {
+    showInfo('Код принят. Сейф открыт.');
+    window.open('safe.html', '_blank');
+  } else if (code !== null) {
+    showInfo('Неверный код.');
+    alert("Неверный код.");
+  }
+}
 
     function openLogovo() {
       const logovoPath = '../index.html';
