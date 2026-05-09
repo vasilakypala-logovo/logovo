@@ -765,34 +765,22 @@
     </div>
 
 
-    <!-- МЕНЮ СВЯЗИ: внешние ссылки и личные адреса -->
-    <div id="connectionMenu" class="table-menu connection-menu" aria-label="Связь">
-      <div class="table-menu-title">СВЯЗЬ</div>
+    <!-- СВЯЗЬ НЕКСА -->
 
-      <div class="connection-group-title">Открытые площадки</div>
-      <button class="table-item" onclick="openConnectionLink('Facebook', 'https://www.facebook.com/')">ФБ</button>
-      <button class="table-item" onclick="openConnectionLink('TikTok', 'https://www.tiktok.com/')">ТИК-ТОК</button>
-      <button class="table-item" onclick="openConnectionLink('YouTube', 'https://www.youtube.com/')">ЮТУБ</button>
-      <button class="table-item" onclick="openConnectionLink('Google', 'https://www.google.com/')">ПОИСК</button>
-      <button class="table-item" onclick="openConnectionLink('Почта', 'https://mail.google.com/')">ПОЧТА</button>
+<div id="connectionMenu"
+class="table-menu connection-menu"
+aria-label="Связь">
 
-      <div class="connection-group-title">Частные сайты / банки</div>
-      <div id="customLinksList" class="custom-links-list"></div>
+  <div class="table-menu-title">СВЯЗЬ</div>
 
-      <div class="connection-group-title">Перенос ЛОГОВА</div>
-      <div class="transfer-row">
-        <button class="connection-add-button" onclick="exportLogovoTexts(event)">СОХРАНИТЬ ТЕКСТЫ В ФАЙЛ</button>
-        <button class="connection-add-button" onclick="chooseLogovoTextBackup(event)">ЗАГРУЗИТЬ ТЕКСТЫ ИЗ ФАЙЛА</button>
-        <input id="logovoTextBackupInput" class="hidden-file-input" type="file" accept="application/json,.json" onchange="importLogovoTexts(event)">
-      </div>
-      <div class="transfer-note">Для переноса на другой ПК: сначала сохранить JSON, потом открыть ЛОГОВО на новом месте и загрузить этот файл.</div>
+  <button class="connection-add-button"
+  onclick="window.location.href='svyaz.html'">
 
-      <div class="connection-custom">
-        <input id="customLinkName" type="text" placeholder="Название: Банк, сайт, кабинет..." />
-        <input id="customLinkUrl" type="text" placeholder="Ссылка: https://..." />
-        <button class="connection-add-button" onclick="addCustomConnectionLink(event)">+ добавить ссылку</button>
-      </div>
-    </div>
+    ОТКРЫТЬ СВЯЗЬ
+
+  </button>
+
+</div>
 
     <div class="info-panel" id="infoPanel"></div>
   </main>
