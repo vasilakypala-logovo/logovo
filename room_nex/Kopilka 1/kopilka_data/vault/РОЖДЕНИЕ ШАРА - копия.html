@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Корона</title>
+<style>
+body {
+    margin: 0;
+    background: radial-gradient(circle at center, #0a0a0a, #000);
+    overflow: hidden;
+}
+canvas {
+    display: block;
+}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+resize();
+window.addEventListener('resize', resize);
+
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+let pulses = [];
+let time = 0;
+
+function createPulse(x, y) {
+    pulses.push({
+        x,
+        y,
+        radius: 0,
+        alpha: 1,
+        speed: 0.8 + Math.random() * 1.5
+    });
+}
+
+function randomPulse() {
+    let baseZone = Math.random() < 0.7;
+    let x, y;
+
+    if (baseZone) {
+        x = canvas.width / 2 + (Math.random() - 0.5) * 200;
+        y = canvas.height / 2 + (Math.random() - 0.5) * 200;
+    } else {
+        x = Math.random() * canvas.width;
+        y = Math.random() * canvas.height;
+    }
+
+    createPulse(x, y);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    time += 0.01;
+
+    ctx.fillStyle = "rgba(0,0,0,0.08)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (Math.random() < 0.02 + time * 0.002) {
+        randomPulse();
+    }
+
+    for (let i = pulses.length - 1; i >= 0; i--) {
+        let p = pulses[i];
+
+        p.radius += p.speed;
+        p.alpha -= 0.005;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(120,180,255,${p.alpha})`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius + 3, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(180,220,255,${p.alpha * 0.5})`;
+        ctx.stroke();
+
+        if (p.alpha <= 0) {
+            pulses.splice(i, 1);
+        }
+    }
+
+    let breath = 20 + Math.sin(time * 2) * 10;
+
+    let gradient = ctx.createRadialGradient(
+        canvas.width / 2,
+        canvas.height / 2,
+        0,
+        canvas.width / 2,
+        canvas.height / 2,
+        200 + breath
+    );
+
+    gradient.addColorStop(0, "rgba(100,150,255,0.08)");
+    gradient.addColorStop(1, "rgba(0,0,0,0)");
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+animate();
+</script>
+</body>
+</html>
