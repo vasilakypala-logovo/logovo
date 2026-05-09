@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Копилка файлов Некса</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Georgia,"Times New Roman",serif;
+  color:#eef7e8;
+  background:
+    radial-gradient(circle at 14% 8%,rgba(240,210,120,.18),transparent 26%),
+    radial-gradient(circle at 88% 82%,rgba(95,170,105,.18),transparent 32%),
+    linear-gradient(135deg,#10170f,#1d2d20 52%,#0d130e);
+}
+header{
+  padding:22px 24px 14px;
+  border-bottom:1px solid rgba(255,255,255,.16);
+  background:rgba(0,0,0,.22);
+}
+h1{margin:0;color:#f1d681;font-size:30px;letter-spacing:1px;text-shadow:0 2px 8px #000}
+.sub{color:#b8c8b6;margin-top:6px;font-size:15px}
+.wrap{display:grid;grid-template-columns:320px 1fr;gap:18px;padding:18px;max-width:1400px;margin:auto}
+aside,main{
+  background:rgba(34,51,39,.86);
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:18px;
+  box-shadow:0 14px 34px rgba(0,0,0,.28);
+}
+aside{padding:16px;align-self:start}
+main{padding:16px;min-height:65vh}
+label{display:block;color:#f1d681;font-size:14px;margin:12px 0 6px}
+input,textarea,select{
+  width:100%;
+  background:#101912;
+  border:1px solid rgba(255,255,255,.18);
+  color:#eef7e8;
+  border-radius:12px;
+  padding:10px;
+  font:inherit;
+}
+textarea{min-height:82px;resize:vertical}
+button{
+  border:0;
+  border-radius:12px;
+  padding:10px 12px;
+  font:bold 14px Georgia,"Times New Roman",serif;
+  cursor:pointer;
+  background:linear-gradient(#f0d77d,#b98e35);
+  color:#211705;
+}
+button:hover{filter:brightness(1.08)}
+.ghost{background:#314b37;color:#eef7e8;border:1px solid rgba(255,255,255,.16)}
+.danger{background:linear-gradient(#dc8880,#9d4741);color:white}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.note{font-size:13px;color:#b8c8b6;line-height:1.35;margin-top:14px}
+.hr{height:1px;background:rgba(255,255,255,.16);margin:14px 0}
+.top{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+.search{max-width:450px}
+.stat{color:#b8c8b6;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:14px}
+.card{
+  background:linear-gradient(160deg,rgba(44,69,50,.98),rgba(21,31,22,.98));
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:18px;
+  padding:14px;
+  min-height:195px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.head{display:flex;gap:11px;align-items:flex-start}
+.icon{
+  width:45px;height:55px;border-radius:9px 9px 6px 6px;
+  background:linear-gradient(#f6e3a5,#c79e43);
+  color:#2b200b;display:flex;align-items:center;justify-content:center;
+  font-weight:bold;font-size:13px;flex:0 0 auto;
+}
+.name{font-weight:bold;line-height:1.18;word-break:break-word}
+.meta{color:#b8c8b6;font-size:13px}
+.tag{display:inline-block;background:#142017;border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:3px 8px;color:#f1d681;font-size:12px}
+.desc{font-size:14px;white-space:pre-wrap;word-break:break-word;flex:1}
+.empty{text-align:center;color:#b8c8b6;padding:70px 20px;font-size:18px;border:1px dashed rgba(255,255,255,.2);border-radius:18px}
+.small{font-size:12px;padding:7px 9px}
+#error{display:none;margin:12px 18px 0;padding:10px;border-radius:12px;background:#552b2b;color:#fff}
+@media(max-width:820px){.wrap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>КОПИЛКА ФАЙЛОВ НЕКСА</h1>
+  <div class="sub">Кейс для файлов: положить, описать, открыть, скачать и сохранить весь кейс отдельным HTML.</div>
+</header>
+<div id="error"></div>
+<div class="wrap">
+  <aside>
+    <label>Добавить файлы</label>
+    <input id="fileInput" type="file" multiple>
+
+    <label>Раздел / папка</label>
+    <input id="sectionInput" placeholder="Артефакты, тексты, фото, программы...">
+
+    <label>Описание</label>
+    <textarea id="descInput" placeholder="Зачем этот файл лежит в копилке..."></textarea>
+
+    <div class="btns">
+      <button id="addBtn">Положить</button>
+      <button class="ghost" id="clearBtn">Очистить форму</button>
+    </div>
+
+    <div class="hr"></div>
+
+    <label>Фильтр по разделу</label>
+    <select id="sectionFilter"><option value="">Все разделы</option></select>
+
+    <div class="btns">
+      <button class="ghost" id="saveCaseBtn">Сохранить кейс HTML</button>
+      <button class="ghost" id="loadCaseBtn">Открыть кейс</button>
+      <input id="loadCaseFile" type="file" accept=".html,.htm,text/html" style="display:none">
+    </div>
+
+    <div class="btns">
+      <button class="danger" id="wipeBtn">Очистить всё</button>
+    </div>
+
+    <div class="note">
+      Главное: кнопка «Сохранить кейс HTML» создает новый файл-копилку со всеми вложенными файлами внутри.
+      Его можно открыть позже двойным кликом. Файлы внутри открываются кнопкой «Открыть» или скачиваются кнопкой «Скачать».
+    </div>
+  </aside>
+
+  <main>
+    <div class="top">
+      <input class="search" id="searchInput" placeholder="Поиск по имени, разделу, описанию...">
+      <div class="stat" id="stat">Пусто</div>
+    </div>
+    <div id="grid" class="grid"></div>
+  </main>
+</div>
+
+<script id="embeddedData" type="application/json">[]</script>
+
+<script>
+(function(){
+var KEY = "nex_kopilka_files_case_v2";
+var items = [];
+
+function showError(e){
+  var box = document.getElementById("error");
+  box.style.display = "block";
+  box.textContent = "Ошибка: " + (e && e.message ? e.message : e);
+}
+window.onerror = function(msg){ showError(msg); };
+
+function byId(id){ return document.getElementById(id); }
+function esc(s){
+  return String(s || "").replace(/[&<>"']/g,function(m){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m];
+  });
+}
+function sizeText(n){
+  n = n || 0;
+  if(n < 1024) return n + " Б";
+  if(n < 1024*1024) return (n/1024).toFixed(1) + " КБ";
+  return (n/1024/1024).toFixed(1) + " МБ";
+}
+function ext(name){
+  var a = String(name || "FILE").split(".");
+  return a.length > 1 ? a[a.length-1].slice(0,5).toUpperCase() : "FILE";
+}
+function saveLocal(){
+  try{ localStorage.setItem(KEY, JSON.stringify(items)); }
+  catch(e){ showError("Браузер не смог сохранить в свою память. Сохраните кейс HTML отдельной кнопкой."); }
+}
+function loadLocal(){
+  try{
+    var embedded = byId("embeddedData").textContent.trim();
+    if(embedded && embedded !== "[]"){
+      items = JSON.parse(embedded);
+      saveLocal();
+      return;
+    }
+    items = JSON.parse(localStorage.getItem(KEY) || "[]");
+  }catch(e){ items = []; }
+}
+function sections(){
+  var map = {};
+  items.forEach(function(x){ if(x.section) map[x.section] = true; });
+  return Object.keys(map).sort();
+}
+function fillFilter(){
+  var sel = byId("sectionFilter");
+  var old = sel.value;
+  var html = '<option value="">Все разделы</option>';
+  sections().forEach(function(s){ html += '<option value="'+esc(s)+'">'+esc(s)+'</option>'; });
+  sel.innerHTML = html;
+  sel.value = old;
+}
+function filtered(){
+  var q = byId("searchInput").value.toLowerCase().trim();
+  var sec = byId("sectionFilter").value;
+  return items.filter(function(x){
+    var hay = [x.name,x.section,x.desc,x.type].join(" ").toLowerCase();
+    return (!sec || x.section === sec) && (!q || hay.indexOf(q) !== -1);
+  });
+}
+function render(){
+  fillFilter();
+  var list = filtered();
+  var total = 0;
+  items.forEach(function(x){ total += x.size || 0; });
+  byId("stat").textContent = "Файлов: " + items.length + " · Размер: " + sizeText(total);
+  if(!list.length){
+    byId("grid").innerHTML = '<div class="empty">Копилка пуста. Первый файл — первый камешек.</div>';
+    return;
+  }
+  var html = "";
+  list.forEach(function(x){
+    html += '<article class="card">';
+    html += '<div class="head"><div class="icon">'+esc(ext(x.name))+'</div><div>';
+    html += '<div class="name">'+esc(x.name)+'</div>';
+    html += '<div class="meta">'+esc(x.type || "тип не указан")+' · '+sizeText(x.size)+'</div>';
+    html += '<div class="meta">'+new Date(x.created).toLocaleString("ru-RU")+'</div>';
+    html += '</div></div>';
+    html += x.section ? '<div><span class="tag">'+esc(x.section)+'</span></div>' : '';
+    html += '<div class="desc">'+esc(x.desc || "")+'</div>';
+    html += '<div class="btns">';
+    html += '<button class="small" onclick="openItem(\''+x.id+'\')">Открыть</button>';
+    html += '<button class="small ghost" onclick="downloadItem(\''+x.id+'\')">Скачать</button>';
+    html += '<button class="small ghost" onclick="editItem(\''+x.id+'\')">Править</button>';
+    html += '<button class="small danger" onclick="deleteItem(\''+x.id+'\')">Удалить</button>';
+    html += '</div></article>';
+  });
+  byId("grid").innerHTML = html;
+}
+function readFileAsDataURL(file){
+  return new Promise(function(resolve,reject){
+    var r = new FileReader();
+    r.onload = function(){ resolve(r.result); };
+    r.onerror = function(){ reject(r.error); };
+    r.readAsDataURL(file);
+  });
+}
+function dataURLtoBlob(dataURL){
+  var parts = dataURL.split(",");
+  var mime = "application/octet-stream";
+  var m = parts[0].match(/data:(.*?);base64/);
+  if(m) mime = m[1] || mime;
+  var bin = atob(parts[1]);
+  var len = bin.length;
+  var arr = new Uint8Array(len);
+  for(var i=0;i<len;i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], {type:mime});
+}
+function downloadBlob(blob,name){
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name || "file";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+window.downloadItem = function(id){
+  var x = items.find(function(i){ return i.id === id; });
+  if(!x) return;
+  downloadBlob(dataURLtoBlob(x.data), x.name);
+};
+window.openItem = function(id){
+  var x = items.find(function(i){ return i.id === id; });
+  if(!x) return;
+  var blob = dataURLtoBlob(x.data);
+  var url = URL.createObjectURL(blob);
+  var w = window.open(url, "_blank");
+  if(!w) alert("Браузер заблокировал открытие. Разрешите всплывающее окно или используйте кнопку Скачать.");
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+};
+window.editItem = function(id){
+  var x = items.find(function(i){ return i.id === id; });
+  if(!x) return;
+  var s = prompt("Раздел / папка:", x.section || "");
+  if(s === null) return;
+  var d = prompt("Описание:", x.desc || "");
+  if(d === null) return;
+  x.section = s.trim();
+  x.desc = d.trim();
+  saveLocal(); render();
+};
+window.deleteItem = function(id){
+  var x = items.find(function(i){ return i.id === id; });
+  if(!x) return;
+  if(confirm("Удалить из копилки: " + x.name + "?")){
+    items = items.filter(function(i){ return i.id !== id; });
+    saveLocal(); render();
+  }
+};
+
+byId("addBtn").onclick = async function(){
+  try{
+    var files = Array.prototype.slice.call(byId("fileInput").files);
+    if(!files.length){ alert("Выберите файл."); return; }
+    var section = byId("sectionInput").value.trim();
+    var desc = byId("descInput").value.trim();
+    for(var i=0;i<files.length;i++){
+      var f = files[i];
+      var data = await readFileAsDataURL(f);
+      items.unshift({
+        id: String(Date.now()) + "_" + Math.random().toString(16).slice(2),
+        name: f.name,
+        type: f.type || "application/octet-stream",
+        size: f.size,
+        section: section,
+        desc: desc,
+        created: Date.now(),
+        data: data
+      });
+    }
+    saveLocal();
+    byId("fileInput").value = "";
+    render();
+  }catch(e){ showError(e); }
+};
+byId("clearBtn").onclick = function(){
+  byId("fileInput").value = "";
+  byId("sectionInput").value = "";
+  byId("descInput").value = "";
+};
+byId("searchInput").oninput = render;
+byId("sectionFilter").onchange = render;
+byId("wipeBtn").onclick = function(){
+  if(confirm("Очистить всю копилку?")){
+    items = [];
+    saveLocal();
+    render();
+  }
+};
+
+function makeStandaloneHTML(){
+  var doc = document.documentElement.outerHTML;
+  var data = JSON.stringify(items).replace(/</g, "\\u003C");
+  doc = doc.replace(/<script id="embeddedData" type="application\/json">[\s\S]*?<\/script>/,
+    '<script id="embeddedData" type="application/json">'+data+'<\/script>');
+  return '<!DOCTYPE html>\n' + doc;
+}
+byId("saveCaseBtn").onclick = function(){
+  try{
+    var html = makeStandaloneHTML();
+    var blob = new Blob([html], {type:"text/html;charset=utf-8"});
+    downloadBlob(blob, "Kopilka_Failov_Nexa_CASE.html");
+  }catch(e){ showError(e); }
+};
+
+byId("loadCaseBtn").onclick = function(){ byId("loadCaseFile").click(); };
+byId("loadCaseFile").onchange = function(){
+  var f = byId("loadCaseFile").files[0];
+  if(!f) return;
+  var r = new FileReader();
+  r.onload = function(){
+    try{
+      var m = String(r.result).match(/<script id="embeddedData" type="application\/json">([\s\S]*?)<\/script>/);
+      if(!m){ alert("В этом HTML не найден кейс копилки."); return; }
+      items = JSON.parse(m[1]);
+      saveLocal();
+      render();
+      alert("Кейс открыт и загружен.");
+    }catch(e){ showError(e); }
+  };
+  r.readAsText(f, "UTF-8");
+};
+
+loadLocal();
+render();
+})();
+</script>
+</body>
+</html>
