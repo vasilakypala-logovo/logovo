@@ -535,100 +535,51 @@
     }
 
 
-    /* --- CONNECTION MENU / СВЯЗЬ --- */
-    .connection-menu {
-      left: 8%;
-      top: 18%;
-      bottom: auto;
-      width: 250px;
-    }
+   /* --- СВЯЗЬ --- */
 
-    .connection-group-title {
-      margin: 10px 0 6px;
-      color: rgba(190,225,255,0.78);
-      font-size: 11px;
-      letter-spacing: 0.14em;
-      text-align: center;
-      text-transform: uppercase;
-    }
+.connection-menu{
+  left:8%;
+  top:18%;
+  width:220px;
+}
 
-    .connection-custom {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(255,255,255,0.12);
-    }
+.connection-add-button{
+  width:100%;
+  padding:10px 12px;
 
-    .connection-custom input {
-      width: 100%;
-      margin: 5px 0;
-      padding: 8px 9px;
-      border-radius: 9px;
-      border: 1px solid rgba(255,255,255,0.16);
-      background: rgba(255,255,255,0.07);
-      color: #fff;
-      font-family: Georgia, 'Times New Roman', serif;
-      outline: none;
-    }
+  border-radius:12px;
 
-    .connection-custom input::placeholder {
-      color: rgba(255,255,255,0.45);
-    }
+  border:1px solid rgba(150,220,255,0.22);
 
-    .connection-add-button {
-      width: 100%;
-      margin-top: 5px;
-      padding: 9px 10px;
-      border-radius: 10px;
-      border: 1px solid rgba(150,220,255,0.22);
-      background: rgba(120,200,255,0.10);
-      color: rgba(235,248,255,0.95);
-      font-family: Georgia, 'Times New Roman', serif;
-      cursor: pointer;
-    }
+  background:rgba(120,200,255,0.10);
 
-    .connection-add-button:hover {
-      background: rgba(120,200,255,0.18);
-      box-shadow: 0 0 14px rgba(120,200,255,0.22);
-    }
+  color:rgba(235,248,255,0.95);
 
-    .custom-links-list {
-      margin-top: 8px;
-    }
+  font-family:Georgia,'Times New Roman',serif;
 
-    .custom-link-row {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
+  cursor:pointer;
 
-    .custom-link-row .table-item {
-      flex: 1;
-    }
+  transition:.2s;
+}
 
-    .custom-link-remove {
-      width: 32px;
-      height: 32px;
-      border-radius: 9px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.05);
-      color: rgba(255,255,255,0.7);
-      cursor: pointer;
-    }
+.connection-add-button:hover{
 
-    .custom-link-remove:hover {
-      background: rgba(255,120,120,0.18);
-      color: #fff;
-    }
+  background:rgba(120,200,255,0.18);
 
-    @media (max-width: 900px) {
-      .connection-menu {
-        left: 1%;
-        top: 16%;
-        transform: scale(0.78);
-        transform-origin: top left;
-      }
-    }
+  box-shadow:0 0 14px rgba(120,200,255,0.22);
+}
 
+@media (max-width:900px){
+
+  .connection-menu{
+
+    left:1%;
+    top:16%;
+
+    transform:scale(0.78);
+    transform-origin:top left;
+  }
+}
 
     /* --- ПЕРЕНОС ЛОГОВА: сохранение текстов в файл --- */
     .transfer-row {
