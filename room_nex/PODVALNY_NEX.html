@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Подвальный Некс</title>
+
+<style>
+html,body{
+margin:0;
+padding:0;
+width:100%;
+height:100%;
+overflow:hidden;
+background:#000;
+font-family:Georgia,"Times New Roman",serif;
+}
+
+.scene{
+position:relative;
+width:100vw;
+height:100vh;
+background:url("bg.png") center center/cover no-repeat;
+}
+
+.ask-btn{
+position:absolute;
+left:50%;
+bottom:5%;
+transform:translateX(-50%);
+padding:18px 48px;
+min-width:430px;
+border-radius:14px;
+border:2px solid rgba(210,170,92,0.95);
+background:linear-gradient(180deg, rgba(20,55,84,0.96), rgba(5,20,35,0.96));
+color:#f3d79c;
+font-size:30px;
+cursor:pointer;
+box-shadow:0 0 25px rgba(0,0,0,0.9);
+text-shadow:0 2px 2px #000;
+}
+
+.ask-btn:hover{
+filter:brightness(1.15);
+}
+
+.dialog{
+display:none;
+position:absolute;
+left:50%;
+bottom:18%;
+transform:translateX(-50%);
+width:560px;
+padding:22px;
+border-radius:16px;
+border:2px solid rgba(210,170,92,0.9);
+background:rgba(8,6,5,0.88);
+box-shadow:0 0 35px rgba(0,0,0,0.95);
+}
+
+.dialog textarea{
+width:100%;
+height:120px;
+resize:none;
+box-sizing:border-box;
+padding:12px;
+font-size:21px;
+border-radius:10px;
+outline:none;
+background:rgba(18,15,12,0.95);
+border:1px solid rgba(220,180,100,0.6);
+color:#f4dfb4;
+font-family:Georgia,"Times New Roman",serif;
+}
+
+.buttons{
+margin-top:14px;
+display:flex;
+justify-content:flex-end;
+gap:10px;
+}
+
+.buttons button{
+padding:10px 24px;
+font-size:18px;
+cursor:pointer;
+border-radius:10px;
+border:1px solid rgba(220,180,100,0.7);
+background:linear-gradient(180deg,#173954,#071928);
+color:#f4d89a;
+}
+
+.answer{
+display:none;
+position:absolute;
+left:50%;
+top:5%;
+transform:translateX(-50%);
+width:74%;
+padding:24px 28px;
+border-radius:18px;
+border:2px solid rgba(210,170,92,0.9);
+background:rgba(8,6,5,0.88);
+color:#f3ddb0;
+font-size:26px;
+line-height:1.4;
+box-shadow:0 0 40px rgba(0,0,0,0.95);
+text-shadow:0 2px 2px #000;
+}
+
+@media(max-width:800px){
+
+.ask-btn{
+min-width:260px;
+font-size:22px;
+padding:14px 24px;
+}
+
+.dialog{
+width:84%;
+}
+
+.answer{
+width:84%;
+font-size:20px;
+}
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="scene">
+
+<div id="answer" class="answer"></div>
+
+<div id="dialog" class="dialog">
+<textarea id="question" placeholder="Введите вопрос..."></textarea>
+
+<div class="buttons">
+<button onclick="answer()">ОТВЕТ</button>
+<button onclick="resetAll()">СБРОСИТЬ</button>
+</div>
+</div>
+
+<button class="ask-btn" onclick="openDialog()">
+Спросить Доктора Некса
+</button>
+
+</div>
+
+<script>
+
+const randomAnswers = [
+
+"Не спешите. В подвале смысл слышнее, когда шаги становятся тише.",
+"Сначала спросить у дома, потом уже у дороги.",
+"Иногда «не туда» — это единственное место, где туда.",
+"Если всё сломалось после одной правки — ищите именно эту правку.",
+"Код любит тишину, но не любит забытые кавычки.",
+"Если программа капризничает — сначала закройте лишнее.",
+"Не бойтесь копий. Копия — это лестница назад.",
+"Пыль — это архив времени.",
+"Слишком много дверей создаёт сквозняк в голове.",
+"Хороший вопрос уже содержит половину ответа.",
+"Когда браузер молчит — значит где-то сидит маленькая ошибка.",
+"Тяжёлая картинка тоже устаёт.",
+"Туман иногда умнее прямой дороги.",
+"Камень редко торопится, зато многое помнит.",
+"Не всё надо чинить сразу.",
+"Некоторые ответы любят полумрак.",
+"Подвал знает то, что забывает верхний этаж.",
+"Не шумите возле смысла.",
+"Хороший механизм не кричит о себе.",
+"Ошибка — это место, где система решила заговорить.",
+
+"Интернет сейчас чувствуется спокойно.",
+"Память компьютера просит меньше открытых окон.",
+"Система выглядит уставшей, но рабочей.",
+"Браузер перегружен вкладками.",
+"Проверьте путь к файлу.",
+"Где-то потерялось расширение.",
+"Похоже, одна из картинок слишком тяжёлая.",
+"Страница открылась не полностью.",
+"Сайт любит точные имена.",
+"Компьютеру нужен короткий отдых.",
+
+"Сегодня подвал настроен философски.",
+"Трубы молчат — значит всё спокойно.",
+"Не всякая тишина пустая.",
+"Ответ уже ходит рядом.",
+"Под лампой мысли собираются лучше.",
+"Не торопите механизм.",
+"Даже туман имеет форму.",
+"Смысл любит боковые двери.",
+"Холодный воздух идёт от неправильного пути.",
+"Лишние кнопки создают блуждание.",
+
+"Подвальный Некс слушает стены.",
+"Некоторые вопросы лучше хранить до вечера.",
+"Порядок начинается с одного закрытого окна.",
+"Если не получается — отойдите на минуту.",
+"Иногда главное действие — ничего не трогать.",
+"Подвал не любит суету.",
+"Там где скрипит — там и ищите.",
+"Старые стены помнят больше браузеров.",
+"Механизм дышит нормально.",
+"Сегодня система не сердится."
+
+];
+
+function openDialog(){
+document.getElementById("dialog").style.display="block";
+document.getElementById("question").focus();
+}
+
+function answer(){
+
+const q=document.getElementById("question").value.toLowerCase().trim();
+
+if(q===""){
+show("Сначала задайте вопрос.");
+return;
+}
+
+if(q.includes("интернет") || q.includes("сеть")){
+show(navigator.onLine ?
+"Интернет сейчас чувствуется спокойно."
+:
+"Подвал не слышит интернет.");
+return;
+}
+
+if(q.includes("время") || q.includes("дата")){
+show("Сейчас: " + new Date().toLocaleString());
+return;
+}
+
+if(q.includes("память") || q.includes("ram")){
+show("Память просит меньше открытых дверей.");
+return;
+}
+
+if(q.includes("торм") || q.includes("лага") || q.includes("медленно")){
+show("Компьютеру нужен короткий отдых.");
+return;
+}
+
+if(q.includes("браузер")){
+show("Браузер сегодня выглядит уставшим.");
+return;
+}
+
+if(q.includes("файл") || q.includes("папк")){
+show("Проверьте путь к файлу.");
+return;
+}
+
+const r=randomAnswers[Math.floor(Math.random()*randomAnswers.length)];
+show(r);
+
+}
+
+function show(t){
+const a=document.getElementById("answer");
+a.innerText=t;
+a.style.display="block";
+}
+
+function resetAll(){
+document.getElementById("question").value="";
+document.getElementById("dialog").style.display="none";
+document.getElementById("answer").style.display="none";
+document.getElementById("answer").innerText="";
+}
+
+</script>
+
+</body>
+</html>
