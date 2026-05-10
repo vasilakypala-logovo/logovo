@@ -392,7 +392,55 @@
 
     /* --- NEW ZONES --- */
 
-    .chair {
+    .chair.mini-nex-breath{
+  position:absolute;
+
+  left:50%;
+  top:50%;
+
+  width:74px;
+  height:74px;
+
+  transform:translate(-50%,-50%);
+
+  border-radius:50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(220,245,255,0.34) 0%,
+      rgba(130,220,255,0.18) 28%,
+      rgba(70,140,220,0.08) 56%,
+      transparent 100%
+    );
+
+  filter:blur(7px);
+
+  box-shadow:
+    0 0 26px rgba(120,210,255,0.22),
+    0 0 80px rgba(120,210,255,0.10);
+
+  animation:nexBreath 6s ease-in-out infinite;
+
+  pointer-events:none;
+}@keyframes nexBreath{
+
+  0%{
+    transform:translate(-50%,-50%) scale(0.88);
+    opacity:0.62;
+  }
+
+  50%{
+    transform:translate(-50%,-50%) scale(1.12);
+    opacity:1;
+  }
+
+  100%{
+    transform:translate(-50%,-50%) scale(0.88);
+    opacity:0.62;
+  }
+}
+    {
       position: absolute;
       left: 24%;
       bottom: 12%;
