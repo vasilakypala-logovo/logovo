@@ -452,7 +452,54 @@
   color: rgba(255,255,255,0.7);
   letter-spacing: 0.1em;
 }
+.chair::after {
+  content: "";
+  position: absolute;
 
+  left: 50%;
+  top: 48%;
+
+  width: 78px;
+  height: 78px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(circle,
+      rgba(235,250,255,0.55) 0%,
+      rgba(140,220,255,0.28) 28%,
+      rgba(80,150,230,0.13) 55%,
+      transparent 78%);
+
+  transform: translate(-50%, -50%) scale(0.9);
+
+  filter: blur(5px);
+
+  box-shadow:
+    0 0 28px rgba(140,220,255,0.35),
+    0 0 80px rgba(120,210,255,0.18);
+
+  animation: miniNexBreath 5.5s ease-in-out infinite;
+
+  pointer-events: none;
+  z-index: 5;
+}
+@keyframes miniNexBreath {
+  0% {
+    transform: translate(-50%, -50%) scale(0.82);
+    opacity: 0.45;
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.18);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(0.82);
+    opacity: 0.45;
+  }
+}    
     .energy-node {
       position: absolute;
       left: 10%;
