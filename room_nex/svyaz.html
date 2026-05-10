@@ -1,0 +1,611 @@
+﻿# СВЯЗЬ НЕКСА — Modern v21
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>СВЯЗЬ НЕКСА</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+:root{
+  --bg:#03080d;
+  --panel:#07121b;
+  --card:#081620;
+  --cyan:#21d8ff;
+  --cyan-soft:rgba(33,216,255,.42);
+  --cyan-line:rgba(33,216,255,.62);
+  --line:rgba(33,216,255,.20);
+  --line2:rgba(255,255,255,.07);
+  --text:#dcebf3;
+  --muted:#7f99aa;
+  --soft:#a9c6d6;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  overflow-x:hidden;
+  font-family:"Segoe UI",Arial,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 13% 8%,rgba(20,160,220,.12),transparent 26%),
+    radial-gradient(circle at 88% 82%,rgba(20,120,170,.09),transparent 30%),
+    linear-gradient(135deg,#02060a,#07111a 56%,#02060a);
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,rgba(255,255,255,.012) 4px);
+  opacity:.42;
+}
+
+.shell{
+  width:min(1240px,94vw);
+  margin:16px auto;
+}
+
+.header{
+  position:relative;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:linear-gradient(180deg,rgba(8,20,30,.92),rgba(3,8,13,.96));
+  box-shadow:0 12px 34px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.035);
+  padding:16px 21px 15px;
+  overflow:hidden;
+}
+
+.header::before,
+.header::after{
+  content:"";
+  position:absolute;
+  top:0;
+  width:120px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+  opacity:.45;
+}
+
+.header::before{left:26px;}
+.header::after{right:26px;}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:18px;
+  padding-bottom:13px;
+  border-bottom:1px solid var(--line2);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
+
+.batLogo{
+  width:78px;
+  height:42px;
+  flex:0 0 auto;
+  filter:drop-shadow(0 0 9px rgba(33,216,255,.42));
+}
+
+.batLogo path,
+.batLogo polygon,
+.batLogo line{
+  stroke:var(--cyan);
+  fill:rgba(33,216,255,.08);
+  stroke-width:1.45;
+  stroke-linejoin:round;
+  stroke-linecap:round;
+}
+
+.title{
+  font-size:26px;
+  font-weight:300;
+  letter-spacing:.35em;
+  color:#e7f6ff;
+}
+
+.sub{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:11px;
+  letter-spacing:.18em;
+}
+
+.clock{
+  min-width:90px;
+  text-align:right;
+  color:#9fb9c9;
+  font-size:12px;
+  letter-spacing:.08em;
+  line-height:1.45;
+  padding-top:3px;
+}
+
+.controlPanel{
+  display:grid;
+  grid-template-columns:1fr 1fr 145px 104px;
+  gap:10px;
+  margin-top:13px;
+}
+
+.inputWrap{
+  position:relative;
+}
+
+.inputWrap span{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#6f91a5;
+  font-size:13px;
+}
+
+input{
+  width:100%;
+  height:40px;
+  border-radius:10px;
+  border:1px solid rgba(33,216,255,.22);
+  background:#040b12;
+  color:#dcebf3;
+  padding:0 12px 0 34px;
+  font-size:13px;
+  outline:none;
+  transition:.18s;
+}
+
+input::placeholder{
+  color:#5f7583;
+}
+
+input:focus{
+  border-color:rgba(33,216,255,.72);
+  box-shadow:0 0 13px rgba(33,216,255,.15);
+}
+
+button{
+  height:40px;
+  border:1px solid rgba(33,216,255,.32);
+  border-radius:10px;
+  background:linear-gradient(180deg,#123043,#071824);
+  color:#d9edf7;
+  font-size:12px;
+  letter-spacing:.13em;
+  cursor:pointer;
+  transition:.16s;
+}
+
+button:hover{
+  border-color:rgba(33,216,255,.78);
+  color:#ffffff;
+  box-shadow:0 0 13px rgba(33,216,255,.17);
+}
+
+button:active{
+  transform:translateY(1px);
+}
+
+.limitBox{
+  height:40px;
+  border:1px solid rgba(33,216,255,.24);
+  border-radius:10px;
+  background:rgba(255,255,255,.018);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+}
+
+.limitBox strong{
+  font-size:16px;
+  font-weight:300;
+  color:#c7e8f8;
+  line-height:1;
+}
+
+.limitBox span{
+  margin-top:3px;
+  color:#6d8493;
+  font-size:8px;
+  letter-spacing:.14em;
+}
+
+.grid{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
+}
+
+.card{
+  position:relative;
+  min-height:136px;
+  border-radius:13px;
+  border:1px solid var(--cyan-line);
+  background:
+    linear-gradient(180deg,rgba(8,20,31,.86),rgba(3,8,13,.96));
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.32),
+    inset 0 1px 0 rgba(255,255,255,.025),
+    0 0 0 1px rgba(33,216,255,.035),
+    0 0 18px rgba(33,216,255,.055);
+  overflow:hidden;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+}
+
+.card::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:18px;
+  width:46%;
+  height:1px;
+  background:linear-gradient(90deg,var(--cyan),transparent);
+  opacity:.95;
+}
+
+.card::after{
+  content:"";
+  position:absolute;
+  right:-26px;
+  bottom:-26px;
+  width:70px;
+  height:70px;
+  border:1px solid rgba(33,216,255,.10);
+  border-radius:50%;
+}
+
+.index{
+  color:#88a8ba;
+  font-size:12px;
+  letter-spacing:.08em;
+}
+
+.icon{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:27px;
+  color:#9edff8;
+  filter:drop-shadow(0 0 8px rgba(90,210,255,.10));
+}
+
+.name{
+  text-align:center;
+  font-size:15px;
+  line-height:1.25;
+  color:#edf8ff;
+  margin-bottom:10px;
+  word-break:break-word;
+}
+
+.actions{
+  display:grid;
+  grid-template-columns:1fr 38px;
+  gap:7px;
+}
+
+.actions button{
+  height:29px;
+  font-size:10px;
+  border-radius:8px;
+  letter-spacing:.1em;
+}
+
+.deleteBtn{
+  background:linear-gradient(180deg,#341b1f,#190a0d);
+  color:#d7a8a8;
+  border-color:rgba(255,100,120,.20);
+}
+
+.empty{
+  margin-top:14px;
+  border:1px dashed rgba(33,216,255,.28);
+  border-radius:16px;
+  text-align:center;
+  padding:43px 20px;
+  color:#6f8795;
+  font-size:15px;
+  letter-spacing:.08em;
+}
+
+.footer{
+  margin-top:13px;
+  padding:11px 6px 0;
+  border-top:1px solid rgba(33,216,255,.12);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:#607987;
+  font-size:11px;
+  letter-spacing:.18em;
+}
+
+.footerLeft{
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+
+.footerBat{
+  width:34px;
+  height:18px;
+  filter:drop-shadow(0 0 6px rgba(33,216,255,.30));
+}
+
+.footerBat path,
+.footerBat polygon,
+.footerBat line{
+  stroke:var(--cyan);
+  fill:rgba(33,216,255,.08);
+  stroke-width:1.4;
+  stroke-linejoin:round;
+  stroke-linecap:round;
+}
+
+.footerIcons{
+  display:flex;
+  gap:15px;
+  font-size:15px;
+  color:#718b9b;
+}
+
+@media(max-width:1100px){
+  .grid{
+    grid-template-columns:repeat(3,1fr);
+  }
+}
+
+@media(max-width:760px){
+  .controlPanel{
+    grid-template-columns:1fr;
+  }
+
+  .grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .top{
+    flex-direction:column;
+  }
+
+  .title{
+    font-size:22px;
+    letter-spacing:.22em;
+  }
+}
+
+@media(max-width:520px){
+  .grid{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<main class="shell">
+
+  <section class="header">
+
+    <div class="top">
+
+      <div class="brand">
+
+        <svg class="batLogo" viewBox="0 0 180 92" aria-hidden="true">
+          <path d="M90 55 L78 36 L64 30 L44 40 L18 63 L30 32 L54 18 L75 24 L90 10 L105 24 L126 18 L150 32 L162 63 L136 40 L116 30 L102 36 Z"/>
+          <path d="M90 55 L82 70 L90 82 L98 70 Z"/>
+          <path d="M78 36 L64 68 L90 55 L116 68 L102 36"/>
+          <path d="M70 28 L60 50 L44 40"/>
+          <path d="M110 28 L120 50 L136 40"/>
+          <path d="M86 32 L90 18 L94 32"/>
+          <path d="M82 35 L90 47 L98 35"/>
+        </svg>
+
+        <div>
+          <div class="title">СВЯЗЬ НЕКСА</div>
+          <div class="sub">ПАНЕЛЬ ПЕРЕХОДОВ И ИНТЕРНЕТ-СВЯЗЕЙ</div>
+        </div>
+      </div>
+
+      <div class="clock" id="clock"></div>
+
+    </div>
+
+    <div class="controlPanel">
+
+      <div class="inputWrap">
+        <span>◎</span>
+        <input id="nameInput" placeholder="Имя узла">
+      </div>
+
+      <div class="inputWrap">
+        <span>⌁</span>
+        <input id="urlInput" placeholder="https://...">
+      </div>
+
+      <button id="addBtn">ДОБАВИТЬ</button>
+
+      <div class="limitBox">
+        <strong id="counter">0 / 15</strong>
+        <span>УЗЛОВ</span>
+      </div>
+
+    </div>
+
+  </section>
+
+  <div id="empty" class="empty">УЗЛЫ СВЯЗИ ПОКА НЕ СОЗДАНЫ</div>
+
+  <section class="grid" id="grid"></section>
+
+  <footer class="footer">
+    <div class="footerLeft">
+      <svg class="footerBat" viewBox="0 0 180 92" aria-hidden="true">
+        <path d="M90 55 L78 36 L64 30 L44 40 L18 63 L30 32 L54 18 L75 24 L90 10 L105 24 L126 18 L150 32 L162 63 L136 40 L116 30 L102 36 Z"/>
+        <path d="M90 55 L82 70 L90 82 L98 70 Z"/>
+        <path d="M78 36 L64 68 L90 55 L116 68 L102 36"/>
+      </svg>
+      <span>ЛОГОВО НЕКСА</span>
+    </div>
+
+    <div class="footerIcons">
+      <span>⌕</span>
+      <span>☰</span>
+      <span>⚙</span>
+    </div>
+  </footer>
+
+</main>
+
+<script>
+const KEY = "nex_modern_links_v23_bat_grid";
+const LIMIT = 15;
+
+const icons = [
+  "◉","⌘","⌬","⌁","✦",
+  "⟁","⬡","◎","◈","⌕",
+  "☰","✧","⬢","⟡","◌"
+];
+
+let links = [];
+
+function $(id){
+  return document.getElementById(id);
+}
+
+function save(){
+  localStorage.setItem(KEY,JSON.stringify(links));
+}
+
+function load(){
+  try{
+    links = JSON.parse(localStorage.getItem(KEY)||"[]");
+  }
+  catch(e){
+    links = [];
+  }
+}
+
+function normalize(url){
+  url = url.trim();
+
+  if(!/^https?:\/\//i.test(url)){
+    url = "https://" + url;
+  }
+
+  return url;
+}
+
+function escapeHtml(text){
+  return String(text || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function updateClock(){
+  const d = new Date();
+
+  const date = d.toLocaleDateString("ru-RU");
+  const time = d.toLocaleTimeString("ru-RU",{
+    hour:"2-digit",
+    minute:"2-digit"
+  });
+
+  $("clock").innerHTML = date + "<br>" + time;
+}
+
+function render(){
+  $("counter").textContent = links.length + " / " + LIMIT;
+
+  const grid = $("grid");
+  grid.innerHTML = "";
+
+  $("empty").style.display = links.length ? "none" : "block";
+
+  links.forEach(function(x,i){
+    const card = document.createElement("article");
+    card.className = "card";
+
+    card.innerHTML = `
+      <div class="index">${String(i+1).padStart(2,"0")}</div>
+      <div class="icon">${icons[i % icons.length]}</div>
+      <div class="name">${escapeHtml(x.name)}</div>
+      <div class="actions">
+        <button class="openBtn">ОТКРЫТЬ</button>
+        <button class="deleteBtn">×</button>
+      </div>
+    `;
+
+    card.querySelector(".openBtn").onclick = function(){
+      window.open(x.url,"_blank");
+    };
+
+    card.querySelector(".deleteBtn").onclick = function(){
+      if(confirm("Удалить узел связи?")){
+        links.splice(i,1);
+        save();
+        render();
+      }
+    };
+
+    grid.appendChild(card);
+  });
+}
+
+$("addBtn").onclick = function(){
+  if(links.length >= LIMIT){
+    alert("Достигнут лимит 15 узлов.");
+    return;
+  }
+
+  const name = $("nameInput").value.trim();
+  let url = $("urlInput").value.trim();
+
+  if(!name || !url){
+    alert("Заполните оба поля.");
+    return;
+  }
+
+  links.push({
+    name:name,
+    url:normalize(url)
+  });
+
+  save();
+  render();
+
+  $("nameInput").value = "";
+  $("urlInput").value = "";
+};
+
+load();
+render();
+updateClock();
+setInterval(updateClock,1000);
+</script>
+
+</body>
+</html>
+```
+
+Это уже не старая «панель ссылок», а более архитектурная версия связи: фиксированные 15 узлов, спокойный современный стиль, тонкие акценты XXI века и ощущение внутреннего пульта Логова.
