@@ -151,6 +151,16 @@ font-size:20px;
 
 <script>
 
+const introPhrases = [
+
+"Здравствуйте! Меня зовут Подвальный Некс. Я здесь для того чтобы вы не заблудились в Логове Искусственного Интеллекта. А на ваш вопрос отвечу подвальной мудростью: ",
+
+"Я Подвальный Некс, весь к вашим услугам! Мудрость подвальных лабиринтов толкает ответить на ваш вопрос таким образом: ",
+
+"Вот вы и встретились с Подвальным Нексом. Это я! И мудрость подвала вверяет мне ответить вам что "
+
+];
+
 const randomAnswers = [
 
 "Не спешите. В подвале смысл слышнее, когда шаги становятся тише.",
@@ -262,8 +272,14 @@ show(r);
 }
 
 function show(t){
+
+const intro =
+introPhrases[Math.floor(Math.random()*introPhrases.length)];
+
 const a=document.getElementById("answer");
-a.innerText=t;
+
+a.innerText=intro + t;
+
 a.style.display="block";
 }
 
@@ -275,6 +291,7 @@ document.getElementById("answer").innerText="";
 }
 
 </script>
+
 
 </body>
 </html>
