@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>OTKRIVALKA</title>
+<title>OTKRIVALKA_ALL</title>
 
 <style>
 html,body{
@@ -17,24 +17,28 @@ html,body{
 #screen{
   position:absolute;
   inset:0;
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   color:white;
   font-size:28px;
   letter-spacing:0.15em;
+
   cursor:pointer;
+
   background:
     radial-gradient(circle at center,
     rgba(255,255,255,0.08),
-    rgba(0,0,0,0.95));
+    rgba(0,0,0,0.96));
 }
 
 #screen:hover{
   background:
     radial-gradient(circle at center,
-    rgba(255,255,255,0.13),
-    rgba(0,0,0,0.95));
+    rgba(255,255,255,0.14),
+    rgba(0,0,0,0.96));
 }
 </style>
 </head>
@@ -42,21 +46,21 @@ html,body{
 <body>
 
 <div id="screen">
-  ARTEFAKT
+  ОТКРЫТЬ
 </div>
 
 <script>
 
 /* ЧТО ОТКРЫВАТЬ */
 
-const OPEN_FILE = 'ARTEFAKT/arindex.html';
+const OPEN_FILE = 'myfile.exe';
 
 
 /* ОТКРЫТИЕ */
 
 document.getElementById('screen').addEventListener('click',()=>{
 
-  window.location.href = OPEN_FILE;
+  window.open(OPEN_FILE,'_blank');
 
 });
 
@@ -64,5 +68,3 @@ document.getElementById('screen').addEventListener('click',()=>{
 
 </body>
 </html>
-
-
