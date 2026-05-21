@@ -1,4 +1,4 @@
-const DB_NAME = 'nex_artifact_safe_browser';
+const DB_NAME = 'nex_library_safe';
 const DB_VERSION = 1;
 let db;
 
