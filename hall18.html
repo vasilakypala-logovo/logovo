@@ -41,7 +41,7 @@ body::after {
     white-space: nowrap;
 }
 
-.portal {
+.portal{
     position: absolute;
     left: 50%;
     bottom: 16%;
@@ -50,8 +50,14 @@ body::after {
     height: min(18vh, 140px);
     cursor: pointer;
     z-index: 3;
+
+    outline:none;
 }
 
+.portal:focus,
+.portal:active{
+    outline:none;
+}
 .portal::before {
     content: "";
     position: absolute;
