@@ -121,58 +121,33 @@ html, body {
     position: absolute;
     left: 63.7%;
     top: 90.2%;
-    width: 3.1%;
-    height: 6.6%;
-    min-width: 26px;
-    min-height: 42px;
+
+    width: 5.2%;
+    height: 5.2%;
+
+    min-width: 34px;
+    min-height: 34px;
+
     transform: translate(-50%, -50%);
     z-index: 6;
     cursor: pointer;
-    border-radius: 4px;
-    background:
-        linear-gradient(to bottom,
-            rgba(255,245,170,0.95) 0%,
-            rgba(255,232,110,0.92) 45%,
-            rgba(255,210,70,0.78) 100%
-        );
-    box-shadow:
-        0 0 10px rgba(255,245,180,0.75),
-        0 0 22px rgba(255,225,120,0.55),
-        0 0 40px rgba(255,235,150,0.28);
-    animation: doorPulse 2.8s ease-in-out infinite;
-}
 
-/* мягкий ореол дверцы */
-.portal-door::before {
-    content: "";
-    position: absolute;
-    inset: -8px;
-    border-radius: 8px;
+    border-radius: 50%;
+
     background:
         radial-gradient(circle,
-            rgba(255,250,210,0.34) 0%,
-            rgba(255,230,140,0.18) 36%,
-            rgba(255,230,140,0.00) 72%);
-    filter: blur(6px);
-    pointer-events: none;
+            rgba(255,245,190,0.28) 0%,
+            rgba(255,225,120,0.10) 45%,
+            rgba(255,225,120,0.00) 78%);
+
+    box-shadow:
+        0 0 12px rgba(255,240,180,0.30),
+        0 0 28px rgba(255,225,120,0.16);
+
+    animation: doorPulse 3.2s ease-in-out infinite;
 }
 
-/* тонкий внутренний блеск */
-.portal-door::after {
-    content: "";
-    position: absolute;
-    left: 18%;
-    top: 8%;
-    width: 24%;
-    height: 74%;
-    border-radius: 3px;
-    background: linear-gradient(to bottom,
-        rgba(255,255,255,0.65),
-        rgba(255,255,255,0.08)
-    );
-    opacity: 0.7;
-    pointer-events: none;
-}
+
 
 @keyframes titleFade {
     from {
