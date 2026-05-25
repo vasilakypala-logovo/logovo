@@ -288,8 +288,14 @@ button{
   color:#f0c37f;
   background:linear-gradient(145deg, rgba(69,38,18,.96), rgba(122,70,34,.92), rgba(61,34,17,.96));
   box-shadow:0 6px 18px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,220,160,.08);
+
+  outline:none;
 }
 
+button:focus{
+  outline:none;
+  box-shadow:none;
+}
 button:hover{filter:brightness(1.12);}
 button:active{transform:translateY(1px);}
 
