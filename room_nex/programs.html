@@ -110,8 +110,36 @@ function render(){
 document.querySelectorAll('.ball').forEach(btn=>{
   btn.addEventListener('click',()=>addBook(btn.dataset.icon));
 });
-document.getElementById('globePortal').addEventListener('click',()=>{
-  window.location.href = '.../dvorets-nex/vestibul/vestibul.html';
+document.getElementById('globePortal').addEventListener('click', async ()=>{
+  const variants = [
+    'dvorets-nex/vestibul/vestibul.html',
+    '../dvorets-nex/vestibul/vestibul.html',
+    '../../dvorets-nex/vestibul/vestibul.html',
+    '/logovo/dvorets-nex/vestibul/vestibul.html',
+    'dvorets-nex/vestibule/vestibule.html',
+    '../dvorets-nex/vestibule/vestibule.html',
+    '/logovo/dvorets-nex/vestibule/vestibule.html',
+    'dvorets-nex/vestibule.html',
+    '../dvorets-nex/vestibule.html',
+    '/logovo/dvorets-nex/vestibule.html',
+    'DVORETS_NEX/vestibul/vestibul.html',
+    '../DVORETS_NEX/vestibul/vestibul.html',
+    '/logovo/DVORETS_NEX/vestibul/vestibul.html'
+  ];
+
+  // На сайте GitHub Pages проверяем, какой файл реально существует.
+  for(const url of variants){
+    try{
+      const r = await fetch(url, {method:'HEAD', cache:'no-store'});
+      if(r.ok){
+        window.location.href = url;
+        return;
+      }
+    }catch(e){}
+  }
+
+  // Если файл открыт локально и fetch запрещён, пробуем самый вероятный путь.
+  window.location.href = '../dvorets-nex/vestibul/vestibul.html';
 });
 render();
 </script>
