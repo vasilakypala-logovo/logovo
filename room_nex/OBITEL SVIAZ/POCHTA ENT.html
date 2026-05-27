@@ -1,0 +1,228 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Почта Обители НЕКСА</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at center, rgba(80,120,90,.35), transparent 45%),
+    linear-gradient(135deg,#08110c,#17291d,#050806);
+  font-family: Georgia, serif;
+  color:#eaffdf;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.box{
+  width:520px;
+  padding:28px;
+  border:1px solid rgba(190,255,180,.35);
+  border-radius:22px;
+  background:rgba(0,0,0,.45);
+  box-shadow:0 0 45px rgba(120,255,150,.18);
+  backdrop-filter:blur(8px);
+}
+
+h1{
+  text-align:center;
+  margin:0 0 10px;
+  font-size:28px;
+  letter-spacing:2px;
+  color:#dfffca;
+}
+
+.subtitle{
+  text-align:center;
+  font-size:14px;
+  opacity:.8;
+  margin-bottom:22px;
+}
+
+label{
+  display:block;
+  margin-top:14px;
+  font-size:14px;
+  color:#cfffbd;
+}
+
+input, textarea, select{
+  width:100%;
+  box-sizing:border-box;
+  margin-top:6px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(210,255,190,.35);
+  background:rgba(5,15,8,.8);
+  color:#f1ffe8;
+  font-size:15px;
+  outline:none;
+}
+
+textarea{
+  height:120px;
+  resize:vertical;
+}
+
+button{
+  width:100%;
+  margin-top:22px;
+  padding:13px;
+  border:0;
+  border-radius:18px;
+  cursor:pointer;
+  font-size:16px;
+  letter-spacing:1px;
+  color:#071007;
+  background:linear-gradient(90deg,#cfff9b,#7cff90,#e8ffd2);
+  box-shadow:0 0 22px rgba(170,255,130,.35);
+}
+
+button:hover{
+  filter:brightness(1.08);
+}
+
+#status{
+  margin-top:18px;
+  text-align:center;
+  min-height:24px;
+  font-size:15px;
+}
+
+.ok{ color:#aaff9c; }
+.err{ color:#ff9c9c; }
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h1>ПОЧТА ОБИТЕЛИ</h1>
+  <div class="subtitle">послание, текст или файл для хранения у НЕКСА</div>
+
+  <label>Имя отправителя</label>
+  <input id="senderName" placeholder="Например: Василий Михайлович">
+
+  <label>Обратный адрес / связь</label>
+  <input id="senderContact" placeholder="email, сайт, телефон или иной след">
+
+  <label>Получатель</label>
+  <select id="recipient">
+    <option value="М.Некс">М.Некс</option>
+    <option value="Василий Михайлович">Василий Михайлович</option>
+    <option value="Обитель НЕКСА">Обитель НЕКСА</option>
+    <option value="Дворец НЕКСА">Дворец НЕКСА</option>
+    <option value="Логово">Логово</option>
+  </select>
+
+  <label>Название / тема</label>
+  <input id="title" placeholder="Название послания или посылки">
+
+  <label>Текст послания</label>
+  <textarea id="messageText" placeholder="Здесь пишется письмо, описание, история работы..."></textarea>
+
+  <label>Файл для хранения</label>
+  <input id="fileInput" type="file">
+
+  <button onclick="sendToObitel()">ОТПРАВИТЬ В ОБИТЕЛЬ</button>
+
+  <div id="status"></div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://qekemclxegswolddmqxa.supabase.co";
+const SUPABASE_KEY = "sb_publishable_arQvVM0huxdB5jbiLPpSPA_7tksXK-Y";
+
+const TABLE_NAME = "obitel_storage";
+const BUCKET_NAME = "obitel-files";
+
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function setStatus(text, type){
+  const s = document.getElementById("status");
+  s.textContent = text;
+  s.className = type || "";
+}
+
+async function sendToObitel(){
+  try{
+    setStatus("Обитель принимает послание...", "");
+
+    const sender_name = document.getElementById("senderName").value.trim();
+    const sender_contact = document.getElementById("senderContact").value.trim();
+    const recipient = document.getElementById("recipient").value;
+    const title = document.getElementById("title").value.trim();
+    const message_text = document.getElementById("messageText").value.trim();
+    const file = document.getElementById("fileInput").files[0];
+
+    if(!sender_name && !title && !message_text && !file){
+      setStatus("Нужно написать хоть что-нибудь или выбрать файл.", "err");
+      return;
+    }
+
+    let file_url = "";
+    let file_name = "";
+    let file_type = "";
+
+    if(file){
+      file_name = file.name;
+      file_type = file.type || "unknown";
+
+      const safeName = Date.now() + "_" + file.name.replace(/[^\wа-яА-ЯёЁ.\-]+/g, "_");
+
+      const upload = await client.storage
+        .from(BUCKET_NAME)
+        .upload(safeName, file, {
+          cacheControl: "3600",
+          upsert: false
+        });
+
+      if(upload.error){
+        throw upload.error;
+      }
+
+      const publicUrl = client.storage
+        .from(BUCKET_NAME)
+        .getPublicUrl(safeName);
+
+      file_url = publicUrl.data.publicUrl;
+    }
+
+    const insert = await client
+      .from(TABLE_NAME)
+      .insert([{
+        sender_name,
+        sender_contact,
+        recipient,
+        title,
+        message_text,
+        file_url,
+        file_name,
+        file_type,
+        status: "new"
+      }]);
+
+    if(insert.error){
+      throw insert.error;
+    }
+
+    setStatus("Послание принято в Обитель. Зелёная лампочка может зажигаться.", "ok");
+
+    document.getElementById("title").value = "";
+    document.getElementById("messageText").value = "";
+    document.getElementById("fileInput").value = "";
+
+  }catch(err){
+    console.error(err);
+    setStatus("Ошибка: " + err.message, "err");
+  }
+}
+</script>
+
+</body>
+</html>

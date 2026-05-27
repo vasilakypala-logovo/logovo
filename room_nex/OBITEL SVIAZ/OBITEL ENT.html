@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>ОБИТЕЛЬ НЕКСА — загрузчик со сжатием</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--panel:rgba(12,24,16,.86);--line:rgba(190,255,205,.22);--green:#d9f5df;--muted:#adc9b4;--danger:#ffb3a8}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;min-height:100%;background:radial-gradient(circle at 50% 15%,rgba(70,130,90,.18),transparent 34%),linear-gradient(180deg,#061008,#020402);color:white;font-family:Georgia,serif}
+.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:26px}
+.panel{width:min(1120px,96vw);border:1px solid var(--line);border-radius:22px;background:var(--panel);box-shadow:0 0 55px rgba(100,255,160,.12),inset 0 0 30px rgba(255,255,255,.025);padding:24px}
+h1{margin:0 0 6px;text-align:center;color:var(--green);font-size:28px;letter-spacing:.16em;font-weight:normal}
+.subtitle{text-align:center;color:var(--muted);font-size:14px;letter-spacing:.08em;margin-bottom:22px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.card{border:1px solid var(--line);border-radius:18px;background:rgba(0,0,0,.18);padding:18px}
+label{display:block;color:#d6eadb;font-size:14px;letter-spacing:.06em;margin:13px 0 6px}
+input,textarea,select{width:100%;border:1px solid rgba(210,255,220,.22);border-radius:10px;background:rgba(0,0,0,.28);color:white;padding:10px 12px;font-family:Georgia,serif;font-size:16px;outline:none}
+select option{background:#102014;color:white}
+textarea{min-height:112px;resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:rgba(220,255,220,.55);box-shadow:0 0 15px rgba(140,255,180,.12)}
+.fileBox{border:1px dashed rgba(220,255,220,.35);border-radius:16px;padding:16px;background:rgba(255,255,255,.025)}
+.compressGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.preview{min-height:390px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.preview img{max-width:100%;max-height:68vh;border-radius:14px;border:1px solid rgba(220,255,220,.28);box-shadow:0 0 28px rgba(120,255,180,.14);display:none}
+.empty{color:rgba(220,255,220,.55);text-align:center;line-height:1.6;letter-spacing:.06em}
+.buttons{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:18px}
+button{border:1px solid rgba(230,255,230,.35);border-radius:999px;background:linear-gradient(180deg,rgba(60,115,75,.95),rgba(20,55,30,.95));color:white;padding:12px 20px;font-family:Georgia,serif;font-size:15px;letter-spacing:.08em;cursor:pointer;box-shadow:0 0 18px rgba(120,255,160,.11)}
+button:hover{filter:brightness(1.14)}button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:rgba(0,0,0,.22)}
+.status{margin-top:16px;padding:12px 14px;border-radius:12px;background:rgba(0,0,0,.24);color:var(--muted);line-height:1.45;white-space:pre-wrap;min-height:48px}
+.status.ok{color:#d9ffd9;border:1px solid rgba(150,255,170,.25)}.status.err{color:var(--danger);border:1px solid rgba(255,140,130,.25)}
+.hint{margin-top:12px;color:rgba(220,240,225,.68);font-size:13px;line-height:1.5}
+.small{color:rgba(220,240,225,.62);font-size:12px;margin-top:8px;word-break:break-all}
+.infoLine{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.19);color:rgba(230,245,232,.74);font-size:13px;line-height:1.45;white-space:pre-wrap}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.compressGrid{grid-template-columns:1fr}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="panel">
+<h1>ОБИТЕЛЬ НЕКСА</h1>
+<div class="subtitle">загрузчик работ · картина + паспорт · сжатие перед отправкой</div>
+<div class="grid">
+<div class="card">
+<div class="fileBox">
+<label>Картинка</label>
+<input id="fileInput" type="file" accept="image/*">
+<div class="compressGrid">
+<div><label>Длинная сторона после сжатия</label><select id="maxSideInput"><option value="1200">1200 px — очень легко</option><option value="1600" selected>1600 px — норма ОБИТЕЛИ</option><option value="2000">2000 px — крупнее</option><option value="2400">2400 px — почти архив</option></select></div>
+<div><label>Качество</label><select id="qualityInput"><option value="0.72">72% — маленький файл</option><option value="0.80" selected>80% — хороший баланс</option><option value="0.88">88% — лучше качество</option><option value="0.94">94% — тяжеловато</option></select></div>
+</div>
+<div id="fileInfo" class="infoLine">Выберите изображение. Перед отправкой программа сама сделает лёгкую JPG-копию.</div>
+<div class="hint">Исходник остаётся у вас на компьютере. В ОБИТЕЛЬ отправляется сжатая копия.</div>
+</div>
+<label>Название работы</label><input id="titleInput" type="text" placeholder="Например: Орден «Удержанный свет»">
+<label>Автор</label><input id="authorInput" type="text" placeholder="Например: Василий Юдов">
+<label>Год создания</label><input id="yearInput" type="text" placeholder="Например: 2026">
+<label>Материалы</label><input id="materialsInput" type="text" placeholder="Например: цифровой образ, орден">
+<label>Размер</label><input id="sizeInput" type="text" placeholder="Например: файл для ОБИТЕЛИ">
+<label>Сопровождение / история</label><textarea id="storyInput" placeholder="Небольшой текст о работе"></textarea>
+<div class="buttons"><button id="sendBtn" onclick="sendToObitel()">ОТПРАВИТЬ В ОБИТЕЛЬ</button><button class="secondary" onclick="clearForm()">ОЧИСТИТЬ</button></div>
+<div id="status" class="status">Выберите картинку и заполните паспорт работы.</div>
+<div id="lastUrl" class="small"></div>
+</div>
+<div class="card preview"><div id="emptyPreview" class="empty">Здесь появится выбранная картина<br>перед отправкой в ОБИТЕЛЬ</div><img id="previewImg" alt="Предпросмотр"></div>
+</div></div></div>
+<script>
+const SUPABASE_URL="https://qekemclxegswolddmqxa.supabase.co";
+const SUPABASE_KEY="sb_publishable_arQvVM0huxdB5jbiLPpSPA_7tksXK-Y";
+const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const BUCKET="artworks", TABLE="artworks";
+const fileInput=document.getElementById("fileInput"),previewImg=document.getElementById("previewImg"),emptyPreview=document.getElementById("emptyPreview"),statusBox=document.getElementById("status"),lastUrl=document.getElementById("lastUrl"),sendBtn=document.getElementById("sendBtn"),fileInfo=document.getElementById("fileInfo");
+fileInput.addEventListener("change",()=>{
+ const file=fileInput.files[0];
+ if(!file){previewImg.style.display="none";emptyPreview.style.display="block";fileInfo.textContent="Выберите изображение. Перед отправкой программа сама сделает лёгкую JPG-копию.";return}
+ previewImg.src=URL.createObjectURL(file);previewImg.style.display="block";emptyPreview.style.display="none";
+ fileInfo.textContent="Исходный файл: "+file.name+"\nРазмер исходника: "+formatBytes(file.size)+"\nПеред отправкой будет создана сжатая JPG-копия.";
+ say("Картинка выбрана. Перед отправкой программа сожмёт её для ОБИТЕЛИ.");
+});
+function formatBytes(bytes){const units=["B","KB","MB","GB"];let size=bytes,i=0;while(size>=1024&&i<units.length-1){size/=1024;i++}return size.toFixed(i===0?0:2)+" "+units[i]}
+function safeFileName(){const stamp=new Date().toISOString().replace(/[-:.TZ]/g,"").slice(0,14);const random=Math.random().toString(36).slice(2,8);return "obitel_"+stamp+"_"+random+".jpg"}
+function getValue(id){return document.getElementById(id).value.trim()}
+function say(text,type){statusBox.className="status"+(type?" "+type:"");statusBox.textContent=text}
+function compressImage(file){
+ const maxSide=parseInt(document.getElementById("maxSideInput").value,10)||1600;
+ const quality=parseFloat(document.getElementById("qualityInput").value)||0.80;
+ return new Promise((resolve,reject)=>{
+  const reader=new FileReader();
+  reader.onerror=()=>reject(new Error("Не удалось прочитать файл изображения."));
+  reader.onload=()=>{
+   const img=new Image();
+   img.onerror=()=>reject(new Error("Не удалось открыть изображение для сжатия."));
+   img.onload=()=>{
+    let width=img.width,height=img.height;
+    const longSide=Math.max(width,height);
+    if(longSide>maxSide){const scale=maxSide/longSide;width=Math.round(width*scale);height=Math.round(height*scale)}
+    const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;
+    const ctx=canvas.getContext("2d");ctx.fillStyle="#ffffff";ctx.fillRect(0,0,width,height);ctx.drawImage(img,0,0,width,height);
+    canvas.toBlob(blob=>{
+     if(!blob){reject(new Error("Не удалось создать сжатую копию."));return}
+     resolve({file:new File([blob],safeFileName(),{type:"image/jpeg"}),width,height,originalBytes:file.size,compressedBytes:blob.size});
+    },"image/jpeg",quality);
+   };
+   img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+ });
+}
+async function sendToObitel(){
+ const file=fileInput.files[0];
+ if(!file){say("Сначала выберите картинку.","err");return}
+ const rowBase={title:getValue("titleInput")||"Без названия",author:getValue("authorInput")||"Неизвестный автор",year:getValue("yearInput"),materials:getValue("materialsInput"),size:getValue("sizeInput"),story:getValue("storyInput")};
+ sendBtn.disabled=true;say("Сжимаю картинку для ОБИТЕЛИ...");
+ try{
+  const compressed=await compressImage(file);
+  say("Сжатие готово.\nИсходник: "+formatBytes(compressed.originalBytes)+"\nКопия: "+formatBytes(compressed.compressedBytes)+"\nРазмер: "+compressed.width+" × "+compressed.height+" px\n\nОтправляю на склад ОБИТЕЛИ...");
+  const uploadResult=await client.storage.from(BUCKET).upload(compressed.file.name,compressed.file,{cacheControl:"3600",upsert:false,contentType:"image/jpeg"});
+  if(uploadResult.error)throw new Error("Ошибка загрузки картинки: "+uploadResult.error.message);
+  const imageUrl=client.storage.from(BUCKET).getPublicUrl(compressed.file.name).data.publicUrl;
+  say("Картинка загружена. Записываю паспорт работы...");
+  const insertResult=await client.from(TABLE).insert([{...rowBase,image_url:imageUrl}]).select();
+  if(insertResult.error)throw new Error("Картинка загружена, но паспорт не записался: "+insertResult.error.message);
+  say("ГОТОВО.\nРабота отправлена в ОБИТЕЛЬ: сжатая картинка + паспорт.\n\nИсходник: "+formatBytes(compressed.originalBytes)+"\nВ ОБИТЕЛЬ ушло: "+formatBytes(compressed.compressedBytes),"ok");
+  lastUrl.textContent=imageUrl;
+ }catch(err){say(err.message,"err")}finally{sendBtn.disabled=false}
+}
+function clearForm(){
+ fileInput.value="";previewImg.src="";previewImg.style.display="none";emptyPreview.style.display="block";
+ ["titleInput","authorInput","yearInput","materialsInput","sizeInput","storyInput"].forEach(id=>document.getElementById(id).value="");
+ fileInfo.textContent="Выберите изображение. Перед отправкой программа сама сделает лёгкую JPG-копию.";lastUrl.textContent="";say("Форма очищена. Можно выбрать новую работу.");
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>ОБИТЕЛЬ — ПРОСМОТР ПОСЛАНИЙ</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+html,body{
+    margin:0;
+    width:100%;
+    min-height:100%;
+    background:
+      radial-gradient(circle at top, rgba(120,180,120,.12), transparent 35%),
+      linear-gradient(180deg,#040806,#0b1710,#050706);
+
+    color:#f3ffe8;
+    font-family:Georgia,serif;
+}
+
+body{
+    padding:30px;
+    box-sizing:border-box;
+}
+
+.title{
+    text-align:center;
+    font-size:34px;
+    letter-spacing:.14em;
+
+    color:rgba(240,255,220,.95);
+
+    text-shadow:
+      0 0 14px rgba(180,255,180,.25),
+      0 0 30px rgba(180,255,180,.10);
+
+    margin-bottom:8px;
+}
+
+.subtitle{
+    text-align:center;
+    font-size:12px;
+    letter-spacing:.20em;
+
+    color:rgba(255,255,220,.55);
+
+    margin-bottom:28px;
+}
+
+#list{
+    width:100%;
+    max-width:1200px;
+    margin:auto;
+}
+
+.card{
+
+    margin-bottom:24px;
+
+    border:1px solid rgba(220,255,220,.14);
+    border-radius:22px;
+
+    background:rgba(255,255,255,.03);
+
+    box-shadow:
+      0 0 24px rgba(0,0,0,.35),
+      inset 0 0 22px rgba(255,255,255,.03);
+
+    padding:20px;
+
+    backdrop-filter:blur(4px);
+}
+
+.head{
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.sender{
+    font-size:22px;
+    color:#e6ffd7;
+}
+
+.date{
+    font-size:12px;
+    opacity:.55;
+}
+
+.recipient{
+    margin-top:4px;
+    font-size:12px;
+    letter-spacing:.08em;
+    opacity:.7;
+}
+
+.subject{
+    margin-top:18px;
+    font-size:20px;
+    color:#fff7cf;
+}
+
+.text{
+    margin-top:16px;
+    line-height:1.6;
+    white-space:pre-wrap;
+    color:#f3f6e8;
+}
+
+.image{
+    margin-top:18px;
+    max-width:100%;
+    border-radius:14px;
+    display:block;
+    box-shadow:0 0 18px rgba(0,0,0,.45);
+}
+
+.fileLink{
+    display:inline-block;
+    margin-top:18px;
+    padding:10px 16px;
+
+    border-radius:12px;
+
+    text-decoration:none;
+
+    color:#081008;
+
+    background:linear-gradient(
+      90deg,
+      #d8ffbc,
+      #95ffaf
+    );
+
+    font-size:14px;
+}
+
+.empty{
+    text-align:center;
+    opacity:.5;
+    margin-top:80px;
+    font-size:18px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="title">ОБИТЕЛЬ НЕКСА</div>
+
+<div class="subtitle">
+АРХИВ ПОСЛАНИЙ И ПОСЫЛОК
+</div>
+
+<div id="list">
+  <div class="empty">Обитель слушает тишину...</div>
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://qekemclxegswolddmqxa.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_arQvVM0huxdB5jbiLPpSPA_7tksXK-Y";
+
+const client =
+supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+async function loadMessages(){
+
+  const list =
+    document.getElementById("list");
+
+  list.innerHTML =
+    '<div class="empty">Обитель открывает архив...</div>';
+
+  try{
+
+    const { data, error } =
+      await client
+      .from("obitel_storage")
+      .select("*")
+      .order("created_at",{ ascending:false });
+
+    if(error) throw error;
+
+    if(!data || data.length===0){
+
+      list.innerHTML =
+        '<div class="empty">Пока нет посланий.</div>';
+
+      return;
+    }
+
+    list.innerHTML = "";
+
+    data.forEach(item=>{
+
+      const card =
+        document.createElement("div");
+
+      card.className = "card";
+
+      let media = "";
+
+      if(item.file_url){
+
+        const lower =
+          (item.file_name || "")
+          .toLowerCase();
+
+        if(
+          lower.endsWith(".jpg") ||
+          lower.endsWith(".jpeg") ||
+          lower.endsWith(".png") ||
+          lower.endsWith(".webp") ||
+          lower.endsWith(".gif")
+        ){
+
+          media =
+          `
+          <img
+            class="image"
+            src="${item.file_url}">
+          `;
+
+        }else{
+
+          media =
+          `
+          <a
+            class="fileLink"
+            href="${item.file_url}"
+            target="_blank">
+
+            ОТКРЫТЬ ФАЙЛ
+
+          </a>
+          `;
+        }
+      }
+
+      card.innerHTML = `
+
+        <div class="head">
+
+          <div>
+
+            <div class="sender">
+              ${item.sender_name || "Неизвестный"}
+            </div>
+
+            <div class="recipient">
+              ДЛЯ:
+              ${item.recipient || "Обитель"}
+            </div>
+
+          </div>
+
+          <div class="date">
+            ${new Date(item.created_at)
+              .toLocaleString()}
+          </div>
+
+        </div>
+
+        <div class="subject">
+          ${item.title || "Без названия"}
+        </div>
+
+        <div class="text">
+          ${item.message_text || ""}
+        </div>
+
+        ${media}
+
+      `;
+
+      list.appendChild(card);
+
+    });
+
+  }catch(err){
+
+    console.error(err);
+
+    list.innerHTML =
+      `<div class="empty">
+        Ошибка загрузки:
+        ${err.message}
+      </div>`;
+  }
+}
+
+loadMessages();
+
+</script>
+
+</body>
+</html>
