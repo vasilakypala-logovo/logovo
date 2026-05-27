@@ -24,6 +24,7 @@ border:none;
 </head>
 <body>
 <div class="scene">
+  <div id="globePortal" title="В библиотеку Дворца"></div>
   <div id="globePortal" title="В вестибюль"></div>
   <div class="velvet-field"><div id="bookGrid" class="book-grid"></div></div>
   <div class="balls" aria-label="выбор иконок">
@@ -111,7 +112,7 @@ document.querySelectorAll('.ball').forEach(btn=>{
   btn.addEventListener('click',()=>addBook(btn.dataset.icon));
 });
 document.getElementById('globePortal').addEventListener('click',()=>{
-  window.location.href = '/logovo/vestibule.html';
+  window.location.href = 'https://vasilakypala-logovo.github.io/dvorets-nex/vestibul/seas/dvorets_library_room/bookinist_stand%207.html';
 });
 render();
 </script>
