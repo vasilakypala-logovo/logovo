@@ -37,18 +37,19 @@
       background-size: 80px 80px;
     }
 
-    .room::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: 6;
-      pointer-events: none;
-      background:
-        linear-gradient(rgba(5,6,10,0.18), rgba(5,6,10,0.32)),
-        url('room.jpg') center/cover no-repeat;
-      opacity: 0.98;
-      mix-blend-mode: screen;
-    }
+   .room::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+
+  background:
+    url('room.jpg') center/cover no-repeat;
+
+  opacity: 1;
+  mix-blend-mode: normal;
+}
 
     .room > * {
       position: absolute;
