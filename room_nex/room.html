@@ -109,23 +109,13 @@ box-shadow: none;
       height: 100%;
       overflow: hidden;
       border-radius: 45% 45% 7% 7% / 13% 13% 6% 6%;
-      background:
-        radial-gradient(circle at 50% 28%, rgba(255,255,255,0.42), transparent 18%),
-        radial-gradient(circle at 42% 45%, rgba(160,190,255,0.28), transparent 34%),
-        linear-gradient(145deg, rgba(24, 30, 48, 0.95), rgba(65, 72, 96, 0.62), rgba(16, 18, 28, 0.95));
-      border: 1px solid rgba(255,255,255,0.32);
+     background: transparent;
+border: none;
     }
 
-    .mirror-glass::before {
-      content: "";
-      position: absolute;
-      inset: -30%;
-      background:
-        linear-gradient(110deg, transparent 35%, rgba(255,255,255,0.16) 45%, transparent 56%),
-        radial-gradient(circle, rgba(255,255,255,0.08) 0 1px, transparent 2px);
-      background-size: auto, 36px 36px;
-      animation: mirror-breath 9s ease-in-out infinite alternate;
-    }
+   .mirror-glass::before{
+  display:none;
+}
 
     @keyframes mirror-breath {
       from { transform: translate(-4%, -2%) rotate(0deg); opacity: 0.65; }
