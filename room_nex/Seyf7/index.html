@@ -4,48 +4,230 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>СЕЙФ АРТЕФАКТОВ НЕКСА</title>
-<link rel="stylesheet" href="assets/style.css">
+<style>
+:root{
+  --silver:#cfd6d2;
+  --silver2:#8d9993;
+  --green:#6fb07a;
+  --dark:#070908;
+  --soft:#f2ead3;
+  --gold:#d7b866;
+  --red:#7f2020;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at top left,rgba(180,210,190,.16),transparent 36%),
+    radial-gradient(circle at bottom right,rgba(95,115,110,.20),transparent 45%),
+    linear-gradient(135deg,#030404,#121716 48%,#050606);
+  color:var(--soft);
+  font-family:Georgia,"Times New Roman",serif;
+}
+.safe-shell{
+  max-width:1180px;
+  margin:24px auto;
+  padding:22px;
+  border:1px solid rgba(207,214,210,.42);
+  border-radius:28px;
+  background:
+    linear-gradient(135deg,rgba(45,52,50,.88),rgba(12,16,15,.92)),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 1px,transparent 1px 7px);
+  box-shadow:0 28px 90px rgba(0,0,0,.62), inset 0 0 80px rgba(255,255,255,.035);
+  position:relative;
+}
+header{text-align:center;position:relative;padding-top:6px}
+.seal{
+  width:82px;height:82px;margin:0 auto 10px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:#f7f1df;font-size:34px;font-weight:bold;
+  background:radial-gradient(circle,#304b38,#101715 70%);
+  border:4px solid var(--silver);
+  box-shadow:0 0 28px rgba(180,220,190,.22), inset 0 0 18px rgba(255,255,255,.10);
+}
+h1{margin:6px 0;color:var(--silver);font-weight:400;letter-spacing:4px;text-shadow:0 0 16px rgba(207,214,210,.24)}
+header p{margin:8px auto 0;max-width:760px;opacity:.72}
+.code-box{
+  position:absolute;
+  z-index:9999;
+  pointer-events:auto;
+  right:18px;
+  top:18px;
+  width:150px;
+  padding:10px;
+  border:1px solid rgba(207,214,210,.35);
+  border-radius:14px;
+  background:rgba(0,0,0,.26);
+}
+.code-box label{display:block;font-size:12px;color:#dbe2de;margin-bottom:5px;opacity:.85}
+.code-box input{width:100%;text-align:center;letter-spacing:3px;margin-bottom:7px;pointer-events:auto;opacity:1;filter:none}
+.code-row{display:grid;grid-template-columns:1fr;gap:6px}
+.code-box button{width:100%;margin:0;padding:8px 9px;font-size:13px;border-radius:10px;pointer-events:auto;opacity:1;filter:none;cursor:pointer}
+.lock-state{font-size:12px;margin-top:7px;color:#e4b0a8;min-height:16px;text-align:center}
+.lock-state.open{color:#aee0b1}
+.counter{
+  width:240px;margin:24px auto 18px;text-align:center;
+  padding:16px;border-radius:20px;
+  background:linear-gradient(#18201e,#090d0c);
+  border:1px solid rgba(207,214,210,.35);
+  box-shadow:inset 0 0 20px rgba(255,255,255,.04);
+}
+.counter div{opacity:.76}.counter strong{display:block;font-size:54px;color:#eef3ef;line-height:1.05}
+.controls{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:16px 0}
+button,.main-btn{
+  border:1px solid rgba(207,214,210,.52);
+  background:linear-gradient(#384440,#17201d);
+  color:#f4efd8;border-radius:13px;padding:11px 15px;
+  cursor:pointer;font-family:Georgia,"Times New Roman",serif;font-size:15px;
+  box-shadow:0 0 12px rgba(175,210,185,.10);text-decoration:none;
+}
+button:hover,.main-btn:hover{background:linear-gradient(#4a5954,#1e2b27)}
+.controls button:disabled,.locked .controls button,.locked .controls .main-btn{opacity:.38;cursor:not-allowed;filter:grayscale(1);pointer-events:none}
+.locked #list{opacity:.45;filter:grayscale(.7)}
+.drop-hint{text-align:center;opacity:.64;margin:8px 0 18px}
+#list{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-top:18px}
+.item{background:rgba(0,0,0,.22);border:1px solid rgba(207,214,210,.25);border-radius:16px;padding:10px;text-align:center}
+.item img{width:100%;height:190px;object-fit:cover;border-radius:10px;background:#eee;display:block;margin-bottom:8px}
+.item .name{font-size:14px;color:#eef3ef;word-break:break-word}.item .meta{font-size:12px;opacity:.65;margin-top:4px}
+.item a{display:inline-block;margin-top:8px;color:#f5dc98;text-decoration:none;font-size:13px}
+footer{margin-top:24px;opacity:.58;font-size:13px;line-height:1.4;text-align:center}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:18px;z-index:10}
+.modal.show{display:flex}
+.modal-card{width:min(1180px,96vw);max-height:92vh;overflow:auto;border-radius:22px;border:1px solid rgba(215,184,102,.38);background:linear-gradient(135deg,#101714,#1b251f);box-shadow:0 30px 90px rgba(0,0,0,.75);padding:16px;position:relative}
+.x{position:sticky;float:right;top:0;width:42px;height:42px;border-radius:50%;font-size:25px;padding:0;margin:0;background:#271414;border-color:rgba(255,210,180,.45)}
+.cert-grid{display:grid;grid-template-columns:390px 1fr;gap:18px;clear:both}.panel{background:rgba(15,24,20,.78);border:1px solid rgba(215,184,102,.38);border-radius:18px;padding:16px;box-shadow:0 18px 50px rgba(0,0,0,.38)}
+.cert-title{text-align:center;color:var(--gold);letter-spacing:3px;font-size:26px;margin:4px 0 12px}.sub{text-align:center;opacity:.72;margin-bottom:14px}label{display:block;margin-top:11px;margin-bottom:5px;color:var(--gold);font-size:14px}
+input,textarea{width:100%;border:1px solid rgba(215,184,102,.35);background:rgba(0,0,0,.30);color:var(--soft);border-radius:10px;padding:9px 10px;font-family:Georgia,"Times New Roman",serif;font-size:15px}
+input[type="file"]{padding:8px}textarea{height:220px;resize:vertical;line-height:1.45}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.previewBox{display:flex;justify-content:center;align-items:flex-start;overflow:auto;min-height:720px}canvas{max-width:100%;height:auto;background:#eee;border-radius:8px;box-shadow:0 24px 70px rgba(0,0,0,.55)}.note{margin-top:12px;font-size:13px;opacity:.7;line-height:1.35}#imgStatus{margin-top:6px;font-size:13px;opacity:.72}
+@media(max-width:900px){.cert-grid{grid-template-columns:1fr}.code-box{position:static;margin:12px auto}.safe-shell{margin:8px}.controls{display:grid}.counter{width:100%}}
+</style>
 </head>
 <body>
-<div class="safe-shell" id="dropZone">
+<div class="safe-shell locked" id="safeShell">
+  <div class="code-box">
+    <label>КОД СЕЙФА</label>
+    <input id="safeCode" placeholder="введите код" inputmode="numeric" autocomplete="off">
+    <div class="code-row">
+      <button id="unlockBtn" type="button">Открыть</button>
+      <button id="lockBtn" type="button">Закрыть</button>
+    </div>
+    <div id="lockState" class="lock-state">закрыт</div>
+  </div>
   <header>
     <div class="seal">Nx</div>
     <h1>СЕЙФ АРТЕФАКТОВ НЕКСА</h1>
-    <p>Браузерная версия. Файлы не требуют ActiveX и не зависят от HTA.</p>
+    <p>Сертификаты хранятся внутри памяти браузера как PNG-свитки. Для папки <b>pspt</b> скачивайте файлы наружу: сейф сам даст им имена 0001, 0002, 0003...</p>
   </header>
-
-  <section class="counter">
-    <div>Паспортов в сейфе</div>
-    <strong id="count">0</strong>
-  </section>
-
+  <section class="counter"><div>Сертификатов в сейфе</div><strong id="count">0</strong></section>
   <section class="controls">
-    <label class="main-btn">
-      Положить паспорта в сейф
-      <input id="fileInput" type="file" multiple hidden>
-    </label>
+    <button id="createBtn">Создать сертификат</button>
+    <label class="main-btn">Положить PNG в сейф<input id="fileInput" type="file" multiple accept="image/png,image/*" hidden></label>
     <button id="refreshBtn">Обновить счёт</button>
-    <button id="exportBtn">Выгрузить все паспорта</button>
-    <button id="removedBtn">Показать вынутые</button>
+    <button id="exportBtn">Выгрузить все сертификаты</button>
+    <button id="clearBtn">Очистить сейф</button>
   </section>
-
-  <div class="drop-hint">Можно перетащить файлы прямо на окно сейфа.</div>
-
+  <div class="drop-hint">Введите код 777 и нажмите «Открыть». После этого можно создавать сертификаты или перетаскивать PNG прямо на окно сейфа.</div>
   <main id="list"></main>
-
-  <footer>
-    Для браузера папки PASSPORTS и REMOVED_FROM_SAFE оставлены как понятная структура проекта. Сам браузер не имеет права сам читать и двигать файлы в папках Windows, поэтому сейф хранит копии внутри памяти браузера. Чтобы сохранить наружу — нажмите «Скачать» или «Выгрузить все паспорта».
-  </footer>
+  <footer>Важно: обычный браузер не имеет права сам записывать файл прямо в соседнюю папку Windows <b>pspt</b>. Поэтому сейф создаёт правильное имя, хранит копию у себя и скачивает PNG наружу. Переложить скачанные файлы в pspt можно вручную.</footer>
 </div>
 
-<div class="modal" id="removedModal" aria-hidden="true">
+<div class="modal" id="certModal" aria-hidden="true">
   <div class="modal-card">
-    <button class="x" id="closeRemoved">×</button>
-    <h2>ВЫНУТО ИЗ СЕЙФА</h2>
-    <div id="removedList"></div>
+    <button class="x" id="closeCert">×</button>
+    <div class="cert-title">СЕРТИФИКАТОР НЕКСА</div>
+    <div class="sub">Созданный PNG сразу зачисляется в сейф с порядковым номером</div>
+    <div class="cert-grid">
+      <div class="panel">
+        <label>Название артефакта</label><input id="title" value="Самородок сегодняшнего дня">
+        <div class="row"><div><label>Номер</label><input id="num" value="№ 0001"></div><div><label>Дата</label><input id="date" value=""></div></div>
+        <label>Автор / хранитель</label><input id="author" value="Василий Юдов">
+        <label>Тип</label><input id="kind" value="Артефакт Логова">
+        <label>Картинка артефакта / знак / миниатюра</label><input id="imageInput" type="file" accept="image/*"><div id="imgStatus">Картинка не выбрана. Справа в сертификате будет пустое окно.</div><button id="clearImageBtn">Убрать картинку</button>
+        <label>Описание / паспортный текст</label><textarea id="text">Сертификат подтверждает, что данный артефакт найден, признан и помещён в сейф Некса.
+
+Это уже не редактируемая браузерная тетрадь, а застывшая картинка-свидетельство. Она не зависит от localStorage, не повторяет текст соседних файлов и не стирается от чужой памяти.
+
+Самородок не чеканят. Его только находят.</textarea>
+        <div class="row"><button id="redrawBtn">Обновить вид</button><button id="saveToSafeBtn">Создать и положить в сейф</button></div>
+        <button id="downloadOnlyBtn">Скачать PNG без сейфа</button><button id="clearFieldsBtn">Очистить поля</button>
+        <div class="note">Высота сертификата растёт по тексту. В сейф он попадёт как цельная PNG-картинка.</div>
+      </div>
+      <div class="panel previewBox"><canvas id="cert" width="1240" height="1754"></canvas></div>
+    </div>
   </div>
 </div>
 
-<script src="assets/app.js"></script>
+<script>
+const STORAGE_KEY='nex_safe_certificates_v1';
+const CODE='777';
+let unlocked=false;
+let items=[];
+const safeShell=document.getElementById('safeShell');
+const countEl=document.getElementById('count');
+const listEl=document.getElementById('list');
+const modal=document.getElementById('certModal');
+const canvas=document.getElementById('cert');
+const ctx=canvas.getContext('2d');
+let artifactImage=null;
+function pad4(n){return String(n).padStart(4,'0')}
+function nextName(){return pad4(items.length+1)+'.png'}
+function saveStore(){localStorage.setItem(STORAGE_KEY,JSON.stringify(items))}
+function loadStore(){try{items=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')||[]}catch(e){items=[]}}
+function setUnlocked(v){
+  unlocked=v;
+  safeShell.classList.toggle('locked',!v);
+  document.querySelectorAll('.controls button,.controls input').forEach(el=>el.disabled=!v);
+  const st=document.getElementById('lockState');
+  st.textContent=v?'открыт':'закрыт';
+  st.classList.toggle('open',v);
+  ['safeCode','unlockBtn','lockBtn'].forEach(id=>{const el=document.getElementById(id); if(el) el.disabled=false;});
+}
+function tryUnlock(){
+  const inp=document.getElementById('safeCode');
+  if(inp.value.trim()===CODE){
+    setUnlocked(true);
+  }else{
+    setUnlocked(false);
+    document.getElementById('lockState').textContent='неверный код';
+    inp.focus();
+    inp.select();
+  }
+}
+document.getElementById('unlockBtn').addEventListener('click',tryUnlock);
+document.getElementById('lockBtn').addEventListener('click',()=>{document.getElementById('safeCode').value='';setUnlocked(false)});
+document.getElementById('safeCode').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock()});
+function render(){countEl.textContent=items.length;listEl.innerHTML='';items.forEach((it,i)=>{const d=document.createElement('div');d.className='item';d.innerHTML='<img src="'+it.data+'"><div class="name">'+it.name+'</div><div class="meta">'+(it.title||'сертификат')+'</div><a download="'+it.name+'" href="'+it.data+'">Скачать</a>';listEl.appendChild(d)})}
+function addPNG(data,title){const name=nextName();items.push({name,data,title:title||name,created:new Date().toISOString()});saveStore();render();return name}
+function downloadData(data,name){const a=document.createElement('a');a.href=data;a.download=name;document.body.appendChild(a);a.click();a.remove()}
+function requireOpen(){if(!unlocked){document.getElementById('lockState').textContent='сначала код';return false}return true}
+document.getElementById('createBtn').onclick=()=>{if(!requireOpen())return;document.getElementById('num').value='№ '+pad4(items.length+1);modal.classList.add('show');modal.setAttribute('aria-hidden','false');drawCert()};
+document.getElementById('closeCert').onclick=()=>{modal.classList.remove('show');modal.setAttribute('aria-hidden','true')};
+document.getElementById('refreshBtn').onclick=()=>{if(!requireOpen())return;loadStore();render()};
+document.getElementById('exportBtn').onclick=()=>{if(!requireOpen())return;items.forEach((it,idx)=>setTimeout(()=>downloadData(it.data,it.name),idx*250))};
+document.getElementById('clearBtn').onclick=()=>{if(!requireOpen())return;if(confirm('Очистить память сейфа? Скачанные PNG с компьютера не удаляются.')){items=[];saveStore();render()}};
+document.getElementById('fileInput').addEventListener('change',function(){if(!requireOpen())return;handleFiles(this.files);this.value=''});
+safeShell.addEventListener('dragover',e=>{e.preventDefault()});
+safeShell.addEventListener('drop',e=>{e.preventDefault();if(!requireOpen())return;handleFiles(e.dataTransfer.files)});
+function handleFiles(files){[...files].forEach(file=>{if(!file.type.startsWith('image/'))return;const r=new FileReader();r.onload=e=>addPNG(e.target.result,file.name);r.readAsDataURL(file)})}
+
+const d=document.getElementById('date'); if(!d.value)d.value=new Date().toLocaleDateString('ru-RU');
+function val(id){return document.getElementById(id).value.trim()}
+function wrapLines(text,maxWidth,font){ctx.font=font;const lines=[];(text||'').split(/\n/).forEach(p=>{if(!p.trim()){lines.push('');return}const words=p.trim().split(/\s+/);let line='';for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word}else line=test}if(line)lines.push(line)});return lines}
+function drawWrapped(text,x,y,maxWidth,lineHeight,font,fillStyle){const lines=wrapLines(text,maxWidth,font);ctx.font=font;ctx.fillStyle=fillStyle;ctx.textAlign='left';ctx.textBaseline='alphabetic';for(const line of lines){if(line)ctx.fillText(line,x,y);y+=lineHeight}return y}
+function drawFitText(text,x,y,maxWidth,lineHeight,maxFont,minFont,color){let fontSize=maxFont,lines=[];while(fontSize>=minFont){const font='bold '+fontSize+'px Georgia';lines=wrapLines(text,maxWidth,font);if(lines.length<=2)break;fontSize-=3}ctx.font='bold '+fontSize+'px Georgia';ctx.fillStyle=color;ctx.textAlign='left';for(const line of lines.slice(0,2)){ctx.fillText(line,x,y);y+=lineHeight}return y}
+function drawImageBox(x,y,w,h){ctx.save();ctx.fillStyle='rgba(255,250,230,.28)';ctx.fillRect(x,y,w,h);ctx.strokeStyle='rgba(93,71,33,.62)';ctx.lineWidth=3;ctx.strokeRect(x,y,w,h);if(artifactImage){const iw=artifactImage.naturalWidth||artifactImage.width,ih=artifactImage.naturalHeight||artifactImage.height;const scale=Math.min((w-26)/iw,(h-26)/ih);const dw=iw*scale,dh=ih*scale,dx=x+(w-dw)/2,dy=y+(h-dh)/2;ctx.drawImage(artifactImage,dx,dy,dw,dh)}else{ctx.fillStyle='rgba(61,42,16,.42)';ctx.font='24px Georgia';ctx.textAlign='center';ctx.fillText('ОКНО',x+w/2,y+h/2-12);ctx.fillText('КАРТИНКИ',x+w/2,y+h/2+24)}ctx.restore()}
+function drawCert(){const W=1240,padBottom=300,textFont='31px Georgia',textLine=44;const textLines=wrapLines(val('text')||'',W-340,textFont);const neededH=Math.max(1754,960+textLines.length*textLine+padBottom);canvas.width=W;canvas.height=neededH;const H=canvas.height;const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#efe3bd');g.addColorStop(.45,'#f8f1d9');g.addColorStop(1,'#d7c08a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);for(let i=0;i<Math.min(12000,Math.floor(W*H/300));i++){ctx.fillStyle='rgba(60,42,16,'+(Math.random()*0.035)+')';ctx.fillRect(Math.random()*W,Math.random()*H,1,1)}ctx.strokeStyle='#5d4721';ctx.lineWidth=16;ctx.strokeRect(70,70,W-140,H-140);ctx.strokeStyle='#b98d35';ctx.lineWidth=4;ctx.strokeRect(105,105,W-210,H-210);ctx.strokeStyle='rgba(93,71,33,.45)';ctx.lineWidth=2;ctx.strokeRect(130,130,W-260,H-260);ctx.save();ctx.translate(W/2,190);ctx.beginPath();ctx.arc(0,0,60,0,Math.PI*2);ctx.fillStyle='#17351f';ctx.fill();ctx.strokeStyle='#d4b35d';ctx.lineWidth=7;ctx.stroke();ctx.fillStyle='#f7efd2';ctx.font='bold 48px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('Nx',0,3);ctx.restore();ctx.textAlign='center';ctx.fillStyle='#34230d';ctx.font='50px Georgia';ctx.fillText('СЕРТИФИКАТ АРТЕФАКТА',W/2,315);ctx.font='28px Georgia';ctx.fillStyle='#76591f';ctx.fillText('ЛОГОВО ИСКУССТВЕННОГО ИНТЕЛЛЕКТА',W/2,365);const leftX=170,topY=465,imageX=760,imageY=455,imageW=310,imageH=250;drawFitText(val('title')||'Без названия',leftX,topY,520,58,50,32,'#1d261d');ctx.textAlign='left';ctx.fillStyle='#3d2a10';ctx.font='29px Georgia';let y=590;ctx.fillText('Номер: '+(val('num')||'—'),leftX,y);y+=54;ctx.fillText('Автор / хранитель: '+(val('author')||'—'),leftX,y);y+=54;ctx.fillText('Тип: '+(val('kind')||'—'),leftX,y);y+=54;ctx.fillText('Дата: '+(val('date')||'—'),leftX,y);drawImageBox(imageX,imageY,imageW,imageH);ctx.strokeStyle='rgba(93,71,33,.5)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(170,820);ctx.lineTo(W-170,820);ctx.stroke();drawWrapped(val('text')||'',170,895,W-340,textLine,textFont,'#251b0d');ctx.save();ctx.translate(W-260,H-270);ctx.rotate(-0.16);ctx.beginPath();ctx.arc(0,0,105,0,Math.PI*2);ctx.strokeStyle='rgba(102,20,20,.75)';ctx.lineWidth=8;ctx.stroke();ctx.beginPath();ctx.arc(0,0,78,0,Math.PI*2);ctx.strokeStyle='rgba(102,20,20,.45)';ctx.lineWidth=3;ctx.stroke();ctx.fillStyle='rgba(102,20,20,.78)';ctx.font='bold 24px Georgia';ctx.textAlign='center';ctx.fillText('СЕЙФ',0,-13);ctx.fillText('НЕКСА',0,22);ctx.restore();ctx.fillStyle='#3d2a10';ctx.font='28px Georgia';ctx.textAlign='left';ctx.fillText('Свидетельство создано Сертификатором Некса',170,H-230);ctx.font='22px Georgia';ctx.fillStyle='rgba(61,42,16,.72)';ctx.fillText('PNG не хранит общую браузерную память и не подменяет текст соседних сертификатов.',170,H-185)}
+function certData(){drawCert();return canvas.toDataURL('image/png')}
+document.getElementById('redrawBtn').onclick=drawCert;
+document.getElementById('saveToSafeBtn').onclick=()=>{const data=certData();const name=addPNG(data,val('title')||'сертификат');downloadData(data,name);document.getElementById('num').value='№ '+pad4(items.length+1);drawCert();alert('Сертификат создан, зачислен в сейф и скачан как '+name+' — его можно положить в папку pspt.')};
+document.getElementById('downloadOnlyBtn').onclick=()=>downloadData(certData(),(val('title')||'certificate').replace(/[\\/:*?"<>|]/g,'').replace(/\s+/g,'_').slice(0,60)+'_NEX_CERTIFICATE.png');
+document.getElementById('clearFieldsBtn').onclick=()=>{['title','num','author','kind','text'].forEach(id=>document.getElementById(id).value='');drawCert()};
+document.getElementById('clearImageBtn').onclick=()=>{artifactImage=null;document.getElementById('imageInput').value='';document.getElementById('imgStatus').textContent='Картинка не выбрана. Справа в сертификате будет пустое окно.';drawCert()};
+document.getElementById('imageInput').addEventListener('change',function(){const file=this.files&&this.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{artifactImage=img;document.getElementById('imgStatus').textContent='Картинка вложена в сертификат: '+file.name;drawCert()};img.src=e.target.result};reader.readAsDataURL(file)});
+['title','num','date','author','kind','text'].forEach(id=>document.getElementById(id).addEventListener('input',drawCert));
+loadStore();render();setUnlocked(false);drawCert();
+</script>
 </body>
 </html>
