@@ -812,6 +812,60 @@
       }
     }
 
+
+/* --- ВОЗВРАТ СВЕЧЕНИЯ КРЕСЛА БЕЗ КВАДРАТА --- */
+
+.chair{
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+.chair::after{
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+
+  background:
+    radial-gradient(circle,
+      rgba(255,255,255,1) 0%,
+      rgba(230,250,255,0.95) 12%,
+      rgba(120,225,255,0.72) 32%,
+      rgba(70,150,255,0.34) 58%,
+      transparent 82%);
+
+  transform: translate(-50%, -50%) scale(0.9);
+  filter: blur(5px);
+
+  box-shadow:
+    0 0 40px rgba(140,220,255,0.70),
+    0 0 110px rgba(120,210,255,0.35);
+
+  animation: miniNexBreath 5.5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 5;
+}
+
+@keyframes miniNexBreath{
+  0%{
+    transform: translate(-50%, -50%) scale(0.82);
+    opacity: 0.85;
+  }
+  50%{
+    transform: translate(-50%, -50%) scale(1.18);
+    opacity: 1;
+  }
+  100%{
+    transform: translate(-50%, -50%) scale(0.82);
+    opacity: 0.85;
+  }
+}
+    
   </style>
 </head>
 <body>
