@@ -91,6 +91,8 @@ button:hover,.main-btn:hover{background:linear-gradient(#4a5954,#1e2b27)}
 #list{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-top:18px}
 .item{background:rgba(0,0,0,.22);border:1px solid rgba(207,214,210,.25);border-radius:16px;padding:10px;text-align:center}
 .item img{width:100%;height:190px;object-fit:cover;border-radius:10px;background:#eee;display:block;margin-bottom:8px}
+.file-stub{width:100%;height:190px;border-radius:10px;margin-bottom:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(145deg,rgba(207,214,210,.16),rgba(0,0,0,.30));border:1px solid rgba(207,214,210,.28);color:#eef3ef;box-shadow:inset 0 0 28px rgba(255,255,255,.035)}
+.file-stub div{font-size:28px;letter-spacing:3px;color:#d7b866;opacity:.9}.file-stub strong{font-size:24px;font-weight:400;margin-top:10px}
 .item .name{font-size:14px;color:#eef3ef;word-break:break-word}.item .meta{font-size:12px;opacity:.65;margin-top:4px}
 .item a,.item button{display:inline-block;margin-top:8px;color:#f5dc98;text-decoration:none;font-size:13px}
 .item button{padding:7px 10px;border-radius:10px;margin:8px 3px 0;background:linear-gradient(#3b4944,#14201c)}
@@ -125,7 +127,7 @@ input[type="file"]{padding:8px}textarea{height:220px;resize:vertical;line-height
   <header>
     <div class="seal">Nx</div>
     <h1>СЕЙФ АРТЕФАКТОВ НЕКСА</h1>
-    <p>Сейф больше не забивает память браузера PNG-свитками. Он создаёт правильные имена 0001, 0002, 0003... и скачивает PNG наружу. Для сайта есть отдельный просмотр: кнопка «Посмотреть pspt сайта» сама ищет PNG в папке <b>pspt</b> рядом с сейфом.</p>
+    <p>Сейф теперь работает как картотека: при входе он проверяет только имена/номера файлов 0001, 0002, 0003... в папке <b>pspt</b>, считает их и показывает реестр. Сам тяжёлый PNG грузится только тогда, когда нажата кнопка «Посмотреть».</p>
   </header>
   <section class="counter"><div>Сертификатов в сейфе</div><strong id="count">0</strong></section>
   <section class="controls">
@@ -134,7 +136,7 @@ input[type="file"]{padding:8px}textarea{height:220px;resize:vertical;line-height
     <label class="main-btn">Показать PNG с компьютера<input id="fileInput" type="file" multiple accept="image/png,image/*" hidden></label>
     <button id="refreshBtn">Очистить витрину</button>
   </section>
-  <div class="drop-hint">При открытии сейф сам смотрит папку <b>pspt</b> на сайте и считает сертификаты. Код 777 нужен только для создания, ручной загрузки PNG и очистки витрины.</div>
+  <div class="drop-hint">При открытии сейф проверяет папку <b>pspt</b> по номерам и не загружает тяжёлые PNG в витрину. Картинка сертификата открывается только по кнопке «Посмотреть». Код 777 нужен только для создания, ручной загрузки PNG и очистки витрины.</div>
   <main id="list"></main>
   <footer>Важно: браузер на сайте не записывает файл прямо в GitHub-папку. Поэтому порядок простой: сейф скачивает PNG наружу, Вы загружаете его в папку <b>pspt</b> на сайте, а кнопка просмотра читает уже опубликованные файлы <b>pspt/0001.png</b>, <b>pspt/0002.png</b> и дальше.</footer>
 </div>
@@ -233,12 +235,17 @@ function render(){
   listEl.innerHTML='';
 
   // Показываем витрину в обратном порядке: новые сертификаты первыми.
+  // Важно: для файлов сайта здесь нет <img src="pspt/0001.png">.
+  // Значит браузер НЕ грузит все PNG при входе, а видит только карточки-имена.
   const viewItems=items.map((it,i)=>({it,i})).reverse();
 
   viewItems.forEach(({it,i})=>{
     const d=document.createElement('div');
     d.className='item';
-    d.innerHTML='<img src="'+it.data+'" alt=""><div class="name">'+esc(it.name)+'</div><div class="meta">'+esc(it.title||'сертификат')+'</div><button type="button" data-view="'+i+'">Посмотреть</button>';
+    const thumb = it.data
+      ? '<img src="'+it.data+'" alt="">'
+      : '<div class="file-stub"><div>PNG</div><strong>'+esc(it.name.replace(/\.png$/i,''))+'</strong></div>';
+    d.innerHTML=thumb+'<div class="name">'+esc(it.name)+'</div><div class="meta">'+esc(it.title||'сертификат')+'</div><button type="button" data-view="'+i+'">Посмотреть</button>';
     listEl.appendChild(d)
   });
 
@@ -249,7 +256,19 @@ function render(){
 function openViewer(it){
   if(!it)return;
   document.getElementById('viewTitle').textContent=it.name+' — '+(it.title||'сертификат');
-  document.getElementById('viewImg').src=it.data;
+  const img=document.getElementById('viewImg');
+
+  // Вот здесь тяжёлый сертификат загружается впервые:
+  // только когда человек нажал «Посмотреть».
+  img.removeAttribute('src');
+  img.alt='Загрузка сертификата '+it.name;
+  img.onerror=function(){
+    img.alt='Не удалось открыть '+it.name;
+    document.getElementById('viewTitle').textContent=it.name+' — файл не найден или ещё не опубликован';
+  };
+  img.onload=function(){ img.alt='Сертификат '+it.name; };
+  img.src=it.data || (it.url + '?open=' + Date.now());
+
   document.getElementById('viewModal').classList.add('show');
   document.getElementById('viewModal').setAttribute('aria-hidden','false');
 }
@@ -259,6 +278,12 @@ function showPNG(data,name,title){
   const n=numberFromName(name);
   if(n>lastKnownNumber)lastKnownNumber=n;
   items.push({name,data,title:title||name});
+  render();
+}
+function showSiteName(name){
+  const n=numberFromName(name);
+  if(n>lastKnownNumber)lastKnownNumber=n;
+  items.push({name:name,url:'pspt/'+name,title:'pspt/'+name});
   render();
 }
 function downloadData(data,name){const a=document.createElement('a');a.href=data;a.download=name;document.body.appendChild(a);a.click();a.remove()}
@@ -275,34 +300,59 @@ document.getElementById('closeCert').onclick=()=>{modal.classList.remove('show')
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.getElementById('closeCert').click();document.getElementById('closeView').click();}});
 document.getElementById('refreshBtn').onclick=()=>{if(!requireOpen())return;items=[];render()};
 
+async function probePngExists(url){
+  // HEAD берёт только заголовок файла, не скачивая тяжёлую картинку.
+  // Если сервер вдруг не любит HEAD, делаем запасной лёгкий запрос с Range.
+  try{
+    let res=await fetch(url,{method:'HEAD',cache:'no-store'});
+    if(res.ok) return true;
+    if(res.status===404) return false;
+  }catch(e){}
+
+  try{
+    const res=await fetch(url,{
+      method:'GET',
+      cache:'no-store',
+      headers:{'Range':'bytes=0-0'}
+    });
+    return res.ok || res.status===206;
+  }catch(e){
+    return false;
+  }
+}
+
 async function loadSitePspt(){
   items=[];
   render();
   const st=document.getElementById('lockState');
-  st.textContent='ищу pspt...';
+  st.textContent='считаю имена pspt...';
   let found=0, misses=0;
   lastKnownNumber=0;
+
   for(let n=1;n<=999;n++){
     const name=pad4(n)+'.png';
-    const url='pspt/'+name+'?v='+Date.now();
-    try{
-      const res=await fetch(url,{cache:'no-store'});
-      if(res.ok){
-        const blob=await res.blob();
-        const data=await new Promise(resolve=>{const r=new FileReader();r.onload=e=>resolve(e.target.result);r.readAsDataURL(blob)});
-        showPNG(data,name,'pspt/'+name);
-        found++;
-        misses=0;
-      }else{
-        misses++;
-      }
-    }catch(e){
+    const url='pspt/'+name+'?check='+Date.now();
+    const exists=await probePngExists(url);
+
+    if(exists){
+      // В витрину кладём только имя и путь.
+      // Сам PNG НЕ читаем и НЕ превращаем в dataURL.
+      showSiteName(name);
+      found++;
+      misses=0;
+      st.textContent='найдено имён: '+found;
+    }else{
       misses++;
     }
+
+    // После найденной цепочки останавливаемся, когда пошли пустые номера.
     if(found>0 && misses>=25)break;
+
+    // Чтобы пустая папка не гоняла проверку до 999.
     if(found===0 && n>=80)break;
   }
-  st.textContent=found ? ('найдено: '+found) : 'в pspt не найдено';
+
+  st.textContent=found ? ('найдено имён: '+found) : 'в pspt не найдено';
   localStorage.setItem('nex_safe_last_count', String(found));
 }
 document.getElementById('sitePsptBtn').addEventListener('click',loadSitePspt);
