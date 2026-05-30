@@ -884,7 +884,7 @@ border: none;
     </section>
 
     <section class="object safe" onclick="openSafeNex()" title="Сейф артефактов">
-      <div class="counter" id="artifactCounter" style="display:none;"></div>
+      <div class="counter" id="artifactCounter">0</div>
     </section>
 
     <section class="object shelves" onclick="toggleWardrobeMenu()" title="Шкаф">
@@ -1190,6 +1190,21 @@ onclick="window.open('svyaz.html','_blank')">
       };
       reader.readAsText(file, 'utf-8');
     }
+
+function refreshArtifactCounter() {
+
+  const counter = document.getElementById('artifactCounter');
+  if (!counter) return;
+
+  const value = localStorage.getItem('nex_safe_last_count') || '0';
+
+  counter.textContent = value;
+  counter.style.display = 'block';
+}
+
+window.addEventListener('load', refreshArtifactCounter);
+window.addEventListener('focus', refreshArtifactCounter);
+
 function openSafeNex() {
   showInfo("Открываю сейф.");
   window.open("Seyf7/index.html");
