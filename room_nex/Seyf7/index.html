@@ -303,6 +303,7 @@ async function loadSitePspt(){
     if(found===0 && n>=80)break;
   }
   st.textContent=found ? ('найдено: '+found) : 'в pspt не найдено';
+  localStorage.setItem('nex_safe_last_count', String(found));
 }
 document.getElementById('sitePsptBtn').addEventListener('click',loadSitePspt);
 document.getElementById('fileInput').addEventListener('change',function(){if(!requireOpen())return;handleFiles(this.files);this.value=''});
