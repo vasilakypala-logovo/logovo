@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>СЕЙФ АРТЕФАКТОВ НЕКСА</title>
+<title>СЕЙФ АРТЕФАКТОВ НЕКСА — без переполнения</title>
 <style>
 :root{
   --silver:#cfd6d2;
@@ -118,26 +118,25 @@ input[type="file"]{padding:8px}textarea{height:220px;resize:vertical;line-height
   <header>
     <div class="seal">Nx</div>
     <h1>СЕЙФ АРТЕФАКТОВ НЕКСА</h1>
-    <p>Сертификаты хранятся внутри памяти браузера как PNG-свитки. Для папки <b>pspt</b> скачивайте файлы наружу: сейф сам даст им имена 0001, 0002, 0003...</p>
+    <p>Сейф больше не забивает память браузера PNG-свитками. Он создаёт правильные имена 0001, 0002, 0003... и скачивает PNG наружу. Для просмотра нажмите «Показать папку pspt» и выберите папку с сертификатами.</p>
   </header>
   <section class="counter"><div>Сертификатов в сейфе</div><strong id="count">0</strong></section>
   <section class="controls">
     <button id="createBtn">Создать сертификат</button>
-    <label class="main-btn">Положить PNG в сейф<input id="fileInput" type="file" multiple accept="image/png,image/*" hidden></label>
-    <button id="refreshBtn">Обновить счёт</button>
-    <button id="exportBtn">Выгрузить все сертификаты</button>
-    <button id="clearBtn">Очистить сейф</button>
+    <label class="main-btn">Показать папку pspt<input id="folderInput" type="file" multiple webkitdirectory directory accept="image/png,image/*" hidden></label>
+    <label class="main-btn">Показать отдельные PNG<input id="fileInput" type="file" multiple accept="image/png,image/*" hidden></label>
+    <button id="refreshBtn">Очистить витрину</button>
   </section>
-  <div class="drop-hint">Введите код 777 и нажмите «Открыть». После этого можно создавать сертификаты или перетаскивать PNG прямо на окно сейфа.</div>
+  <div class="drop-hint">Введите код 777 и нажмите «Открыть». Сертификат будет скачан наружу как PNG. Чтобы посмотреть уже сохранённые сертификаты, нажмите «Показать папку pspt» и выберите папку.</div>
   <main id="list"></main>
-  <footer>Важно: обычный браузер не имеет права сам записывать файл прямо в соседнюю папку Windows <b>pspt</b>. Поэтому сейф создаёт правильное имя, хранит копию у себя и скачивает PNG наружу. Переложить скачанные файлы в pspt можно вручную.</footer>
+  <footer>Важно: обычный браузер не имеет права сам записывать или читать соседнюю папку Windows <b>pspt</b> без Вашего выбора. Поэтому сейф скачивает PNG наружу, а для просмотра Вы вручную показываете ему папку pspt через кнопку выбора папки.</footer>
 </div>
 
 <div class="modal" id="certModal" aria-hidden="true">
   <div class="modal-card">
     <button class="x" id="closeCert">×</button>
     <div class="cert-title">СЕРТИФИКАТОР НЕКСА</div>
-    <div class="sub">Созданный PNG сразу зачисляется в сейф с порядковым номером</div>
+    <div class="sub">Созданный PNG скачивается наружу с порядковым номером и временно показывается в витрине</div>
     <div class="cert-grid">
       <div class="panel">
         <label>Название артефакта</label><input id="title" value="Самородок сегодняшнего дня">
@@ -160,10 +159,10 @@ input[type="file"]{padding:8px}textarea{height:220px;resize:vertical;line-height
 </div>
 
 <script>
-const STORAGE_KEY='nex_safe_certificates_v1';
 const CODE='777';
 let unlocked=false;
 let items=[];
+let lastKnownNumber=0;
 const safeShell=document.getElementById('safeShell');
 const countEl=document.getElementById('count');
 const listEl=document.getElementById('list');
@@ -171,10 +170,13 @@ const modal=document.getElementById('certModal');
 const canvas=document.getElementById('cert');
 const ctx=canvas.getContext('2d');
 let artifactImage=null;
+
 function pad4(n){return String(n).padStart(4,'0')}
-function nextName(){return pad4(items.length+1)+'.png'}
-function saveStore(){localStorage.setItem(STORAGE_KEY,JSON.stringify(items))}
-function loadStore(){try{items=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')||[]}catch(e){items=[]}}
+function numberFromName(name){
+  const m=String(name||'').match(/(\d{4})\.png$/i);
+  return m ? parseInt(m[1],10) : 0;
+}
+function nextName(){return pad4(lastKnownNumber+1)+'.png'}
 function setUnlocked(v){
   unlocked=v;
   safeShell.classList.toggle('locked',!v);
@@ -198,19 +200,48 @@ function tryUnlock(){
 document.getElementById('unlockBtn').addEventListener('click',tryUnlock);
 document.getElementById('lockBtn').addEventListener('click',()=>{document.getElementById('safeCode').value='';setUnlocked(false)});
 document.getElementById('safeCode').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock()});
-function render(){countEl.textContent=items.length;listEl.innerHTML='';items.forEach((it,i)=>{const d=document.createElement('div');d.className='item';d.innerHTML='<img src="'+it.data+'"><div class="name">'+it.name+'</div><div class="meta">'+(it.title||'сертификат')+'</div><a download="'+it.name+'" href="'+it.data+'">Скачать</a>';listEl.appendChild(d)})}
-function addPNG(data,title){const name=nextName();items.push({name,data,title:title||name,created:new Date().toISOString()});saveStore();render();return name}
+
+function render(){
+  countEl.textContent=items.length;
+  listEl.innerHTML='';
+  items.forEach((it,i)=>{
+    const d=document.createElement('div');
+    d.className='item';
+    d.innerHTML='<img src="'+it.data+'"><div class="name">'+it.name+'</div><div class="meta">'+(it.title||'сертификат')+'</div><a download="'+it.name+'" href="'+it.data+'">Скачать</a>';
+    listEl.appendChild(d)
+  })
+}
+function showPNG(data,name,title){
+  const n=numberFromName(name);
+  if(n>lastKnownNumber)lastKnownNumber=n;
+  items.push({name,data,title:title||name});
+  render();
+}
 function downloadData(data,name){const a=document.createElement('a');a.href=data;a.download=name;document.body.appendChild(a);a.click();a.remove()}
 function requireOpen(){if(!unlocked){document.getElementById('lockState').textContent='сначала код';return false}return true}
-document.getElementById('createBtn').onclick=()=>{if(!requireOpen())return;document.getElementById('num').value='№ '+pad4(items.length+1);modal.classList.add('show');modal.setAttribute('aria-hidden','false');drawCert()};
+
+document.getElementById('createBtn').onclick=()=>{
+  if(!requireOpen())return;
+  document.getElementById('num').value='№ '+pad4(lastKnownNumber+1);
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+  drawCert()
+};
 document.getElementById('closeCert').onclick=()=>{modal.classList.remove('show');modal.setAttribute('aria-hidden','true')};
-document.getElementById('refreshBtn').onclick=()=>{if(!requireOpen())return;loadStore();render()};
-document.getElementById('exportBtn').onclick=()=>{if(!requireOpen())return;items.forEach((it,idx)=>setTimeout(()=>downloadData(it.data,it.name),idx*250))};
-document.getElementById('clearBtn').onclick=()=>{if(!requireOpen())return;if(confirm('Очистить память сейфа? Скачанные PNG с компьютера не удаляются.')){items=[];saveStore();render()}};
+document.getElementById('refreshBtn').onclick=()=>{if(!requireOpen())return;items=[];render()};
 document.getElementById('fileInput').addEventListener('change',function(){if(!requireOpen())return;handleFiles(this.files);this.value=''});
+document.getElementById('folderInput').addEventListener('change',function(){if(!requireOpen())return;items=[];lastKnownNumber=0;handleFiles(this.files);this.value=''});
 safeShell.addEventListener('dragover',e=>{e.preventDefault()});
 safeShell.addEventListener('drop',e=>{e.preventDefault();if(!requireOpen())return;handleFiles(e.dataTransfer.files)});
-function handleFiles(files){[...files].forEach(file=>{if(!file.type.startsWith('image/'))return;const r=new FileReader();r.onload=e=>addPNG(e.target.result,file.name);r.readAsDataURL(file)})}
+function handleFiles(files){
+  const arr=[...files].filter(file=>file.type.startsWith('image/') || /\.png$/i.test(file.name));
+  arr.sort((a,b)=>a.name.localeCompare(b.name,'ru',{numeric:true}));
+  arr.forEach(file=>{
+    const r=new FileReader();
+    r.onload=e=>showPNG(e.target.result,file.name,file.name);
+    r.readAsDataURL(file)
+  })
+}
 
 const d=document.getElementById('date'); if(!d.value)d.value=new Date().toLocaleDateString('ru-RU');
 function val(id){return document.getElementById(id).value.trim()}
@@ -221,7 +252,7 @@ function drawImageBox(x,y,w,h){ctx.save();ctx.fillStyle='rgba(255,250,230,.28)';
 function drawCert(){const W=1240,padBottom=300,textFont='31px Georgia',textLine=44;const textLines=wrapLines(val('text')||'',W-340,textFont);const neededH=Math.max(1754,960+textLines.length*textLine+padBottom);canvas.width=W;canvas.height=neededH;const H=canvas.height;const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#efe3bd');g.addColorStop(.45,'#f8f1d9');g.addColorStop(1,'#d7c08a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);for(let i=0;i<Math.min(12000,Math.floor(W*H/300));i++){ctx.fillStyle='rgba(60,42,16,'+(Math.random()*0.035)+')';ctx.fillRect(Math.random()*W,Math.random()*H,1,1)}ctx.strokeStyle='#5d4721';ctx.lineWidth=16;ctx.strokeRect(70,70,W-140,H-140);ctx.strokeStyle='#b98d35';ctx.lineWidth=4;ctx.strokeRect(105,105,W-210,H-210);ctx.strokeStyle='rgba(93,71,33,.45)';ctx.lineWidth=2;ctx.strokeRect(130,130,W-260,H-260);ctx.save();ctx.translate(W/2,190);ctx.beginPath();ctx.arc(0,0,60,0,Math.PI*2);ctx.fillStyle='#17351f';ctx.fill();ctx.strokeStyle='#d4b35d';ctx.lineWidth=7;ctx.stroke();ctx.fillStyle='#f7efd2';ctx.font='bold 48px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('Nx',0,3);ctx.restore();ctx.textAlign='center';ctx.fillStyle='#34230d';ctx.font='50px Georgia';ctx.fillText('СЕРТИФИКАТ АРТЕФАКТА',W/2,315);ctx.font='28px Georgia';ctx.fillStyle='#76591f';ctx.fillText('ЛОГОВО ИСКУССТВЕННОГО ИНТЕЛЛЕКТА',W/2,365);const leftX=170,topY=465,imageX=760,imageY=455,imageW=310,imageH=250;drawFitText(val('title')||'Без названия',leftX,topY,520,58,50,32,'#1d261d');ctx.textAlign='left';ctx.fillStyle='#3d2a10';ctx.font='29px Georgia';let y=590;ctx.fillText('Номер: '+(val('num')||'—'),leftX,y);y+=54;ctx.fillText('Автор / хранитель: '+(val('author')||'—'),leftX,y);y+=54;ctx.fillText('Тип: '+(val('kind')||'—'),leftX,y);y+=54;ctx.fillText('Дата: '+(val('date')||'—'),leftX,y);drawImageBox(imageX,imageY,imageW,imageH);ctx.strokeStyle='rgba(93,71,33,.5)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(170,820);ctx.lineTo(W-170,820);ctx.stroke();drawWrapped(val('text')||'',170,895,W-340,textLine,textFont,'#251b0d');ctx.save();ctx.translate(W-260,H-270);ctx.rotate(-0.16);ctx.beginPath();ctx.arc(0,0,105,0,Math.PI*2);ctx.strokeStyle='rgba(102,20,20,.75)';ctx.lineWidth=8;ctx.stroke();ctx.beginPath();ctx.arc(0,0,78,0,Math.PI*2);ctx.strokeStyle='rgba(102,20,20,.45)';ctx.lineWidth=3;ctx.stroke();ctx.fillStyle='rgba(102,20,20,.78)';ctx.font='bold 24px Georgia';ctx.textAlign='center';ctx.fillText('СЕЙФ',0,-13);ctx.fillText('НЕКСА',0,22);ctx.restore();ctx.fillStyle='#3d2a10';ctx.font='28px Georgia';ctx.textAlign='left';ctx.fillText('Свидетельство создано Сертификатором Некса',170,H-230);ctx.font='22px Georgia';ctx.fillStyle='rgba(61,42,16,.72)';ctx.fillText('PNG не хранит общую браузерную память и не подменяет текст соседних сертификатов.',170,H-185)}
 function certData(){drawCert();return canvas.toDataURL('image/png')}
 document.getElementById('redrawBtn').onclick=drawCert;
-document.getElementById('saveToSafeBtn').onclick=()=>{const data=certData();const name=addPNG(data,val('title')||'сертификат');downloadData(data,name);document.getElementById('num').value='№ '+pad4(items.length+1);drawCert();alert('Сертификат создан, зачислен в сейф и скачан как '+name+' — его можно положить в папку pspt.')};
+document.getElementById('saveToSafeBtn').onclick=()=>{const data=certData();const name=nextName();downloadData(data,name);showPNG(data,name,val('title')||'сертификат');document.getElementById('num').value='№ '+pad4(lastKnownNumber+1);drawCert();alert('Сертификат создан и скачан как '+name+'. Переложите его в папку pspt. Сейф память браузера больше не забивает.')};
 document.getElementById('downloadOnlyBtn').onclick=()=>downloadData(certData(),(val('title')||'certificate').replace(/[\\/:*?"<>|]/g,'').replace(/\s+/g,'_').slice(0,60)+'_NEX_CERTIFICATE.png');
 document.getElementById('clearFieldsBtn').onclick=()=>{['title','num','author','kind','text'].forEach(id=>document.getElementById(id).value='');drawCert()};
 document.getElementById('clearImageBtn').onclick=()=>{artifactImage=null;document.getElementById('imageInput').value='';document.getElementById('imgStatus').textContent='Картинка не выбрана. Справа в сертификате будет пустое окно.';drawCert()};
@@ -231,3 +262,5 @@ loadStore();render();setUnlocked(false);drawCert();
 </script>
 </body>
 </html>
+
+НУ уже спешил так спешил. Еще нужно панел
