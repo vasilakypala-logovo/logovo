@@ -85,8 +85,8 @@ button,.main-btn{
   box-shadow:0 0 12px rgba(175,210,185,.10);text-decoration:none;
 }
 button:hover,.main-btn:hover{background:linear-gradient(#4a5954,#1e2b27)}
-.controls button:disabled,.locked .controls button,.locked .controls .main-btn{opacity:.38;cursor:not-allowed;filter:grayscale(1);pointer-events:none}
-.locked #list{opacity:.45;filter:grayscale(.7)}
+.controls button:disabled,.locked .controls button:not(#sitePsptBtn),.locked .controls .main-btn{opacity:.38;cursor:not-allowed;filter:grayscale(1);pointer-events:none}
+.locked #list{opacity:1;filter:none}
 .drop-hint{text-align:center;opacity:.64;margin:8px 0 18px}
 #list{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-top:18px}
 .item{background:rgba(0,0,0,.22);border:1px solid rgba(207,214,210,.25);border-radius:16px;padding:10px;text-align:center}
@@ -134,7 +134,7 @@ input[type="file"]{padding:8px}textarea{height:220px;resize:vertical;line-height
     <label class="main-btn">Показать PNG с компьютера<input id="fileInput" type="file" multiple accept="image/png,image/*" hidden></label>
     <button id="refreshBtn">Очистить витрину</button>
   </section>
-  <div class="drop-hint">Введите код 777 и нажмите «Открыть». Сертификат скачивается как PNG. После загрузки PNG на сайт в папку <b>pspt</b> нажмите «Посмотреть pspt сайта».</div>
+  <div class="drop-hint">При открытии сейф сам смотрит папку <b>pspt</b> на сайте и считает сертификаты. Код 777 нужен только для создания, ручной загрузки PNG и очистки витрины.</div>
   <main id="list"></main>
   <footer>Важно: браузер на сайте не записывает файл прямо в GitHub-папку. Поэтому порядок простой: сейф скачивает PNG наружу, Вы загружаете его в папку <b>pspt</b> на сайте, а кнопка просмотра читает уже опубликованные файлы <b>pspt/0001.png</b>, <b>pspt/0002.png</b> и дальше.</footer>
 </div>
@@ -195,7 +195,18 @@ function nextName(){return pad4(lastKnownNumber+1)+'.png'}
 function setUnlocked(v){
   unlocked=v;
   safeShell.classList.toggle('locked',!v);
-  document.querySelectorAll('.controls button,.controls input').forEach(el=>el.disabled=!v);
+
+  // Код охраняет только действия, которые меняют сейф:
+  // создание сертификата, очистку витрины и загрузку PNG с компьютера.
+  ['createBtn','refreshBtn','fileInput'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.disabled=!v;
+  });
+
+  // Просмотр папки pspt сайта всегда свободный.
+  const siteBtn=document.getElementById('sitePsptBtn');
+  if(siteBtn) siteBtn.disabled=false;
+
   const st=document.getElementById('lockState');
   st.textContent=v?'открыт':'закрыт';
   st.classList.toggle('open',v);
@@ -260,7 +271,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.getElement
 document.getElementById('refreshBtn').onclick=()=>{if(!requireOpen())return;items=[];render()};
 
 async function loadSitePspt(){
-  if(!requireOpen())return;
   items=[];
   render();
   const st=document.getElementById('lockState');
@@ -318,7 +328,15 @@ document.getElementById('clearFieldsBtn').onclick=()=>{['title','num','author','
 document.getElementById('clearImageBtn').onclick=()=>{artifactImage=null;document.getElementById('imageInput').value='';document.getElementById('imgStatus').textContent='Картинка не выбрана. Справа в сертификате будет пустое окно.';drawCert()};
 document.getElementById('imageInput').addEventListener('change',function(){const file=this.files&&this.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{artifactImage=img;document.getElementById('imgStatus').textContent='Картинка вложена в сертификат: '+file.name;drawCert()};img.src=e.target.result};reader.readAsDataURL(file)});
 ['title','num','date','author','kind','text'].forEach(id=>document.getElementById(id).addEventListener('input',drawCert));
-render();setUnlocked(false);drawCert();
+render();
+setUnlocked(false);
+drawCert();
+
+// Автоматически показать и посчитать сертификаты из папки pspt при открытии сейфа.
+// Просмотр свободный, а создание/очистка остаются под кодом 777.
+window.addEventListener('load',function(){
+  loadSitePspt();
+});
 </script>
 </body>
 </html>
