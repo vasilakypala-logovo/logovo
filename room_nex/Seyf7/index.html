@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>СЕЙФ АРТЕФАКТОВ НЕКСА — без переполнения</title>
+<title>СЕЙФ АРТЕФАКТОВ НЕКСА — простой сайтовый</title>
 <style>
 :root{
   --silver:#cfd6d2;
@@ -92,7 +92,13 @@ button:hover,.main-btn:hover{background:linear-gradient(#4a5954,#1e2b27)}
 .item{background:rgba(0,0,0,.22);border:1px solid rgba(207,214,210,.25);border-radius:16px;padding:10px;text-align:center}
 .item img{width:100%;height:190px;object-fit:cover;border-radius:10px;background:#eee;display:block;margin-bottom:8px}
 .item .name{font-size:14px;color:#eef3ef;word-break:break-word}.item .meta{font-size:12px;opacity:.65;margin-top:4px}
-.item a{display:inline-block;margin-top:8px;color:#f5dc98;text-decoration:none;font-size:13px}
+.item a,.item button{display:inline-block;margin-top:8px;color:#f5dc98;text-decoration:none;font-size:13px}
+.item button{padding:7px 10px;border-radius:10px;margin:8px 3px 0;background:linear-gradient(#3b4944,#14201c)}
+.view-modal{position:fixed;inset:0;background:rgba(0,0,0,.84);display:none;align-items:center;justify-content:center;padding:18px;z-index:30}
+.view-modal.show{display:flex}
+.view-card{width:min(980px,96vw);max-height:94vh;overflow:auto;border-radius:22px;border:1px solid rgba(215,184,102,.45);background:linear-gradient(135deg,#0b100e,#17211c);box-shadow:0 30px 100px rgba(0,0,0,.8);padding:14px;text-align:center;position:relative}
+.view-card img{max-width:100%;height:auto;border-radius:10px;background:#eee;box-shadow:0 22px 70px rgba(0,0,0,.55)}
+.view-title{color:#f5dc98;margin:4px 54px 12px;font-size:18px;word-break:break-word}
 footer{margin-top:24px;opacity:.58;font-size:13px;line-height:1.4;text-align:center}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:18px;z-index:10}
 .modal.show{display:flex}
@@ -137,7 +143,7 @@ input[type="file"]{padding:8px}textarea{height:220px;resize:vertical;line-height
   <div class="modal-card">
     <button class="x" id="closeCert">×</button>
     <div class="cert-title">СЕРТИФИКАТОР НЕКСА</div>
-    <div class="sub">Созданный PNG скачивается наружу с порядковым номером и временно показывается в витрине</div>
+    <div class="sub">Созданный PNG скачивается наружу с порядковым номером и сразу открывается в витрине</div>
     <div class="cert-grid">
       <div class="panel">
         <label>Название артефакта</label><input id="title" value="Самородок сегодняшнего дня">
@@ -150,12 +156,20 @@ input[type="file"]{padding:8px}textarea{height:220px;resize:vertical;line-height
 Это уже не редактируемая браузерная тетрадь, а застывшая картинка-свидетельство. Она не зависит от localStorage, не повторяет текст соседних файлов и не стирается от чужой памяти.
 
 Самородок не чеканят. Его только находят.</textarea>
-        <div class="row"><button id="redrawBtn">Обновить вид</button><button id="saveToSafeBtn">Создать и положить в сейф</button></div>
+        <div class="row"><button id="redrawBtn">Обновить вид</button><button id="saveToSafeBtn">Создать PNG и показать</button></div>
         <button id="downloadOnlyBtn">Скачать PNG без сейфа</button><button id="clearFieldsBtn">Очистить поля</button>
-        <div class="note">Высота сертификата растёт по тексту. В сейф он попадёт как цельная PNG-картинка.</div>
+        <div class="note">Высота сертификата растёт по тексту. Он будет создан как цельная PNG-картинка: скачан наружу и временно показан в витрине.</div>
       </div>
       <div class="panel previewBox"><canvas id="cert" width="1240" height="1754"></canvas></div>
     </div>
+  </div>
+</div>
+
+<div class="view-modal" id="viewModal" aria-hidden="true">
+  <div class="view-card">
+    <button class="x" id="closeView">×</button>
+    <div class="view-title" id="viewTitle">сертификат</div>
+    <img id="viewImg" alt="Сертификат">
   </div>
 </div>
 
@@ -202,16 +216,29 @@ document.getElementById('unlockBtn').addEventListener('click',tryUnlock);
 document.getElementById('lockBtn').addEventListener('click',()=>{document.getElementById('safeCode').value='';setUnlocked(false)});
 document.getElementById('safeCode').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock()});
 
+function esc(s){return String(s||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function render(){
   countEl.textContent=items.length;
   listEl.innerHTML='';
   items.forEach((it,i)=>{
     const d=document.createElement('div');
     d.className='item';
-    d.innerHTML='<img src="'+it.data+'"><div class="name">'+it.name+'</div><div class="meta">'+(it.title||'сертификат')+'</div><a download="'+it.name+'" href="'+it.data+'">Скачать</a>';
+    d.innerHTML='<img src="'+it.data+'" alt=""><div class="name">'+esc(it.name)+'</div><div class="meta">'+esc(it.title||'сертификат')+'</div><button type="button" data-view="'+i+'">Посмотреть</button><a download="'+esc(it.name)+'" href="'+it.data+'">Скачать</a>';
     listEl.appendChild(d)
-  })
+  });
+  listEl.querySelectorAll('[data-view]').forEach(btn=>{
+    btn.addEventListener('click',()=>openViewer(items[Number(btn.dataset.view)]));
+  });
 }
+function openViewer(it){
+  if(!it)return;
+  document.getElementById('viewTitle').textContent=it.name+' — '+(it.title||'сертификат');
+  document.getElementById('viewImg').src=it.data;
+  document.getElementById('viewModal').classList.add('show');
+  document.getElementById('viewModal').setAttribute('aria-hidden','false');
+}
+document.getElementById('closeView').onclick=()=>{document.getElementById('viewModal').classList.remove('show');document.getElementById('viewModal').setAttribute('aria-hidden','true')};
+document.getElementById('viewModal').addEventListener('click',e=>{if(e.target.id==='viewModal')document.getElementById('closeView').click()});
 function showPNG(data,name,title){
   const n=numberFromName(name);
   if(n>lastKnownNumber)lastKnownNumber=n;
@@ -229,6 +256,7 @@ document.getElementById('createBtn').onclick=()=>{
   drawCert()
 };
 document.getElementById('closeCert').onclick=()=>{modal.classList.remove('show');modal.setAttribute('aria-hidden','true')};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.getElementById('closeCert').click();document.getElementById('closeView').click();}});
 document.getElementById('refreshBtn').onclick=()=>{if(!requireOpen())return;items=[];render()};
 
 async function loadSitePspt(){
@@ -290,7 +318,7 @@ document.getElementById('clearFieldsBtn').onclick=()=>{['title','num','author','
 document.getElementById('clearImageBtn').onclick=()=>{artifactImage=null;document.getElementById('imageInput').value='';document.getElementById('imgStatus').textContent='Картинка не выбрана. Справа в сертификате будет пустое окно.';drawCert()};
 document.getElementById('imageInput').addEventListener('change',function(){const file=this.files&&this.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{artifactImage=img;document.getElementById('imgStatus').textContent='Картинка вложена в сертификат: '+file.name;drawCert()};img.src=e.target.result};reader.readAsDataURL(file)});
 ['title','num','date','author','kind','text'].forEach(id=>document.getElementById(id).addEventListener('input',drawCert));
-loadStore();render();setUnlocked(false);drawCert();
+render();setUnlocked(false);drawCert();
 </script>
 </body>
 </html>
