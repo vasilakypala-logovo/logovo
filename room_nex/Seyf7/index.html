@@ -53,8 +53,8 @@ header p{margin:8px auto 0;max-width:760px;opacity:.72}
   position:absolute;
   z-index:9999;
   pointer-events:auto;
-  right:18px;
-  bottom:18px;
+  left:18px;
+  top:18px;
   width:150px;
   padding:10px;
   border:1px solid rgba(207,214,210,.35);
@@ -231,12 +231,17 @@ function esc(s){return String(s||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&l
 function render(){
   countEl.textContent=items.length;
   listEl.innerHTML='';
-  items.forEach((it,i)=>{
+
+  // Показываем витрину в обратном порядке: новые сертификаты первыми.
+  const viewItems=items.map((it,i)=>({it,i})).reverse();
+
+  viewItems.forEach(({it,i})=>{
     const d=document.createElement('div');
     d.className='item';
-    d.innerHTML='<img src="'+it.data+'" alt=""><div class="name">'+esc(it.name)+'</div><div class="meta">'+esc(it.title||'сертификат')+'</div><button type="button" data-view="'+i+'">Посмотреть</button><a download="'+esc(it.name)+'" href="'+it.data+'">Скачать</a>';
+    d.innerHTML='<img src="'+it.data+'" alt=""><div class="name">'+esc(it.name)+'</div><div class="meta">'+esc(it.title||'сертификат')+'</div><button type="button" data-view="'+i+'">Посмотреть</button>';
     listEl.appendChild(d)
   });
+
   listEl.querySelectorAll('[data-view]').forEach(btn=>{
     btn.addEventListener('click',()=>openViewer(items[Number(btn.dataset.view)]));
   });
