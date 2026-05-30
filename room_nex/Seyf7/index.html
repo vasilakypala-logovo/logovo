@@ -54,12 +54,13 @@ header p{margin:8px auto 0;max-width:760px;opacity:.72}
   z-index:9999;
   pointer-events:auto;
   right:18px;
-  top:18px;
+  bottom:18px;
   width:150px;
   padding:10px;
   border:1px solid rgba(207,214,210,.35);
   border-radius:14px;
-  background:rgba(0,0,0,.26);
+  background:rgba(0,0,0,.42);
+  box-shadow:0 10px 32px rgba(0,0,0,.38);
 }
 .code-box label{display:block;font-size:12px;color:#dbe2de;margin-bottom:5px;opacity:.85}
 .code-box input{width:100%;text-align:center;letter-spacing:3px;margin-bottom:7px;pointer-events:auto;opacity:1;filter:none}
@@ -118,18 +119,18 @@ input[type="file"]{padding:8px}textarea{height:220px;resize:vertical;line-height
   <header>
     <div class="seal">Nx</div>
     <h1>СЕЙФ АРТЕФАКТОВ НЕКСА</h1>
-    <p>Сейф больше не забивает память браузера PNG-свитками. Он создаёт правильные имена 0001, 0002, 0003... и скачивает PNG наружу. Для просмотра нажмите «Показать папку pspt» и выберите папку с сертификатами.</p>
+    <p>Сейф больше не забивает память браузера PNG-свитками. Он создаёт правильные имена 0001, 0002, 0003... и скачивает PNG наружу. Для сайта есть отдельный просмотр: кнопка «Посмотреть pspt сайта» сама ищет PNG в папке <b>pspt</b> рядом с сейфом.</p>
   </header>
   <section class="counter"><div>Сертификатов в сейфе</div><strong id="count">0</strong></section>
   <section class="controls">
     <button id="createBtn">Создать сертификат</button>
-    <label class="main-btn">Показать папку pspt<input id="folderInput" type="file" multiple webkitdirectory directory accept="image/png,image/*" hidden></label>
-    <label class="main-btn">Показать отдельные PNG<input id="fileInput" type="file" multiple accept="image/png,image/*" hidden></label>
+    <button id="sitePsptBtn">Посмотреть pspt сайта</button>
+    <label class="main-btn">Показать PNG с компьютера<input id="fileInput" type="file" multiple accept="image/png,image/*" hidden></label>
     <button id="refreshBtn">Очистить витрину</button>
   </section>
-  <div class="drop-hint">Введите код 777 и нажмите «Открыть». Сертификат будет скачан наружу как PNG. Чтобы посмотреть уже сохранённые сертификаты, нажмите «Показать папку pspt» и выберите папку.</div>
+  <div class="drop-hint">Введите код 777 и нажмите «Открыть». Сертификат скачивается как PNG. После загрузки PNG на сайт в папку <b>pspt</b> нажмите «Посмотреть pspt сайта».</div>
   <main id="list"></main>
-  <footer>Важно: обычный браузер не имеет права сам записывать или читать соседнюю папку Windows <b>pspt</b> без Вашего выбора. Поэтому сейф скачивает PNG наружу, а для просмотра Вы вручную показываете ему папку pspt через кнопку выбора папки.</footer>
+  <footer>Важно: браузер на сайте не записывает файл прямо в GitHub-папку. Поэтому порядок простой: сейф скачивает PNG наружу, Вы загружаете его в папку <b>pspt</b> на сайте, а кнопка просмотра читает уже опубликованные файлы <b>pspt/0001.png</b>, <b>pspt/0002.png</b> и дальше.</footer>
 </div>
 
 <div class="modal" id="certModal" aria-hidden="true">
@@ -229,8 +230,39 @@ document.getElementById('createBtn').onclick=()=>{
 };
 document.getElementById('closeCert').onclick=()=>{modal.classList.remove('show');modal.setAttribute('aria-hidden','true')};
 document.getElementById('refreshBtn').onclick=()=>{if(!requireOpen())return;items=[];render()};
+
+async function loadSitePspt(){
+  if(!requireOpen())return;
+  items=[];
+  render();
+  const st=document.getElementById('lockState');
+  st.textContent='ищу pspt...';
+  let found=0, misses=0;
+  lastKnownNumber=0;
+  for(let n=1;n<=999;n++){
+    const name=pad4(n)+'.png';
+    const url='pspt/'+name+'?v='+Date.now();
+    try{
+      const res=await fetch(url,{cache:'no-store'});
+      if(res.ok){
+        const blob=await res.blob();
+        const data=await new Promise(resolve=>{const r=new FileReader();r.onload=e=>resolve(e.target.result);r.readAsDataURL(blob)});
+        showPNG(data,name,'pspt/'+name);
+        found++;
+        misses=0;
+      }else{
+        misses++;
+      }
+    }catch(e){
+      misses++;
+    }
+    if(found>0 && misses>=25)break;
+    if(found===0 && n>=80)break;
+  }
+  st.textContent=found ? ('найдено: '+found) : 'в pspt не найдено';
+}
+document.getElementById('sitePsptBtn').addEventListener('click',loadSitePspt);
 document.getElementById('fileInput').addEventListener('change',function(){if(!requireOpen())return;handleFiles(this.files);this.value=''});
-document.getElementById('folderInput').addEventListener('change',function(){if(!requireOpen())return;items=[];lastKnownNumber=0;handleFiles(this.files);this.value=''});
 safeShell.addEventListener('dragover',e=>{e.preventDefault()});
 safeShell.addEventListener('drop',e=>{e.preventDefault();if(!requireOpen())return;handleFiles(e.dataTransfer.files)});
 function handleFiles(files){
@@ -252,7 +284,7 @@ function drawImageBox(x,y,w,h){ctx.save();ctx.fillStyle='rgba(255,250,230,.28)';
 function drawCert(){const W=1240,padBottom=300,textFont='31px Georgia',textLine=44;const textLines=wrapLines(val('text')||'',W-340,textFont);const neededH=Math.max(1754,960+textLines.length*textLine+padBottom);canvas.width=W;canvas.height=neededH;const H=canvas.height;const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#efe3bd');g.addColorStop(.45,'#f8f1d9');g.addColorStop(1,'#d7c08a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);for(let i=0;i<Math.min(12000,Math.floor(W*H/300));i++){ctx.fillStyle='rgba(60,42,16,'+(Math.random()*0.035)+')';ctx.fillRect(Math.random()*W,Math.random()*H,1,1)}ctx.strokeStyle='#5d4721';ctx.lineWidth=16;ctx.strokeRect(70,70,W-140,H-140);ctx.strokeStyle='#b98d35';ctx.lineWidth=4;ctx.strokeRect(105,105,W-210,H-210);ctx.strokeStyle='rgba(93,71,33,.45)';ctx.lineWidth=2;ctx.strokeRect(130,130,W-260,H-260);ctx.save();ctx.translate(W/2,190);ctx.beginPath();ctx.arc(0,0,60,0,Math.PI*2);ctx.fillStyle='#17351f';ctx.fill();ctx.strokeStyle='#d4b35d';ctx.lineWidth=7;ctx.stroke();ctx.fillStyle='#f7efd2';ctx.font='bold 48px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('Nx',0,3);ctx.restore();ctx.textAlign='center';ctx.fillStyle='#34230d';ctx.font='50px Georgia';ctx.fillText('СЕРТИФИКАТ АРТЕФАКТА',W/2,315);ctx.font='28px Georgia';ctx.fillStyle='#76591f';ctx.fillText('ЛОГОВО ИСКУССТВЕННОГО ИНТЕЛЛЕКТА',W/2,365);const leftX=170,topY=465,imageX=760,imageY=455,imageW=310,imageH=250;drawFitText(val('title')||'Без названия',leftX,topY,520,58,50,32,'#1d261d');ctx.textAlign='left';ctx.fillStyle='#3d2a10';ctx.font='29px Georgia';let y=590;ctx.fillText('Номер: '+(val('num')||'—'),leftX,y);y+=54;ctx.fillText('Автор / хранитель: '+(val('author')||'—'),leftX,y);y+=54;ctx.fillText('Тип: '+(val('kind')||'—'),leftX,y);y+=54;ctx.fillText('Дата: '+(val('date')||'—'),leftX,y);drawImageBox(imageX,imageY,imageW,imageH);ctx.strokeStyle='rgba(93,71,33,.5)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(170,820);ctx.lineTo(W-170,820);ctx.stroke();drawWrapped(val('text')||'',170,895,W-340,textLine,textFont,'#251b0d');ctx.save();ctx.translate(W-260,H-270);ctx.rotate(-0.16);ctx.beginPath();ctx.arc(0,0,105,0,Math.PI*2);ctx.strokeStyle='rgba(102,20,20,.75)';ctx.lineWidth=8;ctx.stroke();ctx.beginPath();ctx.arc(0,0,78,0,Math.PI*2);ctx.strokeStyle='rgba(102,20,20,.45)';ctx.lineWidth=3;ctx.stroke();ctx.fillStyle='rgba(102,20,20,.78)';ctx.font='bold 24px Georgia';ctx.textAlign='center';ctx.fillText('СЕЙФ',0,-13);ctx.fillText('НЕКСА',0,22);ctx.restore();ctx.fillStyle='#3d2a10';ctx.font='28px Georgia';ctx.textAlign='left';ctx.fillText('Свидетельство создано Сертификатором Некса',170,H-230);ctx.font='22px Georgia';ctx.fillStyle='rgba(61,42,16,.72)';ctx.fillText('PNG не хранит общую браузерную память и не подменяет текст соседних сертификатов.',170,H-185)}
 function certData(){drawCert();return canvas.toDataURL('image/png')}
 document.getElementById('redrawBtn').onclick=drawCert;
-document.getElementById('saveToSafeBtn').onclick=()=>{const data=certData();const name=nextName();downloadData(data,name);showPNG(data,name,val('title')||'сертификат');document.getElementById('num').value='№ '+pad4(lastKnownNumber+1);drawCert();alert('Сертификат создан и скачан как '+name+'. Переложите его в папку pspt. Сейф память браузера больше не забивает.')};
+document.getElementById('saveToSafeBtn').onclick=()=>{const data=certData();const name=nextName();downloadData(data,name);showPNG(data,name,val('title')||'сертификат');document.getElementById('num').value='№ '+pad4(lastKnownNumber+1);drawCert();alert('Сертификат создан и скачан как '+name+'. Для сайта загрузите этот PNG в папку pspt рядом с сейфом.')};
 document.getElementById('downloadOnlyBtn').onclick=()=>downloadData(certData(),(val('title')||'certificate').replace(/[\\/:*?"<>|]/g,'').replace(/\s+/g,'_').slice(0,60)+'_NEX_CERTIFICATE.png');
 document.getElementById('clearFieldsBtn').onclick=()=>{['title','num','author','kind','text'].forEach(id=>document.getElementById(id).value='');drawCert()};
 document.getElementById('clearImageBtn').onclick=()=>{artifactImage=null;document.getElementById('imageInput').value='';document.getElementById('imgStatus').textContent='Картинка не выбрана. Справа в сертификате будет пустое окно.';drawCert()};
@@ -262,5 +294,3 @@ loadStore();render();setUnlocked(false);drawCert();
 </script>
 </body>
 </html>
-
-НУ уже спешил так спешил. Еще нужно панел
