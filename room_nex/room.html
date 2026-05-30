@@ -1191,15 +1191,8 @@ onclick="window.open('svyaz.html','_blank')">
       reader.readAsText(file, 'utf-8');
     }
 function openSafeNex() {
-  const code = prompt("Введите код сейфа:");
-
-  if (code === "777") {
-    showInfo("Код принят. Открываю сейф.");
-    window.open("Seyf7/index.html");
-  } else if (code !== null) {
-    showInfo("Неверный код.");
-    alert("Неверный код.");
-  }
+  showInfo("Открываю сейф.");
+  window.open("Seyf7/index.html");
 }
 
     function openLogovo() {
