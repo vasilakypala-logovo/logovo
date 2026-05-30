@@ -198,7 +198,7 @@ border: none;
   box-shadow: none;
 
   padding: 18px;
-  opacity: 0;
+  opacity: 1;
 }
 
     .safe::before {
@@ -865,6 +865,32 @@ border: none;
   display:none !important;
 }
     
+  
+/* --- ВНЕШНИЙ СЧЁТЧИК СЕЙФА --- */
+.safe .counter{
+  display:block !important;
+  position:absolute;
+  left:50%;
+  top:50%;
+  right:auto;
+  bottom:auto;
+  transform:translate(-50%,-50%);
+  min-width:54px;
+  padding:7px 10px;
+  border-radius:14px;
+  background:rgba(0,0,0,0.58);
+  border:1px solid rgba(255,246,191,0.48);
+  color:#fff6bf;
+  font-size:24px;
+  font-weight:bold;
+  line-height:1;
+  text-align:center;
+  text-shadow:0 0 10px rgba(255,230,130,0.95);
+  box-shadow:0 0 16px rgba(255,230,130,0.22), inset 0 0 10px rgba(255,255,255,0.06);
+  pointer-events:none;
+  z-index:50;
+}
+
   </style>
 </head>
 <body>
