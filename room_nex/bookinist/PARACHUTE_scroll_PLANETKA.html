@@ -1,0 +1,2655 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Парашютные тексты — HTML-книга-свиток</title>
+<style>
+html,body{margin:0;min-height:100%;background:#0e1518;color:#dff4f8;font-family:Georgia,"Times New Roman",serif;}
+body{background:radial-gradient(circle at 52% 0%,#79c7df55,transparent 42%),linear-gradient(120deg,#0e1518, #183947 48%, #0d0b09);}
+.shell{display:flex;min-height:100vh;}
+aside{width:310px;box-sizing:border-box;padding:18px 14px;background:rgba(7,6,5,.74);border-right:1px solid rgba(238,210,150,.22);position:fixed;left:0;top:0;bottom:0;overflow:auto;}
+main{margin-left:310px;box-sizing:border-box;width:calc(100% - 310px);padding:30px 4vw 60px;}
+h1{font-size:24px;line-height:1.25;margin:0 0 6px;color:#e5fbff;font-weight:normal;}
+.meta{font-size:13px;color:rgba(234,223,202,.72);margin-bottom:16px;}
+.tocBtn{display:block;width:100%;text-align:left;margin:0 0 7px;padding:8px 10px;border:1px solid rgba(229,199,130,.22);border-radius:10px;background:rgba(255,244,215,.055);color:#dff4f8;cursor:pointer;font-family:Georgia,"Times New Roman",serif;font-size:14px;line-height:1.25;}
+.tocBtn:hover,.tocBtn.active{background:#358ca533;border-color:rgba(255,224,150,.55);color:#e5fbff;}
+.nav{display:flex;gap:10px;margin:16px 0 10px;}
+.nav button{flex:1;padding:9px;border-radius:12px;border:1px solid rgba(255,225,160,.30);background:rgba(255,255,255,.06);color:#e5fbff;cursor:pointer;}
+.chapter{display:none;max-width:950px;margin:0 auto;background:rgba(255,250,235,.075);border:1px solid rgba(238,210,150,.18);border-radius:24px;box-shadow:0 20px 80px rgba(0,0,0,.34);padding:34px 42px;}
+.chapter.active{display:block;}
+h2{font-size:30px;line-height:1.2;margin:0 0 8px;color:#e5fbff;font-weight:normal;}
+.source{font-size:12px;color:rgba(234,223,202,.60);margin-bottom:24px;}
+pre{white-space:pre-wrap;word-wrap:break-word;font-family:Georgia,"Times New Roman",serif;font-size:19px;line-height:1.62;color:#dff4f8;margin:0;}
+.topline{max-width:950px;margin:0 auto 18px;display:flex;align-items:center;gap:12px;justify-content:space-between;color:rgba(234,223,202,.72);}
+.smallBtn{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,225,160,.28);background:rgba(255,255,255,.06);color:#e5fbff;cursor:pointer;}
+@media(max-width:800px){.shell{display:block;}aside{position:relative;width:auto;max-height:45vh;border-right:0;border-bottom:1px solid rgba(238,210,150,.22);}main{margin-left:0;width:auto;padding:18px 12px 40px;}.chapter{padding:24px 18px;border-radius:18px;}pre{font-size:17px;}h2{font-size:24px;}}
+@media print{aside,.topline{display:none;}main{margin:0;width:auto;padding:0;}.chapter{display:block;box-shadow:none;border:0;page-break-after:always;color:#000;background:#fff;}body{background:#fff;color:#000;}pre{color:#000;font-size:13pt;}h2{color:#000;}}
+.bookmarkBox{margin:14px 0 12px;padding:10px 11px;border:1px solid rgba(117,236,135,.28);border-radius:16px;background:rgba(41,117,54,.13);font-size:13px;line-height:1.35;color:rgba(230,255,226,.88);}
+.bookmarkBtn{margin-top:8px;width:100%;padding:8px 10px;border-radius:14px;border:1px solid rgba(117,236,135,.35);background:rgba(62,180,77,.15);color:#eaffdf;cursor:pointer;font-family:Georgia,"Times New Roman",serif;}
+.planet{position:fixed;right:28px;top:48%;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#efffe9 0 12%,#82ff84 18%,#18a83d 58%,#07551e 100%);box-shadow:0 0 12px rgba(129,255,133,.95),0 0 34px rgba(98,255,116,.42);z-index:9;cursor:pointer;transition:top .35s ease,transform .2s ease;}
+.planet:hover{transform:scale(1.12);}
+@media(max-width:800px){.planet{right:12px;}}
+@media print{.planet,.bookmarkBox{display:none;}}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside>
+<h1>Парашютные тексты</h1>
+<div class="meta">Глав: 9. Один самостоятельный HTML-файл.</div>
+<div class="nav"><button id="prevBtn">←</button><button id="nextBtn">→</button></div>
+<div class="bookmarkBox">🟢 Планетка-закладка цепляется за место в книге и возвращает чтение туда же.<button class="bookmarkBtn" id="saveMark">Поставить планетку здесь</button></div>
+<button class="tocBtn" data-i="0">01. Авиаклубы города Москвы</button><button class="tocBtn" data-i="1">02. Генерал-лейтенант Н.С.Демин. Десантники (фрагмент мемуаров)</button><button class="tocBtn" data-i="2">03. Rec.Skydiving F.A.Q. Sheet (United Kingdom)</button><button class="tocBtn" data-i="3">04. Rec.Skydiving F.A.Q. Sheet</button><button class="tocBtn" data-i="4">05. Описание вида SKY DIVER</button><button class="tocBtn" data-i="5">06. 404 Not Found</button><button class="tocBtn" data-i="6">07. Newsgroups: rec.skydiving</button><button class="tocBtn" data-i="7">08. Blood on the risers</button><button class="tocBtn" data-i="8">09. You know you&#x27;re a skydiver when...</button>
+</aside>
+<main>
+<div class="topline"><span id="pos"></span><button class="smallBtn" onclick="window.print()">Печать / PDF</button></div>
+<article class="chapter" id="ch0" data-title="Авиаклубы города Москвы"><h2>Авиаклубы города Москвы</h2><div class="source">aviaclubs.txt.htm</div><pre>Авиаклубы города Москвы
+
+
+1-й МГАК
+
+
+Каширское ш., 12. 111-5056
+м.Каширская
+Вертолеты Ми-2, Ми-8
+Аэродром: г.Медынь Калужская обл. (08433) 211-23
+
+
+3-й МГАК
+
+
+Каширское ш., 12. 111-3315, 2264, 2265
+м.Каширская
+Парашютные прыжки всех видов для спортсменов и начинающих 1300-900тыр.
+Полеты на вертолетах и самолетах
+4 месячный курс пилотирования $6000
+Аэродром: дер. Волосово Чеховский р-н Московской обл.
+электричкой с Курского вокзала до Чехова, А.21 до ост &quot;Аэродром&quot;
+
+
+Аэроклуб ОКБ Сухого
+
+
+Поликарпова, 23а. 945-6873, 941-7977, 941-7556
+м.Беговая
+Ознакомительные полеты на самолетах 95-300$/час
+планерах 30-40$/час
+Аэродром: 20 км от Тулы (170 км от Москвы)
+
+
+Дельтапланерный клуб МАИ
+
+
+Панфилова, 20 кор 3. 158-4895
+Полеты на дельтапланах, парапланах, мотодельтапланах.
+
+
+Тушинский аэроклуб
+
+
+Информацией не обладаю</pre></article><article class="chapter" id="ch1" data-title="Генерал-лейтенант Н.С.Демин. Десантники (фрагмент мемуаров)"><h2>Генерал-лейтенант Н.С.Демин. Десантники (фрагмент мемуаров)</h2><div class="source">desantniki.txt.htm</div><pre>Генерал-лейтенант Н.С.Демин. Десантники (фрагмент мемуаров)
+
+
+Фрагмент  1-й главы из неопубликованной книги воспоминаний
+о войне &quot;Огненные версты&quot; (1976 г.)
+
+
+...История  советских  воздушнодесантных войск началась 29
+июля 1930 года. В тот день под Воронежем были проведены  первые
+в  нашей  стране  парашютно-десантные  операции  с  выполнением
+прыжков  с  самолета.  Добровольцы,  совершившие  тренировочные
+прыжки,  были  участниками  первого в мире парашютного десанта.
+Тогда  же  в  нашей   стране   началось   создание   парашютной
+промышленности.
+Большую  роль  в  организации советских воздушно-десантных
+войск, в разработке теории их боевого применения сыграл  Маршал
+Советского  Союза  М.  Н.  Тухачевский.  В труде &quot;Новые вопросы
+войны&quot; он отмечал важность воздушных десантов в будущей  борьбе
+против агрессора.
+Внимание к боевому применению воздушных десантов позволило
+уже в начале 30-х  годов  обеспечить  Красную  Армию  десантной
+авиацией.  парашютной  и  другой  техникой  и  в короткие сроки
+сформировать соединения и части воздушнодесантных войск.
+К  началу  Великой Отечественной войны Советский Союз имел
+уже  обученные  воздушиодесантные  соединения.   К   сожалению,
+применить  эти  войска  в  массовом  масштабе в начале войны не
+позволила стратегическая  обстановка.  Красная  Армия,  активно
+обороняясь,  отходила  на  восток.  В  силу этого и ряда других
+причин  наша  армия,  имея  хорошо   обученные   и   достаточно
+оснащенные    боевой    техникой    воздушнодесантные   войска,
+использовала их в ограниченных размерах.
+В  последних  числах  января  1941  г. командира корпуса и
+меня, комиссара корпуса, вызвали в штаб воздушнодесантных войск
+(ВДВ).  Командующим  ВДВ тогда был назначен генерал-майор В. А.
+Глазунов, членами Военного совета т. т. В. Я. Клоков  и  Г.  П.
+Громов.
+
+
+x x x
+
+
+Первый прыжок десантника является как бы концентрированным
+выражением  всех  человеческих  качеств  --  смелости,  отваги,
+бесстрашия,  расчета,  уверенности  в  себе, готовности идти на
+известный  риск,  он  связан  с  романтикой  подвига  в   жизни
+человека.
+Когда,   отделившись   от   самолета,  увидишь  над  собой
+раскрытый купол парашюта, эта минута кажется  самой  светлой  и
+радостной  в  жизни,  хочется  громко  запеть  от  счастья. Это
+мгновение наполняет человека гордостью,  чувством  собственного
+достоинства, смелостью и отвагой.
+В  моем  сердце  и  сознании  десантники  до  конца  жизни
+сохранятся как  смелое  крылатое  племя,  воспитанное  в  самое
+трудное  время  войны.  Десантники  на  войне  -- это дружная и
+монолитная  семья,  спаянная  единой  целью  --  готовностью  и
+умением   драться   в   тылу   врага.   Все   мы,  командиры  и
+политработники, вместе с десантниками  тщательно  готовились  к
+этому.  Много  прыгали,  лично сами укладывали парашюты, каждый
+день напряженно учились подрывному и саперному делу,  стрельбе,
+выносливости,  разведке,  изучали  противника,  его  сильные  и
+слабые стороны, готовились быть смелыми и дерзкими для действий
+в тылу врага. И мы хорошо понимали, что воспитать мужественного
+и дерзкого десантника -- это дело очень  сложное,  оно  требует
+большого умения и личного примера.
+На  прыжках, при тренировках на физическую выносливость, в
+изучении  подрывного  дела  наши  политработники   чаще   всего
+воздействовали  на  подчиненных  личным  примером,  они первыми
+совершали  прыжки,  показывали,  как  надо   поджигать   запалы
+взрывчатки  и  бросать  боевые гранаты, оказывать первую помощь
+раненому или попавшему в  беду  товарищу.  У  комиссаров  наших
+десантных  бригад  тов. Евдана, Голофаста, Вырвича прыжков было
+значительно больше, чем у рядовых и сержантов.
+Из  командного  состава  соединения  опытными десантниками
+были лишь командир  корпуса  генерал  И.  И.  Губаревич  и  еще
+несколько   начальников   парашютной  службы.   Многие  офицеры
+управления корпуса прибыли из пехоты и других родов войск  и  к
+парашютным прыжкам особого пристрастия не имели. Комкор однажды
+вызвал меня, улыбнулся:
+--  Я  командир,  могу  приказать  людям  прыгать. А ты --
+комиссар. Сумей убедить их--спасибо скажу.  Если  надо,  личным
+примером убеди. У тебя ведь уже немало прыжков.
+Я пригласил штабных работников для беседы.
+--  Товарищ  полковой  комиссар,--  сказал  мне  начальник
+оперативного отдела,-- а почему  вы  так  настойчиво  требуете,
+чтобы все освоили парашют? Мы из пехоты, дело свое знаем. Но мы
+-- люди в годах. Когда нужно, пойдем в бой. А парашют... Почему
+бы наш корпус не выбросить посадочным десантом?
+Беседа  не очень удалась. Но кое-что все же запало людям в
+души. Например, я объяснил, что после неудачного для нас начала
+войны   не   хватает   транспортных  самолетов  для  посадочных
+десантов. А вообще-то десантники должны владеть парашютом!
+Однажды,  присутствуя  на заседании Военного совета ВДВ, я
+поделился с командующим и  членами  Военного  совета  мыслью  о
+парашютной подготовке штабных работников корпуса. Генерал В. А.
+Глазунов поддержал меня:
+--  Правильно,  комиссар. Всех, всех надо научить прыгать,
+вплоть до музыкантов и поваров.
+Забегая вперед, скажу об этом замечательном полководце. За
+форсирование Днепра  в  сложных  условиях  и  блестящий  маневр
+соединениями  4-го  гвардейского  стрелкового  корпуса  в обход
+никопольской  группировки   противника   Василию   Афанасьевичу
+Глазунову  было присвоено звание Героя Советского Союза. Войска
+корпуса, которым он командовал,  во  взаимодействии  с  другими
+соединениями освободили Одессу.
+Василий   Афанасьевич   проявил   высокое   мастерство   в
+руководстве   десантными    войсками    при    наступлении    в
+лесисто-болотистой   местности,   особенно   при   форсировании
+Западного Буга и Вислы. За эту  операцию  Президиум  Верховного
+Совета СССР наградил командира корпуса генерал-лейтенанта В. А.
+Глазунова второй медалью &quot;Золотая Звезда&quot;.
+Василий  Афанасьевич  был простым, скромным и трудолюбивым
+военачальником. Все мы, десантники, любили своего командующего,
+При  первой  же  встрече  В. А.  Глазунов подробно расспросил о
+настроении личного состава, о том, как обучаются десантники. Он
+присутствовал   на   первых   тренировочных   прыжках.   Вызвав
+адъютанта, распоряжался:
+-- Комиссару корпуса принеси маузер в деревянной колодке и
+маленький &quot;Вальтер&quot;. Мне же генерал пояснил:
+--  Время  тяжелое.  Я  тебя знаю еще по Дальнему Востоку,
+нем-цам в бою живым не дашься. Если  худо  придется,  вот  этот
+маленький  пистолет тебе пригодится. А маузер... сам понимаешь!
+Бей их до последнего.
+
+Позднее,   участвуя  в  боях,  я  не  раз  вспоминал  этот
+разговор. Десантникам приходилось драться в  тылу,  попадать  в
+самые невероятные переделки. Всякое случалось, но в плен они не
+сдавались.
+Особенно нас волновали вопросы, как воспитать в десантнике
+волю, стойкость и  выносливость,  готовность  переносить  любые
+трудности во время боя в тылу врага.  Эти качества не даются от
+природы. Они формируются в процессе обучения, на практике.
+Стойкость   и   мужество   для  десантника  --  норма  его
+поведения. Он не может даже  и  предположить,  в  какой  момент
+придется  пережить критическое состояние. Кажется, что все идет
+хорошо, парашют надежный и безотказный, прыжок, и вдруг...
+
+Десантировались  воины.  Смело  шагнул в проем самолетного
+люка и рядовой Николай  Козак.  В  воздухе,  однако,  случилось
+непредвиденное.  Какая-то  сила  вдруг быстро потянула младшего
+сержанта Владимира Яриша вниз, относя его  на  парашют  Козака.
+Перехлест строп с неполным раскрытием купола!
+--  Николай!  Скользи!--тревожно  прокричал  Яриш. Рядовой
+Козак схватил несколько строп, потянул вниз,  чтобы  уклониться
+от  летевшего на него Владимира Яриша. Но было уже поздно. Ноги
+младшего сержанта коснулись купола, соскользнули  с  него...  В
+следующую   секунду   Владимир  зацепился  за  стропы  парашюта
+товарища своим ранцем. Парашют Яриша &quot;погас&quot;,  ему  не  хватало
+воздуха.  С каждой секундой неумолимо сокращалось расстояние до
+земли. Но десантники не растерялись.
+Николай  Козак  решил  ввести в действие запасной парашют.
+Рывок за кольцо, и...  шелковый купол  падает  вниз.  Сказалось
+нервное напряжение. &quot;ЗП&quot; (запасной парашют) надо было открывать
+не рывком за вытяжное кольцо. Следовало осторожно,  придерживая
+левой  рукой  клапаны  ранца,  вытянуть кольцо, затем вытравить
+пять-шесть метров строп и откинуть парашют  в  сторону.  Но  об
+этом  хорошо на земле рассуждать. А когда вместе с &quot;пассажиром&quot;
+летишь на &quot;жесткую планету&quot;...
+Младший  сержант  Яриш  спокойно,  словно  это  было  не в
+аварийной  обстановке,  а   на   предпрыжковой   подготовке   в
+парашютном  городке,  по  всем  правилам  вытянул кольцо своего
+запасного парашюта, взял купол двумя руками и с силой бросил  в
+сторону  и  вверх  под  углом  в 45 градусов. Купол стал тотчас
+наполняться   упругим    воздухом.     Приземление    произошло
+благополучно.
+
+Опыт товарищей, настойчивая тренировка вселяют уверенность
+в свои силы,  в  успех  нового  дела.  Это  и  есть  воспитание
+психологической   устойчивости,   умение  взять  себя  в  руки,
+побороть робость в  любой,  самой  сложной  обстановке.  Каждый
+человек   может   преодолеть   чувство   страха,   робости  или
+неуверенности. Для этого надо в совершенстве знать  свое  дело,
+постоянно закалять волю, учиться держать себя в руках.
+Подолгу  мы,  политработники,  горячо обсуждали, как лучше
+воспитывать десантников  волевыми,  стойкими,  мужественными  и
+самоотверженными, храбрыми и отважными, чтобы легче было с ними
+воевать  в  тылу  врага.  Основой  в  этом  важном  деле   было
+воспитание  любви  и  преданности  нашей Родине, своему народу,
+Коммунистической партии.
+
+Каждый  десантник  воспитывался  так,  чтобы  он  смог без
+колебаний, в любую минуту пойти в бой в тылу врага, сражаться и
+побеждать  там  даже  один,  а  если  потребуется  и умереть за
+Родину,  за  наш   народ.   Эти   качества   прививали   воинам
+политработники. Убеждением, словом, личным примером.
+Ставка  Верховного Главнокомандующего приняла решение -- к
+середине февраля 1943 года подготовить  крупную  наступательную
+операцию   с   целью   уничтожения  в  районе  города  Демянска
+группировки противника, где  находилась  в  полуокружении  16-я
+фашистская армия.
+В  конце  февраля  1943 года наша дивизия в составе Первой
+ударной армии сосредоточилась  у  переднего  края  за  Ловатью.
+Боевой  приказ  командарма  генерала  Короткова  обязал нас, не
+теряя ни секунды, приступить к подготовке  операции.   Огромная
+работа  проводилась  со всеми воинами по разъяснению значимости
+предстоящей задачи.
+
+Бой  --  строгий  судья.  Постоянно кто-нибудь выбывает из
+строя временно, а то уходит и навсегда, отдав жизнь за  Родину.
+Поэтому работа с активом приобретает здесь особое значение. Все
+командиры и политработники уделяли много повседневного внимания
+подбору  и воспитанию партийного актива, особенно парторгов рот
+и  их  заместителей.  Основные  усилия  были  сосредоточены  на
+индивидуальной  работе  с  отличившимися в бою воинами, ибо это
+был главный резерв пополнения непрерывно выбывающего  из  строя
+актива.  Работа  с молодыми коммунистами начиналась буквально с
+выдачи им партийного  билета.  Часто  тут  же  они  получали  и
+партийные  задания,  а  в  бою  сразу  становились активистами,
+вожаками масс.
+В  бою  часто  нет времени и возможности собирать собрания
+партактива, даже проводить короткие семинары  или  инструктажи.
+Работа  с активом велась главным образом индивидуально. Каждого
+в отдельности инструктировали через звенья политработников, как
+надо  поднимать  роту в атаку, что следует предпринимать, чтобы
+неопытные бойцы не обморозились, особенно ночью.
+С  наступлением распутицы наше положение резко ухудшилось.
+Продовольствие не подвозилось, его не  было  даже  за  Ловатью.
+Люди  голодали,  пухли  от  недоедания.   Оставшиеся лошади, на
+которых надо было возить пушки,  совершенно  отощали,  они  ели
+побеги,  кору  с  деревьев  и даже хвою с молодых сосен и елей.
+Многие десантники болели цингой.
+Мы  постоянно  находились  на  переднем  крае,  разъясняли
+бойцам  реально  создавшуюся  обстановку,   поднимали   их   на
+выполнение   поставленной   боевой   задачи.    Работа   велась
+непосредственно в окопах и блиндажах,  но  в  большинстве  мест
+невозможно  было  даже  вырыть  эти  окопы и не из чего сделать
+блиндажи, так как во всей округе, кроме низкорослой  болотистой
+осины  и  кустарников, ничего не росло. А враг не давал поднять
+головы: с утра до вечера буквально засыпал минами и  снарядами,
+с  воздуха  непрерывно  утюжила боевые порядки и тылы вражеская
+авиация. Она волнами налетала на районы сосредоточения войск  и
+на дороги, сделанные из бревен, и бомбила нас. Ночью негде было
+обогреть и  обсушить  людей,  нельзя  было  разжечь  костра,  а
+палаток  и  печек и в помине не было. И, несмотря ни на что, мы
+все время поддерживали боевой дух бойцов, вели их  за  собой  в
+бой.
+
+Десантники  дрались как герои, помогая Ленинграду прорвать
+блокаду.
+
+&lt; ... &gt;
+
+Много  прожито  и  много пережито. Есть о чем вспомнить. И
+когда я задумываюсь над этим, в памяти моей неизбежно всплывают
+огненные версты Великой Отечественной войны и героическое племя
+бесстрашных солдат Отчизны.</pre></article><article class="chapter" id="ch2" data-title="Rec.Skydiving F.A.Q. Sheet (United Kingdom)"><h2>Rec.Skydiving F.A.Q. Sheet (United Kingdom)</h2><div class="source">faq-skydive-uk.txt.htm</div><pre>Rec.Skydiving F.A.Q. Sheet (United Kingdom)
+
+
+Subject: rec.skydiving UK FAQ (Frequently Asked Questions)
+Date:    23 Sep 1997
+From:    peteshew@cix.compulink.co.uk (&quot;Pete Shew&quot;)
+Newsgroups: rec.skydiving, news.answers, rec.answers
+
+Archive-name:  sports/skydiving/uk-faq
+Last-modified: 1997/8/04
+Version: 10
+
+[Changes since last version - Jul 1997
+1. Some DZ web sites added
+]
+
+
+Rec.Skydiving F.A.Q. Sheet (United Kingdom)
+
+=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+This posting constitutes a complement to the Rec.Skydiving F.A.Q. with
+specific reference to the pursuit of the sport in the United Kingdom.
+Its intended audience is those resident in, or planning to visit, the
+UK.
+
+[HOT NEWS - now in HTML at http://www.shew.clara.net/faquk.htm]
+
+Additions, corrections, or suggestions can be posted or emailed to the
+current maintainer, Pete Shew, pete@remove_this_bit@shew.clara.net.
+
+NOTE: BPA-OM refers to the British Parachute Association Operations
+Manual 1984 (Second re-write February 1996).
+
+Rec.skydiving has regular questions along the lines of &quot;If I go to the
+USA to take an AFF course, will I be able to jump when I return to the
+UK?&quot;, and &quot;I&#x27;m planning to come to the UK for a few days, where can I
+jump and what documents do I need?&quot;. This FAQ attempts to answer some
+of these questions. Please read to see if your question can be answered
+before posting a question to rec.skydiving.
+
+If you can’t find the answer here, then please let me know the question
+AND answer, when you get it, for possible inclusion in a later version.
+
+I have arranged this FAQ into the following sections:
+
+-.      The British training systems and how they differ from the US
+equivalents.
+
+-.      British medical and reserve packing requirements
+
+-.      Requirements for UK jumpers abroad and foreign jumpers in the UK.
+
+-.      British Parachute Association details
+
+-.      British Drop Zone listing.
+
+-.      Disclaimer
+
+
+*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+
+
+1. The British training systems and how they differ from the US
+
+equivalents.
+
+*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+
+Training is carried out at parachuting clubs which are usually run
+under the auspices of the British Parachute Association, although there
+are a few exceptions. Before being accepted on a course you will have
+to provide evidence of fitness to parachute - either a self declaration,
+or if over 40, a doctors medical certificate.
+
+
+1.1  Qualifications of parachutists
+
+
+The BPA qualifies parachutists according to a category system. The
+significant levels are:
+
+Cat 8 - qualified as a parachutist. Restricted formation skydiving,
+restricted weather conditions, can use throw away pilot chute, must
+wear a Protec helmet.
+
+Cat 9 - some FS and weather restrictions lifted.
+
+Cat 10 - all FS and weather restrictions lifted.
+
+In addition there are Fиdиration Aиronautique Internationale (FAI)
+certificates of which the only significant ones are:
+
+FAI ’C’ licence - Cat 10 and 50 jumps and cleared for spotting.
+Permitted to do certain demo jumps, may be jumpmaster.
+
+FAI ’D’ licence - Cat 10 and 200 jumps. May wear a frappe hat.
+This is the ultimate qualification unless instructor or rigger
+qualification is sought.
+
+
+1.2 Ram Air Progression System (RAPS) or Static Line Squares to Cat 8
+
+
+This is available at most Drop Zones in the UK now, and has totally
+replaced rounds at a large number.
+
+This system uses the modern ram air or &quot;square&quot; sports parachute from
+the first jump. The square parachute has a higher forward speed, may
+be jumped in higher wind conditions (giving a significantly higher
+number of jumpable days) and a potentially much more gentle landing
+than the traditional, military style round parachute
+
+The student first uses a Static Line square parachute that is opened
+automatically on leaving the aircraft by means of the &quot;static line&quot;
+attached to a strong point within the aircraft. The student also
+has a piggyback mounted reserve parachute and an Automatic Activation
+Device (AAD) which will attempt to deploy the reserve if conditions
+merit it.
+
+During progression, the student with move on to a ripcord deployed
+version of the same equipment. The ripcord may be mounted on the
+legstrap or the bottom of the container - it is not usually possible
+for a student to change between equipment with different ripcord
+locations, so moving between DZs may be difficult.
+
+The progression system requires the student to demonstrate over a
+series of jumps, stability and ability to pull a dummy ripcord handle
+before progressing to freefall. A further series of jumps incorporating
+increasing freefall delays and showing control by performing turns,
+back loops and tracks leads to the Category 8 qualification dive of a
+half series. That is, a dive exit, back loop, alternate 360 degree
+turns, a short track and wave off, usually from 8000ft.
+
+After achieving Cat 8 the parachutist may then convert from ripcord
+to a throw away pilot chute. This must be on kit fitted with an
+Automatic Activation Device (AAD).
+
+The absolute minimum number of jumps is 17 or 18 depending on how the
+manual is interpreted, but expect a good progression to take less than
+30 jumps. A slow one may take 50 or 60 jumps.
+
+A variation of the RAPS progression allows the student who has reached
+Category 5 to transfer to the AFF system at Level 3. (This could reduce
+the cost of AFF by avoiding the expensive early AFF jumps with two
+instructors).
+
+
+1.3 Static Line Round progression to Cat 8
+
+
+Still in common use in the UK is the static line round parachute
+course. This is largely used on &quot;charity farms&quot; where the majority of
+first time jumpers are doing charity associated jumping and are
+unlikely to stay in the sport.
+
+This is the traditional first introduction to parachuting and uses a
+round parachute which is automatically opened when the student leaves
+the plane - just like in the war movies. The round can be steered and
+has a forward speed of five to eight m.p.h., and is an extremely safe
+and reliable piece of kit. The student will also have a belly mounted
+reserve parachute.
+
+The progression system requires the student to demonstrate over a
+series of jumps, stability and ability to pull a dummy ripcord handle
+before progressing to freefall. A further series of jumps incorporating
+increasing freefall delays and showing control by performing turns,
+back loops and tracks leads to the Category 8 qualification dive of a
+half series. That is, a dive exit, back loop, alternate 360 degree
+turns, a short track and wave off, usually from 8000ft.
+
+The student may convert to a RAPS canopy at any time during the
+progression subject to approval of the Club Chief Instructor (CCI).
+No progression may take place for at least the first two jumps. The
+conversion may be left until after Cat 8.
+
+After Cat 8 (and conversion to RAPS kit if necessary) the parachutist
+may then convert to a throw away pilot chute. This must be on kit
+fitted with an Automatic Activation Device (AAD).
+
+The absolute minimum number of jumps is 17 or 18 depending on how the
+manual is interpreted, but expect a good progression to take less than
+30 jumps, plus conversion jumps (two lots).
+
+
+1.4 Accelerated Freefall (AFF) to Cat 8
+
+
+AFF or Accelerated Free Fall takes the student to Cat. 8 in just eight
+training jumps plus ten consolidation jumps if all goes well. The
+equipment used is a ripcord deployed ram air parachute with AAD like
+the RAPS kit.
+
+All training jumps except the last are from at least 10000 feet, and
+the first three are with two instructors holding the student and
+performing in-air coaching. A major part of AFF is the pre jump
+briefing, and the post jump debrief, many centres use air to air video
+to supplement the training and to review the jump.
+
+The seventh training jump is the same half series that the category
+jumpers perform. The final jump in the training is a hop and pop from
+around 5000ft to simulate aircraft emergency bale out and give
+experience of subterminal deployment. NOTE: THIS IS NOT AN AFF
+REQUIREMENT IN THE USA.
+
+Following the hop and pop, ten consolidation jumps must be made at an
+approved AFF club before Cat 8 is awarded. NOTE: THIS IS NOT AN AFF
+REQUIREMENT IN THE USA. Conversion to throw away pilot chute
+deployment may be carried out during the consolidation.
+
+This is the most likely cause for problems with UK students going to
+the USA to do AFF courses. Unless they use BPA approved instructors
+they may have problems when returning to the UK. I don’t have any
+general guidelines, but I am aware of cases where the student has had
+to repeat the half series jump. As far as I am aware, the student will
+always have to do the hop and pop and the ten consolidation jumps.
+
+I remember one case (a few years ago) where someone returned after
+doing AFF in Florida and a number of FS jumps, and they were asked to
+return to the category system by their home DZ!
+
+The UK student should also be careful of cheap AFF courses offered at
+boogies and DZs in continental Europe - their rules may be different
+and you may have to repeat some of the course back in the UK.
+
+[This is an area in which I need more information and case histories.
+I will also try to tie down a few CCIs].
+
+Of course, there will be no problems with AFFs achieved outside the UK
+if the instructors are current BPA AFF instructors. This is the case
+in Skydive Sebastian in Florida, and many UK instructors offer AFF
+courses in France and Spain.
+
+The minimum number of jumps is 18  including consolidation and
+conversion, and is unlikely to be much more.
+
+
+1.5 Progression to Cat 10.
+
+
+The WARP system is the usual method of progression to Cat 10.
+This is identical to the US WARP system, so no problems should be
+encountered. The old BPA progression system (4 point 4 way) still
+exists but is out of favour. Skydive University training is also
+now acceptable.
+
+
+1.6 Progression to &quot;D&quot; licence - just keep loggin&quot; them jumps.
+
+
+*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+
+
+2. British medical and reserve packing requirements
+
+
+*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+
+
+2.1 Medical certificates
+
+
+As of the 14th October 1996, the requirements are that a parachutist
+on reaching 40 or first starting to parachute over 40 requires a
+medical certificate endorsed and stamped by a medical doctor.
+
+Subsequently, and up to the ago of fifty, an annual self certification
+is required. Beyond the age of fifty, a tri-annual medical certificate
+endorsed and stamped by a medical doctor is required, with self
+certification for each of the intermediate years.
+
+
+2.2 Reserve repacking
+
+
+In The UK, reserves must be inspected and repacked at least every six
+months. This must be carried out by a person authorised rto pack that
+specific reserve/container/AAD combination.
+
+There is still a deal of confusion over the qualifications for
+repacking reserves. My understanding is the following order of
+qualification:
+
+&gt; Rigger examiner, advanced  rigger, rigger
+all may assemble and pack any reserve into any container with any
+AAD provided that they have the relevant manuals and safety notices
+to hand. Qualified riggers may also perform remedial work and AAD
+installation.
+
+&gt; Advanced packers
+may assemble and pack any reserve into any container with any AAD
+provided that they have the relevant manuals and safety notices to
+hand. Remedial work is restricted  - my guess is that if can be called
+assembly it is OK, if it is installation it is not OK. Fitting a Cypres
+to a &quot;Cypres ready&quot; conatiner is acceptable - installing the Cypres
+pocket is not.
+
+&gt; Holders of advanced packing tickets
+may assemble and pack reserves/container/AAD combinations that are
+specifically endorsed on their advanced packing certificate, provided
+that they have the relevant manuals and safety notices to hand.
+Remedial work is restricted  - my guess is that if can be called
+assembly it is OK, if it is installation it is not OK. Fitting a
+Cypres to a &quot;Cypres ready&quot; conatiner is acceptable - installing
+the Cypres pocket is not.
+
+It is no longer possible to obtain an advanced packing certificate
+as the Advanced Packer qualification has superceded it, but it is
+still possible to get additional endorsements on an existing certificate.
+
+&gt; Holders of packing certificates endorsed for round reserves
+may pack round reserves. Not many of these left - I hope.
+
+&gt; Instructors
+may pack round reserves - this is another hang over from the dark ages!
+
+*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+
+
+3. Requirements for UK jumpers abroad and foreign jumpers in the UK
+
+
+*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+
+
+3.1 UK jumpers abroad
+
+
+Usually your current documentation is sufficient. Most countries will
+respect your reserve packing (but I think the US may demand that your
+reserve repack is less than 4 months old - the UK cycle is 6 monthly).
+The BPA third party insurance is NOT valid in North America, so USPA
+membership or equivalent may be required. Medical cover is strongly
+recommended when jumping abroad - make sure you have your form E111
+when jumping in the European Union.
+
+
+3.2 Foreign jumpers in the UK
+
+
+BPA-OM Section 6. EQUIPMENT, Para 8.5 Reserve parachutes that have been
+packed in a foreign country, in a manner acceptable to the parachuting
+organisation in that country, may be jumped at a BPA club for up to 120
+days from the date of that packing.
+
+BPA-OM Section 11 MEDICAL, Para 2.6 Foreign Parachutists. A Parachutist
+from a foreign country may parachute at a BPA club if he/she fulfills
+the medical requirements of that parachutist&#x27;s own country.
+
+BPA-OM Section 12 DOCUMENTATION Para 1.1 All Parachutists, riggers,
+pilots, judges and DZ controllers must be current members of the
+British Parachute Association.
+
+In general, foreign parachutists have no problems jumping in the UK -
+just be sure to bring all your documents. Note that headgear, an
+altimeter and a knife are mandatory in the UK
+
+*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+
+
+4. The British Parachute Association
+
+
+*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+
+[This is the major parachuting authority in the UK. It is now
+recognised by the British Civilian Aviation Authority (CAA) as an
+Approved Organisation (28 Mar 1996), and is deputised to handle certain
+matters on behalf the CAA. I am not certain whether this extends to
+the regulation of non-BPA parachuting centres or whether they are still
+answerable directly to the CAA.]
+
+British Parachute Association,
+Wharf Way,
+Glen Parva,
+Leicester   LE2 9TF
+
+Tel: 0116 278 5271        Fax: 0116 247 7662
+
+
+Officers:
+BPA Chairman        Lofty Thomas
+BPA Vice Chairman   Phil Gibbs
+Council members     Chris Allen, Paul Applegate, Steve Apps,
+Tye Boughen, Peter Carroll, Dave Emerson,
+Phil Gibbs, Steven Hoy, Graham Liggins,
+Ian Marshall, Michael Matthews,
+Charles Ross, John Saunders, John Smyth,
+Lofty Thomas
+
+
+Magazine:   Sports Parachutist
+3 Burton Street
+Peterborough
+PE1 5HA
+
+Tel/Fax:    01733 755860
+email:      sportpara@aol.com
+Ed:         Lesley Gale
+
+
+*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+
+
+5. British Drop Zone listing.
+
+
+*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+
+The information in this section bears a surprising resemblance to the
+listing published in the BPA magazine Sports Parachutist.
+
+=====================================================================
+DROP ZONES
+=====================================================================
+Army Parachute Association
+The Commandant, JSPC  (Joint Services Parachute Club)
+Airfield Camp
+Netheravon
+Salisbury
+Wilts   SP4 9SF
+Tel: Bulford Camp 01980 33371 ext: (Commandant) 8245
+(Chief Instructor) 8229
+(Staff) 8277
+
+
+[Usually known just as Netheravon, this is the largest of the military
+drop zones. It is open to the public, and has instruction in AFF, RAPS,
+S/L rounds, WARP etc. A couple of Islanders (one a turbine) and a
+Short&#x27;s Skyliner]
+
+
+Black Knights Parachute Centre
+Bob Parry,
+Patty&#x27;s Farm,
+Hilliam Lane,
+Cockerham Nr Lancaster
+Tel: 01524 791820 (Weekend)  0151 924 5560 (Midweek)
+
+Week-end and Bank Holiday centre. 1st jump S/L courses. Radios and
+Aeroconicals. SL and FF progression to category 10. WARP, RW, and CRW
+instruction. Tandems. Air-to-air video available. Cessna 185 (in
+flight door). Accuracy pit. Canteen, showers, washing and toilet
+facilities. Tents and caravans on DZ. B&amp;B local.
+
+
+Border Parachute Centre
+Tim Andrewes
+Brunton Airfield,
+Chathill,
+Northumberland NE67 5ER
+Tel: 01665 589000
+
+On Northumbrian coast (area of outstanding natural beauty) ideal for
+combining a family holiday. Cessna 207, Cherokee 6 and Reims Rocket.
+Canteen on DZ, bar, restaurant and great accommodation centre, 3
+miles. Open Friday afternoons and weekends. Rounds, RAPS, Tandem, AFF,
+WARP, CRW.
+
+
+British Parachute School
+The Control Tower
+Langar Airfield
+Langar
+Nottingham
+Tel:/Fax: 01949 60878
+
+Large airfield only used for parachuting, with unlimited altitude.
+Open every day. Visitors welcome. Static line round and square
+courses. AFF, Tandem and WARP. Progression encouraged. Porter, Cessna
+206, Islander and Turbolet (Big, fast, seatbelts fitted and available
+all summer).
+
+
+British Skysports, Bridlington
+Dave or Nick Johnston
+East Leys Farm,
+Grindale
+Bridlington
+E.  Yorkshire YO16 4YB
+Tel: 01262 677367 or 0836 276188
+
+7 days. RAPS, Tandem, AFF WARP, CRW. Cessna 206 and 182, Advanced
+rigger. Camping Showers
+
+
+Cornwall Parachute Centre
+Frans Ranch
+Old Naval Airfield
+St Merryn
+Cornwall
+Tel: 01841 540691
+
+A different kind of skydiving centre! Cleanest and friendliest centre
+around. Emphasis on having fun and learning. C128 with inflight door,
+unrestricted altitude, static line squares, R.W. instruction under
+the Kinesthesia program, creepers, video facilities, all types of
+jumping, including RW &amp; freestyle, good jump prices. Everyone welcome,
+local accommodation available.
+
+
+Devon and Somerset Parachute School
+30 Tower Way
+Highfield
+Dunkeswell
+Nr Honiton
+Devon
+Tel: 01404 891690
+
+Part time club based at Dunkeswell airfield. Running 1st jump static
+line courses, Tandem, AFF courses with very experienced instructors
+who have been running AFF at Dunkeswell for 5 years. Student radios,
+reserves with AADs. Local accomodation available. Meals available on
+airfield as well as a bar.
+
+[This is the same place as the Royal Naval &amp; Royal Marines Sports
+parachute Association (RN&amp;RMSPA). Beautiful countryside, great local
+pub. See comments on RN&amp;RMSPA -  Pete]
+
+
+Eaglescott Parachute Centre
+Eaglescott Airfield
+Ashreigney
+Chumleigh
+Devon EX18 7PH
+Tel: 01769 560726 or 01769 520552
+
+Open every weekend and also weekdays by arrangement. Friendly small
+club atmosphere with emphasis on safety. All students equipped with
+AADs, helmet radios, and GQ Aeroconicals. RW, CRW, Style and Accuracy
+pit. Tents and caravans on the DZ. Local B&amp;&amp;B. If it windy, you can
+always go surfing! New RAPS equipment.
+
+
+Headcorn Parachute Centre
+Headcorn Airfield
+Headcorn
+Kent    TN27 9HX
+Tel: 01622 890 862
+
+Fulltime 9 to dusk, very active midweek. All levels of instruction /
+progression. Tandem, AFF, RAPS, Rounds, WARP, Accuracy, two Islanders
+- Free accomodation. Cafeteria run by skydivers, parachute club shop
+on site. Competitions, lots of fun, everyone welcome.
+
+
+Ipswich Parachute Centre
+Ipswich Airport
+Nacton Road
+Ipswich
+Suffolk IP3 9QF
+Tel:01473 710044
+DZ (Chatteris) 01354 740114
+
+Now operating at Chatteris for students only. Courses weekends and
+Thursday/Friday as required. For DZ details see North London Parachute
+Centre.
+
+Rigging services are still available at Ipswich Airport for the time
+being.
+
+
+London Parachute School
+P.O. Box 18
+Goring on Thames
+Reading RG8 9EW
+Tel: 01249 651909 DZ
+(Weekends) 0860 559112
+
+Weekend club: beginners courses and progression training. Farmland
+DZ. B&amp;B available locally. Aeroconicals, radios, boots and helmets
+loaned free. All welcome at small but friendly club. Please telephone
+beforehand for weekend activity.
+
+[DZ is at Lewknor, just off the M40]
+
+
+Merlin Parachute Centre
+Alanbrooke Barracks Topcliffe,
+Near Thirsk
+North Yorkshire
+Tel: Weekends 01748 875367
+Weekdays 01274 631044
+
+Open every weekend and bank holiday. Beginners courses, excellent
+student progression, student radios, AADs, boots and helmets. Tandem,
+WARP, AFF, RW/CRW instruction and air to air video available. Purpose
+built training areas, toilet and canteen facilities. accuracy pit and
+Islander aircraft. Friendly atmosphere, non members made very
+welcome. B&amp;B and free camping off site.
+
+
+Midlands Parachute Centre - CLOSED 1st MAY 1997
+The Control Tower,
+Windrush Camp,
+Nr Burford,
+Oxfordshire OX18 4TW
+Tel: Weekends 0451 844422 or 844449
+Weekdays/fax 01787 461621
+
+Skydive MPC. Great weekend club. Static line, tandem and WARP.
+Bunkhouse and showers, and cafe all on airfield. Camping but no
+caravans.
+
+
+North London Parachute Centre
+Chatteris Airfield
+Mount Pleasant Farm
+Chatteris
+Cambridgeshire
+CCI Micky Collins
+Tel 01354 740810
+
+Weekend DZ, piston Islander. Student and experienced jumpers.
+
+Head from Chatteris toward March and turn right near Doddington, then
+right again down a small road. Watch for signs.
+
+Airwaves also use this DZ - 01322 557375
+
+
+North West Parachute Centre
+Cark Airfield
+Flookborough
+Nr Grange-over-Sands
+Cumbria
+Tel: Airfield 015395 58672/58555
+Weekdays 01787 461621
+http://www.dragonfire.net/~thedropzone/nwpc/nwpc.htm (suspended)
+
+In fabulous lakeland scenery. RW, CRW, WARP, Kit Hire, BN Islander,
+bunk house, showers, etc. Camping on airfield, visitors welcome open
+weekends and bank holidays mostly.
+
+
+Oxon and Northants Parachute Centre
+Mike Bolton
+Hinton-in-the-hedges Airfield
+Steane, Nr. Brackley
+Northants NN13 5NS
+Tel: Office 01384 393373
+Mobile 0850 762349
+
+Situated off A422 between Banbury and Brackley. Open every Weekend,
+midweek evenings during BST months. Beginners S/L courses, radios,
+freefall progression, kit hire, C182 and C206.
+
+
+Peterborough Parachute Centre
+Sibson Airfield
+Wansford
+Peterborough PE8 6NE
+Tel: 01832 280490
+Fax: 01832 280409
+web: http://www.skynet.co.uk/~icarus/
+
+Tuesday to Sunday from 0800hr. Islander C206 + large turbine a/c during
+the summer. AFF, WARP, Tandem. Bunkhouse accommodation, free camping,
+bar, food. UNRESTRICTED ALTITUDE, Unrivalled experience.
+
+
+Peterlee
+Shotton Colliery Airfield
+Peterlee
+Co. Durham DH6 2NF
+Tel: 0191 5171234 / 0191 3865315
+
+Shotton Colliery Airfield, 2 miles west of Peterlee Flyover
+intersection. Open daily up to 8:30 pm. Beginners, Tandem, WARP, CRW,
+canteen, toilets and indoor packing facilities.
+
+
+Royal Air Force Sports Parachute Association (RAFSPA)
+Weston-on-the-Green
+Nr. Bicester
+Oxon
+Tel:    01869 343343
+web:    http://www.skydive.demon.co.uk/ (unofficial)
+
+Turbine Islander, C206, Occasional Skyvan. Showers, bar, canteen,
+camping. RAPS, AFF, WARP.
+
+
+Royal Naval &amp; Royal Marine Sports Parachute Association (RN &amp; RM SPA)
+The Old Control Tower
+Dunkeswell Airfield
+Dunkeswell
+Honiton
+Devon
+Tel: 01404 891697 / 891716
+
+Islander and Cessna 185 both with in flight doors. 1st jump courses,
+S/L rounds, AADs, radios, WARP, RW. Good partying, great local pub,
+beautiful countryside. Free camping.
+
+
+Skydive Scotland
+The Parachute Centre
+Errol Airfield
+Grange Errol
+Perthshire PH2 7TB
+Tel: 01821 642881 (Office)
+01382 360664 (Airfield)
+
+Weekends. Rounds RAPS AFF WARP CRW Tandem. Islander and C207.
+Canteen, dormitories, showers and camping.
+
+
+Skydive Strathallan
+Scotty Milne
+Strathallan Airfield
+Nr Auchterarder
+Perthshire      PH3 1LA
+Tel 01764 62572 (Weekends)
+web:    http://www.tardis.ed.ac.uk/~kish/strathallan.html
+
+Over thirty years of skydiving in Scotland. Open weekends and Friday
+evenings. C206/207. WARP, RW, CRW, Style. Accuracy (pit and electronic
+pad) air to air video. Canteen, lounge, video room, shop. Good camping,
+B&amp;B nearby.
+
+
+Stirling Parachute Centre
+Thornhill
+Nr. Stirling   FK8 3QT
+Tel: 01786 870788
+Fax: 01786 870748
+
+Full parachute training facility set in spectacular scenery.
+Convenient for both Glasgow and Edinburgh, and easily reached off the
+M9. Beginners courses run midweek and weekends. Progression from
+first jump to experienced free fall, RW, WARP, CRW, Tandem. Lecture
+rooms, indoor training and packing facilities. Camping available, B&amp;B
+nearby.
+
+
+Target Skysports Parachute Club
+Hibaldstow Airfield
+Hibaldstow Brigg
+South Humberside
+Tel:    0113 250 5600
+DZ 01652 648837
+
+Open Wed, Fri, Sat, Sun &amp; Bank Holidays - other weekdays by
+arrangement. 1st jump static line courses, tandem jumps, excellent
+student progression - WARP, RW, CRW, and AFF instruction. Radio
+helmets, AADs student and experienced kit hire, Cafe, toilet and
+shower facilities, accommodation, caravanning and camping. Twin Dornier,
+C206, Cherokee VI and Piper Lance. Competitive jump prices, everyone
+welcome. Unrestricted altitude.
+
+
+The Parachute Centre
+Tilstock Airfield
+Whitchurch
+Shropshire
+Tel:    01948 841111
+email:  skydive@tilstock.demon.co.uk
+web:    http://www.tilstock.demon.co.uk
+
+Open Saturdays and most Fridays (phone first) 8:30 until 21:00. No
+Sunday operation due to local planning restrictions. Easy to find on the
+A41, 3 miles South of Whitchurch. S?L round, Tandem, AFF, RAPS, FS &amp;CF
+coaching. Cessna 206 with in-flight door to 10,000&#x27;. Clubhouse with
+canteen and showers. Accommodation available. Good vibes with a friendly
+atmosphere. Everybody is welcome and nobody has to get up early on
+Sunday!
+
+
+West Wilts Parachute Club
+John Davis
+24 Turners Lane
+Crudwell
+Malmesbury
+Wilts SN16 9EN
+
+Tel: 01666 577756
+
+Ex Badminton Parachute Club
+
+
+Wild Geese Skydiving Centre
+Maggie Penny
+Movenis Airfield
+116 Carrowreagh Rd
+Garvagh
+Coleraine
+Co.Londonderry
+N.Ireland        BT51 5LQ
+DZ             Tel: 012665 58609         Fax: 012665 57050
+
+Open 7 days a week. Accommodation for 36, hot showers, full catering.
+Camping welcome. Daily student courses - full indoor training -
+training to Cat 10, RW and CRW instruction. S/L square courses, AFF,
+Tandem jumping and Display Team. Kit hire, AADs, radios, Air to air
+video and large accuracy pit with competition pad. Cessna 206 and
+Pilatus Porter.
+
+=====================================================================
+ASSOCIATED AND AFFILIATED ORGANISATIONS
+=====================================================================
+
+British Collegiate Parachute Association
+77 Trafford Road
+Eccles
+Salford
+Gt. Manchester
+M30 0JT
+(0161) 950 9095
+jason@bcpa.u-net.com
+http://www.u-net.com/~bcpa
+
+
+Cyprus Combined Services Parachute Club
+CJSATC Pergamos Camp, BFPO 58
+Tel: +357 47 44337 (Office)
++357 47 44245 (DZ)
+
+[Skydive in the morning, laze on the beach in the afternoon, party at
+night .. it&#x27;s a hard life. - Pete]
+
+[Accommodation can be had at the Sussex Pub - discounts to
+parachutists and convenient for the DZ:
+
+Sussex Hotel Apartments
+PO Box 289
+Dhekelia Road
+Larnaca
+Cyprus
+Tel:    Office  +357 4 644811/1
+Home    +357 4 644698
+Fax     +357 4 631779
+]
+
+
+POPS UK (Parachutists over Phorty Society)
+Sue Hill
+Hon. Sec. POPS UK
+40 The Hamlet,
+St Annes
+Lancashire FY8 3LE
+
+Tel:   01253 713841
+email: popsuk@bigfoot.com
+web:   http://www.pops.org.uk
+
+
+RAPA JSPC(L)
+(Rhine Army Parachute Association)
+Flugplatz,
+33175 Bad Lippspringe,
+Germany,
+BFPO 16
+Tel:    +49 05254 98 2378 or 2740
+Fax:    +49 05254 87456
+
+
+Joint Services Parachute Centre, Hong Kong
+Borneo Lines,
+Shek Kong
+NT Hong Kong
+BFPO 1
+Tel: +852 483 7221
+Fax: +852 4889341
+
+*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+
+
+4. Disclaimer
+
+
+*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+
+All information provided herein is offered on an &quot;as is&quot; basis.  There
+is no warranty expressed or implied concerning its applicability or
+fitness for any particular purpose.  Consult a trained professional
+before attempting any of the activities described in this document; it
+is not intended to be a substitute for proper professional instruction.
+
+--------      End                  -------
+Rec.Skydiving F.A.Q. Sheet (United Kingdom)
+
+
+Pete Shew
+pete at shew dot clara dot net (apologies but I hate spam)</pre></article><article class="chapter" id="ch3" data-title="Rec.Skydiving F.A.Q. Sheet"><h2>Rec.Skydiving F.A.Q. Sheet</h2><div class="source">faq-skydive.txt.htm</div><pre>Rec.Skydiving F.A.Q. Sheet
+
+
+Subject: rec.skydiving FAQ (Frequently Asked Questions)
+Date:    22 Sep 1997
+From:    belboz@cs.cmu.edu (Barry Brumitt)
+Newsgroups: rec.skydiving, news.answers, rec.answers
+
+Archive-name: sports/skydiving/faq
+Last-modified: 8/13/97
+
+[Changes since last version (04/28/97):
+1) Updated Denmark information.
+]
+[Changes since last version (03/30/97):
+1) Updated email address for germany&#x27;s national association
+]
+
+
+Rec.Skydiving F.A.Q. Sheet
+
+=-=-=-=-=-=-==-=-=-=-=-=-=
+
+
+PARACHUTE : An aerodynamic deceleration device.
+(Federal Aviation Administration)
+
+
+This posting constitutes a dynamic compilation of Frequently Asked Questions
+concerning the sport of skydiving, related activities, and the news group
+rec.skydiving.  It is posted on or about the second and fourth Mondays of
+every month.
+
+Additions, corrections, or suggestions can be posted or emailed to the
+current maintainer, Barry Brumitt, belboz@frc2.frc.ri.cmu.edu.
+The original version was written by Jerry Sobieski, jerrys@umiacs.umd.edu,
+who is currently too busy to maintain it.
+
+First, the news group rec.skydiving is an unmoderated group for the discussion
+of issues relating to sport skydiving.  It obviously is not limited to
+skydiving as there are many sports that share technology, history, common
+interests, and avid proponents; but these tend to be minor distractions for the
+hard core jumper :-).  News or events to be held, or post-event reviews are
+commonly posted, as are questions about equipment, skills, regulations, theory,
+etc.  And plain ol&#x27; reminiscing over &quot;the good ol&#x27; days&quot; by the old timers, and
+long exuberant descriptions of newcomer&#x27;s first jumps are posted here as well.
+
+Skydiving is not just a sport, it&#x27;s a lifestyle (not to be confused with bungee
+jumping which is just a sport :-).
+
+It seems there are a great many new readers every year of rec.skydiving, many
+of which stumbled across it and found it interesting but have never jumped.
+After a time, they seem to always ask the same questions.  So in an effort to
+promote the sport, minimize redundant postings, and in general continue the
+camaraderie of fellow free spirits here is now the &quot;Rec.Skydiving F.A.Q.
+Sheet&quot;.  If your question is not answered in this document, please feel free to
+post it to the net.  If we get tired of answering it (:-), we&#x27;ll append it to
+the FAQ sheet.  The information disseminated in this FAQ sheet is generally
+related to the sport within the United States.  However, much of the
+information is applicable world-wide as well.  If you need specifics for a
+given geographical area, post it.  Someone from that region can then reply.
+
+The questions are not ordered in their &quot;asking frequency&quot;.  Instead, I have
+tried to order them so as to provide the information in a more easily
+understood manner.
+
+The Most Frequently Asked Questions are:
+
+-.      How does one learn to skydive?
+-.      What are the age requirements?
+-.      What are the physical requirements?
+-.      What does the training consist of?
+-.      How do I tell a good Drop Zone from poor one?
+-.      What if my parachute doesn&#x27;t open?
+-.      How fast do you fall?
+-.      How hard is the landing?
+-.      How much does it cost?
+-.      I&#x27;m a skydiving student, and I&#x27;m have trouble with
+something, can I get some help and advice.
+-.      Where can I try Skysurfing or BASE jumping?
+-.      Where can I find out more about Hang/Paragliding?
+-.      &quot;How do you breathe in freefall?&quot; and other Whuffo questions.
+
+Other Information provided in this file are:
+-.      Movie Myths
+-.      Appendix of abbreviations
+-.      List of Magazines and Skydiving Periodicals
+-.      Information about rec.skydiving FTP/WWW archive sites
+-.      Information about obtaining rec.skydiving/FTP via Email
+-.      Information about learning jump outside of the USA
+-.      Disclaimer
+
+
+How does one learn to skydive?
+
+------------------------------
+
+One looks in the telephone directory (Yellow Pages) under &quot;Parachuting&quot;
+or &quot;Skydiving and Parachute Jumping Instructions&quot; to find a local parachuting
+operation - normally referred to as a &quot;drop zone&quot; (DZ).  A phone call will
+generally provide you with enough information to make arrangements to attend
+the First Jump Course and/or how to reach the DZ.  You can also call the United
+States Parachute Association (USPA, 1440 Duke St., Alexandria, VA  22314) at
+(703)-836-3495 to get the name of an affiliated drop zone in your area.  A
+friend or acquaintance who has jumped previously may also be able to give you a
+recommendation. You can also see http://home.worldweb.net/USPA/ for further
+information from the USPA.
+
+Most DZs will offer the First Jump Course (FJC) at least once each weekend.
+Some will offer it during the week or several times during the weekend.  You
+will need to contact your local DZ to determine their scheduling.  The FJC
+consists of about 4-6 hours of ground school followed by your jump - weather
+permitting.
+
+There are several different types of training you can take: Static Line,
+Accelerated Freefall, or Tandem.  They are described below in greater detail.
+However, not all drop zones offer all these options, so you should ask the DZ
+which type(s) of training they provide.
+
+Some drop zones have promotional videos they will sell you (~$10) that describe
+the training and show you what it is all about.  Almost every DZ these days
+uses videos for training aids and will be glad to let you view them (for free!)
+if you stop by.  They will mail you a brochure and other detailed information
+upon request as well.
+
+It is *your* safety at stake and *your* responsibility to look after it.  If
+you have reservations about making your first jump, make the effort to visit
+the DZ, check it out, meet the people and staff.  They will be glad to see you,
+and you will be *much* more confident and comfortable having done so, and
+consequently have a much better time!
+
+
+What are the age requirements?
+
+------------------------------
+
+Most Dropzones will require you to be 18 years of age to make a skydive. Some
+dropzones in some states will allow 16 year olds to jump with parental
+consent. So, if you are under 16, you will just have to wait; take up
+some odd jobs, and start saving your money.
+
+On the other side, there is no maximum age. See the following question to
+determine if skydiving is appropriate for you.
+
+
+What are the physical requirements?
+
+-----------------------------------
+
+In general, the prospective student should be in reasonably good physical
+shape, this *is* a sport after all.  You will be required wear around 35 lbs of
+equipment, endure opening shock, maneuver the canopy, land, and possibly trudge
+great distances on foot.  You will experience 30 degree swings in temperature,
+atmospheric pressure changes, 4 hours of lecture, and lots of beer.  It&#x27;s
+grueling (:-).
+
+But seriously, problems may arise where a prospect is too heavy (over ~250lbs/
+110kg, see below)) or if they have medical conditions which may impair them
+during the activity.  Someone who experiences fainting spells, blackouts, or
+has a weak heart should not be jumping.  Someone with respiratory illness
+*may* have a problem due to atmospheric changes at altitude.  The better your
+physical condition, the more you will enjoy the experience.  This being said,
+very few people have medical or physical conditions which actually preclude
+jumping.
+
+Most dropzones will try to work with you.  If you have a question, ask them,
+and as always, ask your doctor.  You may be surprised at the relatively few
+physical constraints involved.
+
+Concerning weight restrictions, there are two primay concerns. First, does
+the drop zone have a parachute system which you can both legally use and safely
+land? Second, if you are going to be at the top-end of the safe weight range
+for a particular parachute, are you in relatively good shape? An imperfect
+landing will be much less liekely to injure an athletic person. If this is
+unclear, consider the difference between a 5&#x27;10&quot; linebacker who weighs
+240lbs, and a 5&#x27;10&quot; channel surfer of the same weight. If the former has a bad
+landing, he&#x27;ll probably brush himself off and get up. The latter may very well
+injure himself substantially, lacking both the strength to withstand landing
+and coordination to do a good Parachute Landing Fall(PLF). With this in mind,
+use the following table as a guide.
+
+Weight        Comments
+-----------   --------------------------------------------------------------
+&lt; 200lbs      Almost every DZ should be willing to let you jump.
+200-230lbs.   The majority of DZ&#x27;s should be willing to let you jump. Being
+being in relatively good shape is a plus. Beyond about
+230lbs, most reserves canopies are no longer strictly legal
+for you to use.
+230-250lbs.   Some DZ&#x27;s may take you, but will likely insist that you be in
+good shape, i.e. not a couch-potato. You must recognize that
+there is a greater chance of injury, particularly if you are
+not somewhat athletic.
+&gt;250lbs.      Very few DZ&#x27;s will be able to let you skydive. They are likely
+to use converted Tandem gear. Without this type of
+equipment, you will need to be in excellent physical
+condition, and be willing to accept a greatly increased
+chance of injury in case of a bad landing.
+Please note that this table is only a guideline. Call your local Drop Zone and
+discuss the matter with them. Also, there are experienced skydivers who are
+quite heavy -- however, they likely learned when they were lighter and had
+mastered landing before they gaining the additional weight.
+
+
+What does the training consist of?
+
+----------------------------------
+
+The FJC teaches the student every thing they need to know to safely make their
+first jump.  There are several different programs available for first jumpers;
+the one you choose will depend on your personal preferences and circumstances.
+The differences of each are summarized below:
+
+Static Line (S/L)
+
+This method has evolved over the last ~30 years from its military origins into
+a successful method for training sport parachutists.  The student gets 4-5
+hours of ground training and is then taken to an altitude of about 3000 feet
+for the jump.  The jump itself consists of a simple &quot;poised&quot; exit from the
+strut of a small single engine Cessna aircraft.  As the student falls away from
+the plane, the main canopy is deployed by a &quot;static line&quot; attached to the
+aircraft.  The student will experience about two to three seconds of falling
+as the parachute opens.
+
+Subsequent S/L jumps require about 15 minutes of preparation.  After 2 good
+static line jumps, the student will be trained to pull their ripcord for
+themselves.  The student then does 3 more static line jumps where they
+demonstrate this ability by pulling a dummy ripcord as they leave the plane
+(the static line is still initiating the deployment).  The student is then
+cleared to do their first actual freefall.
+
+The first freefall is a &quot;clear &amp; pull&quot;, where the student initiates the pull
+sequence immediately upon leaving the aircraft.  Next is a 10 second delay
+jump.  Subsequent jumps go to progressively higher altitudes with longer
+delays.  After 20 freefalls, and meeting certain other basic requirements, the
+student receives their A license and is cleared off student status.
+
+Accelerated Free Fall (AFF)
+
+The AFF program was instituted in 1982 as an &quot;accelerated&quot; learning process as
+compared to the traditional static line progression.  The AFF program will give
+you a true taste of modern sport skydiving.
+
+The ground training is a bit more extensive than S/L (~5 hours) because the
+student will be doing a 50 second freefall (that&#x27;s right!) on his/her very
+first jump.  The student will exit the aircraft at 10,000-12,000 feet along
+with two AFF Jumpmasters (JM) who will assist the student during freefall.  The
+jumpmasters maintain grips on the student from the moment they leave the
+aircraft until opening, assisting the student as necessary to fall stable,
+perform practice ripcord pulls, monitor altitude, etc.  The student then pulls
+his/her own ripcord at about 4000 ft.
+
+The AFF program is a 7 level program.  Levels 1, 2, &amp; 3 require two freefall
+Jumpmasters to accompany the student.  These dives concentrate on teaching
+basic safety skills such as altitude awareness, body position, stability during
+freefall and during the pull sequence, and most importantly- successful ripcord
+pull.  On level 3, the JMs will release the student in freefall for the first
+time, to fly completely on their own.
+
+Levels 4, 5, 6, &amp; 7 require only one freefall JM (less $$) and teach the
+student air skills such as turns, forward movement and docking on other people,
+frontloops, backloops, &quot;superman&quot; exits from the plane, etc.
+
+Each AFF level is designed to take one jump, and requires about 45 minutes of
+training.  After successfully performing the objectives of each level, the
+student moves on to the next level.
+
+After graduating Level 7, the student enters a more free format stage called
+&quot;Level 8&quot; where they practice and hone their skills by themselves and in small
+groups until they obtain 20 freefalls and qualify for their A license.
+
+Tandem jumps.
+
+Tandem jumps are meant to offer an introduction to the sport.  They allow the
+neophyte to take a ride with an experienced jumper.  A tandem jump requires
+from 15 to 45 minutes of ground preparation (it is *not* a First Jump Course).
+It consists of an experienced jumper called a &quot;tandemmaster&quot; and the
+passenger.  The passenger and tandem master each wear a harness, however only
+the master wears the parachutes.  The passengers&#x27;s harness attaches to the
+front of the master&#x27;s harness and the two of them freefall *together* for 30
+seconds, open together, and land together under one Really_BIG_Parachute.
+
+Tandem jumping provides an obvious advantage for the adventurous spirit who
+cannot adequately meet the physical or proficiency requirements for the S/L
+or AFF jumps. By relying on Tandem Master&#x27;s skills, they will still be able
+to experience the thrill of skydiving.
+
+Because the tandem training is not a First Jump Course, if you decide to
+pursue the sport, you will still have to attend a FJC in either the AFF or
+Static Line curriculum.
+
+It should be noted that, in the United States, tandem jumping is still
+classed by the Federal Aviation Administration as an &quot;experimental&quot; form of
+Parachuting, and as such operates under waiver to certain Federal Aviation
+Regulations regarding required equipment. Currently the USPA (see below) is
+not involved in the certification or training of tandem Masters or in the
+setting of minimum tandem safety standards. These functions are performed
+solely by, and at the discretion of, the manufacturers of the tandem
+equipment. Among many experienced jumpers, tandem jumping remains a very
+controversial subject as to its safety and utility for novice training.
+
+
+In all of these training methods, students are taught normal and emergency
+procedures for all aspects of the jump - climb to altitude, exit, opening,
+canopy control, and landing.  They are also shown the equipment and go over it
+so that they understand how it works.
+
+Nearly all student training centers now utilize *sport* skydiving gear.  No
+more military surplus stuff.  Students have light-weight harness/container
+systems in aesthetic colors, high performance canopies designed for students.
+No more paraboots-- students use their own tennis shoes.  No more heavy
+motorcycle helmets-- students use lightweight sporting helmets.  Ground-to-air
+radio for canopy control assistance, air-to-air video, on and on...
+
+
+How do I tell a good Drop Zone from poor one?
+
+---------------------------------------------
+
+Most dropzones that provide regular student training are &quot;USPA Affiliated&quot;.
+The United States Parachute Association (USPA) is the representative body for
+sport parachuting within the US, and a member of the FAI (the international
+equivalent).  The USPA defends the sport&#x27;s interests before the FAA and other
+regulating/lawmaking bodies at all levels of government.  It also develops and
+monitors safety and training doctrine for the sport.  Other benefits include
+liability insurance for students and DZs in the case of damage to property, the
+monthly magazine &quot;Parachutist&quot;, etc.
+
+The USPA has had tremendous success instituting rating programs for
+Jumpmasters, Instructors, and Instructor-Examiners to ensure that only properly
+trained and qualified personnel work with students.  You should insist on USPA
+Instructors and Jumpmasters.
+
+Some USPA-affiliated DZ&#x27;s have not been diligent in using only Currently-rated
+Instructors and Jumpmasters. Do not be afraid to ask to see your Instructor or
+Jumpmaster&#x27;s rating card. It should show the appropriate rating and expiration
+date. Also note that currently, Tandem Jumpmasters are certified by the
+equipment manufacturer, not USPA.
+
+USPA affiliation is not required, and does not *guarantee* a DZ to be a &quot;good&quot;
+DZ, and non-affiliation does not mean the DZ is &quot;bad&quot;.  However, the USPA,
+through their diligence and caution, has compiled an excellent safety record
+over the years.
+
+These are just guidelines.  You should always check it out before you jump.
+
+
+What if your parachute doesn&#x27;t open?
+
+------------------------------------
+
+Clearly, this is the most Frequently-Asked-Question posed by all prospective
+jumpers.
+
+By law (FAA regulations), all intentional parachute jumps must be made with a
+single harness, dual parachute system with both a main canopy *AND* a reserve
+canopy.  In other words, you have a second (or spare) canopy in case the first
+one fails to open properly.
+
+However, it must be noted that the technology utilized in today&#x27;s sport
+parachuting equipment is light years ahead of the old military surplus gear
+used in the &#x27;60s and &#x27;70s.  The canopies are DRASTICALLY different from the
+classic G.I. Joe round parachutes.  The materials are stronger, lighter and
+last longer, the packing procedures are simpler, the deployment sequence is
+much more refined, etc.
+
+The reserve canopies are even more carefully designed and packed.  The reserve
+parachute must be inspected and repacked every 120 days by an FAA rated
+parachute Rigger - even if it has not been used during that time.
+
+The student&#x27;s main canopy is always packed either by a rigger or under a
+rigger&#x27;s direct supervision by experienced packers.
+
+There are also additional safety features employed to ensure canopy deployment
+such as Automatic Activation Devices (AAD) and Reserve Static Lines (RSL) which
+add still more layers of safety.
+
+
+How much does it cost?
+
+----------------------
+
+Prices vary from DZ to DZ.  Typically, the S/L course runs ~$120-$150, AFF from
+$250-$300, and the tandem from ~$140-$200.  Some DZs can provide a freefall
+videoman to tape your skydive for an additional $50-75.  These prices include
+the ground school and the first jump.
+
+After completing their first jump, skydiving tradition allows each student to
+express their appreciation and admiration for their newfound skydiving friends
+for their assistance in successfully achieving this milestone in their life by
+purchasing (from a local establishment) and presenting to them a case of beer.
+This case, customarily a fine imported beer, is ceremoniously iced down for
+consumption at the end of the day.  The cost generally runs $15-20.
+
+(It should be noted that while jumpers have a reputation for major no-holds-
+barred parties, the use of drugs and/or alcohol on the DZ premises is
+*strictly* prohibited during jump operations for what should be obvious
+reasons.  This rule is observed and enforced by both jumpers and management.)
+
+After the first jump, the cost of each successive jump decreases in stages as
+less supervision is required.  Once off student status, and owning your own
+gear, jumps will cost about $15-17 to 13,000&#x27; (about 65 seconds of freefall).
+Many drop zones have discount programs as well that can further decrease the
+cost of jumps.
+
+A file containing prices for experienced jumpers is available via WWW at
+http://www-leland.stanford.edu/~eap/prices , at the FTP site described below,
+and via E-mail from eap@phase.stanford.edu (Subject: SEND DZ PRICE LIST). To
+add your DZ to the list, see information contained therein.  The list includes
+locations, prices, planes, phone number, internet contact, and web page
+locations.
+
+Equipment can run from $1000 to $3500 depending on what you want to spend.
+There is a used equipment market (much like the used car market) which can SAVE
+you loads of money, or you can custom order everything brand-spankin-new with
+your own personalized colors and sizes, which will COST you loads of money
+(:-).  You can buy it all at once or a piece at a time as finances allow.
+Generally, you shouldn&#x27;t worry about buying gear until you are off student
+status or close to your A license.
+
+Of course, all prices are in US dollars (as opposed to dinars or rubles :-).
+
+
+How fast do you fall?
+
+---------------------
+When you leave the aircraft, you are moving horizontally at the same speed
+as the aircraft, typically 90-110MPH. During the first 10 seconds, a skydiver
+accelerates up to about 115-130MPH straight down. (A tandem pair uses a drouge
+chute to keep them from falling much faster than this). It is possible to
+change your body position to vary your rate of fall. In a standard
+face-to-earth position, you can change your fall rate up or down a few (10-20)
+miles per hour. However, by diving or &quot;standing up&quot; in freefall, any
+experienced skydiver can learn to reach speeds of over 160-180MPH. Speeds of
+over 200MPH require significant practice to achieve.  The record
+freefall speed, done without any special equipment, is 321MPH.  Obviously, it
+is desirable to slow back down to 110MPH before parachute opening.
+
+Once under parachute, decent rates of 1000ft./min. are typical. A lighter
+student with a bigger canopy may come down much more slowly, and, obviously, a
+heavier person may have a somewhat faster decent. Experienced jumper&#x27;s
+can canopies descend (in normal glide) at up to 1500ft./min. During radical
+turns, the decent rate can go well over 2000ft./min.
+
+
+How hard is the landing?
+
+------------------------
+
+The canopies used today bear little resemblance to the classic round canopies
+of years gone by.  Today, nearly all jumpers and jump schools use &quot;square&quot;
+canopies for parachuting.  These canopies are actually rectangular in shape,
+and when open, act like an airplane wing (or an airfoil).  They are more like
+gliders than umbrellas.
+
+The aerodynamics of the square canopy provide it with exceptional
+maneuverability, allowing the jumpers to land almost anywhere they wish.  This
+wing shape also provides tippy-toe soft landings for even the novice jumper.
+The days of landing like a sack of flour are history.  Most students land
+standing up on their first jump.
+
+
+I&#x27;m a skydiving student, and I&#x27;m have trouble with
+
+something, can I get some help and advice?
+--------------------------------------------------
+
+Yes, you can ask any question on rec.skydiving about learning to skydive,
+be it trouble with turns, packing, exits, or what-have-you. However, please
+recognize the person best equipped to help you with your difficulties is
+probably your regular real-life instructor. Be sure to ask him the same
+question you ask on rec.skydiving! Don&#x27;t take or act on any advice given on
+rec.skydiving without talking to your instructor first -- not everyone here is
+an instructor, and no one knows your history and experience better than your
+instructor.
+
+Advice given on rec.skydiving is offered without warranty. It is not uncommon
+to see both excellent and downright dangerous advice given. Talk with a
+rated instructor or jumpmaster (or your country&#x27;s local equivalent) before
+changing your equipment, airplane, exit, freefall, deployment, emergency,
+canopy control, landing, packing or any other skydiving-related procedures,
+particularly if suggested anywhere on rec.skydiving. Remember, skydiving is
+dangerous, the participant assumes all risks.
+
+
+Where can I try Skysurfing or BASE jumping?
+
+-------------------------------------------
+
+It a nutshell, you can&#x27;t --  unless you&#x27;re already a very experienced skydiver.
+
+&quot;Skysurfing&quot; or &quot;Skyboarding&quot; refers to skydiving with a small board, similar
+to snowboard, attached to your feet. This allows for some radical maneuvers in
+freefall.  However, such jumps should only be attempted by expert skydivers,
+and preferably after long discussion with one of many skysurfers who have
+experience. Some board manufacturers and experienced skydsurfers offer
+instructional classes or videotapes.
+
+BASE jumping involves jumping off of fixed objects (like Buildings, Antennas,
+Spans (bridges), or Earth (cliffs)), and landing under a parachute.  While
+being an expert skydiver isn&#x27;t an absolute requirement, you need a great deal
+of experience in parachute packing, canopy control, quick reflexes, and body
+position awareness before this can be attempted with any real safety. Start
+with skydiving, and then go from there. Furthermore, there are very few places
+where one may BASE jump legally, as most locations are private property.
+
+
+Where can I find out more about Hang/Paragliding?
+
+-------------------------------------------------
+
+rec.skydiving isn&#x27;t the proper forum for the discussion of either of these
+activities. However, for those who are interested Paragliding or
+Hang-Gliding, there is a list server for these topics.
+
+To subscribe send a message to:       hang-gliding-request@lists.utah.edu
+with a subject line saying:          subscribe
+For a daily digest this message to:   hang-gliding-d-request@lists.utah.edu
+
+As of 5/15/95, rec.aviation.hang-gliding exists. This is an appropriate
+location to post questions concerning hang-gliding or paragliding.
+
+
+&quot;How do you breathe in freefall?&quot; and other Whuffo Questions
+
+------------------------------------------------------------
+
+&quot;How do you breath in freefall?&quot;
+-- Through genetically developed gills.
+
+This falls into the realm of urban folklore.  One CAN breathe in freefall - if
+it were necessary.  However, due to the high speed of terminal freefall (and
+much higher speeds in vertical freefall dives), the jumper&#x27;s body is exposed to
+O2 molecules at a much higher rate than someone walking around on the ground.
+The body is able to absorb the necessary O2 through the skin.  This is why
+jumpers flap their cheeks in freefall, it presents a larger surface area to the
+airstream for oxygen osmosis.  Once under canopy, the jumper resumes breathing
+normally.
+
+This is also why jumpers do not jump on cloudy days or when they might risk
+going through clouds.  The moisture in the clouds can condense on their exposed
+skin surfaces preventing the absorption of the necessary oxygen resulting in
+suffocation.  AADs are recommended for jumpers in climates where weather is a
+factor.
+
+&quot;Don&#x27;t your ears pop on the way down?&quot;
+-- &quot;Yes, we&#x27;re not ignoring you, we&#x27;re deaf.&quot;
+&quot;What if you have to go the bathroom in the plane?&quot;
+-- &quot;Go ahead!&quot;
+&quot;Can you steer your parachute?&quot;
+-- &quot;No, one time I landed in Jamacia.&quot;
+&quot;Does it hurt?&quot;
+-- &quot;Yes, that&#x27;s why we jump all the time! Masochism!&quot;
+&quot;What if your parachute doesn&#x27;t open?&quot;
+-- &quot;Gee, I never thought of that...&quot;
+&quot;Why do you jump?&quot;
+-- &quot;Why do _you_ breathe?&quot;
+&quot;Where do you jump?&quot;
+-- &quot;O&#x27;Hare, Midway, LAX, Dulles, where ever I happen to be.&quot;
+(:-)
+
+
+Movie Myths
+
+-----------
+
+Myth #1: Freefall conversation.
+Talking in Freefall is virtually impossible.  The wind is too loud.
+Myth #2: 4 minute freefalls.
+Without taking Oxygen on the plane with you, freefall time is limited
+to about 80 seconds on a single jump.
+Myth #3: First-jump freefall acrobatics
+Learning to fall stable and to fly while in freefall takes practice --
+it&#x27;s not realistic to do this on your first jump.
+Myth #4: Low-pull contests
+This virtually never happens.  Everyone tends to deploy around
+2000-2500.  Skydivers fall at about 5.5 sec/thousand feet.
+Myth #5: Diving out and catching someone without a parachute
+Stunts similar to this have been done, however, it almost impossible
+to hold onto someone during the opening shock of the parachute when at
+terminal velocity.
+
+
+Appendix of Skydiving Abbreviations, Terms, and Colloquialisms
+
+-------------------------------------------------------------
+
+AAD     Abbrev. n, &quot;Automatic Activation Device&quot;.  A altitude sensing device
+used to automatically activate the opening sequence for a parachute.
+Most commonly refers to their application to sport reserve parachutes,
+but also used in other non-sport scenarios such as ejection seats,
+etc.
+
+AFF     Abbrev. n, &quot;Accelerated FreeFall&quot;.  A training program for first jump
+students where the skydiving skills development rate is accelerated
+over that of the older static line program.
+
+boogie  n, A gathering of jumpers for the purposes of jumping and socializing.
+Typically, boogies will have large aircraft, unusual aircraft
+(balloons, helicopters), special events (record attempts), or some sort
+of competition as a focal point to attract jumpers from widely diverse
+regions.
+
+bounce  Colloquialism v, term for landing, after freefall, without the aid of a
+parachute.  Also: hammer in, frappe, go in.
+
+canopy  n, parachute.
+
+CFS     Abbrev., &quot;Canopy Formation Skydiving&quot;. The new &quot;official&quot; term for a
+discipline of skydinvg in which jumpers *under canopy* fly their
+parachutes together to form various formations. However, most skydivers
+still refer to it as &quot;CRW&quot;. (See CRW.)
+
+CRW     Abbrev., &quot;Canopy Relative Work&quot;.  Describes the maneuvering done by
+jumpers *under canopy* to fly their parachutes together to form various
+formations.  Sometimes referred to as CReW (Crew). See CFS.
+
+DZ      Abbrev. n, &quot;Drop Zone&quot;.  A place where parachuting operations take
+place.  This is may be a designated area, or frequently, a commercial
+business which supplies aircraft, instruction, gear sales and
+services.
+
+flare   v, to pull down on both of the canopy&#x27;s steering toggles in order to
+lower decent rate and forward speed just prior to landing. The forward
+speed is traded-off for lift. A flare performed too late has no effect,
+a flare performed too early can result in a stall in which the canopy
+looses forward speed and drops straight down.  A correctly performed
+flare results in an exceptionally soft landing.
+
+FS      Abbrev., &quot;Formation Skydiving&quot;. The new &quot;official&quot; term for a dicipline
+of skydiving in which two or more jumpers fly relative to each other
+*in freefall* in order to form various formations. However, most
+skydivers refer to it as Relative Work, or &quot;RW.&quot; (See RW.)
+
+hook turn n, A high-speed turn with either the steering toggles or the front
+risers performed at very low altitude in order to build up speed before
+landing.  See &quot;turf surf.&quot;
+
+JM      Abbrev. n, &quot;JumpMaster&quot;.  A jumper trained and certified to supervise
+students and/or novices during their jump.
+
+main    n, the primary parachute.
+
+opening shock n, The force experienced by the jumper due to the sudden
+deceleration from terminal velocity due to the deployment of a
+parachute.
+
+RW      Abbrev., &quot;Relative Work&quot;.  Describes the freefall maneuvering whereby
+two or more jumpers fly relative to each other *in freefall* in order
+to form various formations. See FS.
+
+reserve n, the secondary, or backup, parachute.
+
+round   n, a class of parachutes designed to simply decelerate a body in a
+fluid medium.  The classic parachute.
+
+square  n, a class of parachutes designed to inflate and take the shape of an
+airfoil.  These are more accurately rectangular in shape and are
+semi-rigid wings.
+
+turf surf v, (also, to &quot;surf it&quot;) a high-speed style of landing.  The jumper
+builds up speed (see Hook Turn) and then flares mere moments before
+touchdown, resulting in a spectacular landing in which the jumper skims
+mere inches above the ground at 30-40mph, for up to 100 yards.  Or, if
+the jumper flares too late, resulting in a spectacular landing in which
+the jumper impacts the ground, leading to medical bills, orthopedic
+surgery, and/or death.  Attempt this maneuver at your own risk!
+
+USPA    Abbrev. n, &quot;United States Parachute Association&quot;.
+
+whuffo  Colloquialism, n, A person who is not a skydiver (from the often-asked
+phrase &quot;Whuffo you jump out of them airplanes?&quot;).
+
+
+List of Skydiving-related magazines and periodicals
+
+---------------------------------------------------
+Parachutist: Free w/ USPA Membership, $12/yr, back issues $3.
+USPA, 1440 Duke St, Alexandra, VA, 22314. 703-836-3495.
+Skydiving: $18/yr.
+Skydiving, PO Box 1520, DeLand, FL, 32721. 904-736-4793.
+Sport Parachutist Magazine: sp@postlin.demon.co.uk
+(Publication of the British Parachuting Association)
+CANPARA: Canadian Parachuting Association Magazine. 613-835-3731
+CSPA, 4185 Dunning Rd. Rural Rt 3. Navan, ON. K4B 1J1 Canada
+Rambling On: A$30, A$55 overseas. Published Quarterly. (07)399-6400
+15 Wynnum Rd, Norman Park, Queensland 4170, Australia.
+Fallschrim Sportmagazin: DM70/yr, Europe. (43)316-846589
+Friedrich Wegerer,C.v.Hoetzendorfstrasse 29,A-810 GRAZ,Austria
+Fritt Fall: NOK 100/year. Norwegian Parachuting Assoc. Magazine
+PO Box 3869, Ulleval Hageby, 0805 Oslo, Norway.
+Email: frittfall@online.no   http://www.stud.ntnu.no/studorg/
+nthfsk/fnlf/frittfall/frittfall.html
+PARAMAG: 336FF/yr, 450FF airmail/yr, French, Phone:+33.21.37.38.00
+32 bis rue Malvoisin,62410 HULLUCH, France Fax:+33.21.37.60.57
+DropZone:270FF/yr,350FF/yrEEC,490FF/yr airmail Phone:+33.1.42.87.25.52
+EditionsHorsLimites,77BisRueRobespierre,BP187,93 103 Montreuil
+Cedex,France.Fax:+33.1.42.87.35.53.Email:emmanuel.ars@sligos.fr
+Blue Sky: Price Unknown, German. Phone: +49/561-774758 (Fax: -775506)
+Postfach 70, 34290 Ahnatal, Germany.
+
+
+rec.skydiving FTP and WWW archive sites
+
+---------------------------------------
+
+There is a WWW (World Wide Web) site at http://www.afn.org/skydive/
+which provides links to virtually all known skydiving-related
+information in the Internet, including all the information on the
+FTP site.
+
+There is an FTP site for rec.skydiving located on ftp.afn.org (128.227.163.4)
+under the /skydive directory.  It contains:
+
+1. Most recent FAQ.
+2. Archive of all rec.skydiving messages since July 1988.
+3. DZ information (reviews, prices (*).)
+4. A collection of skydiving GIF/JPG&#x27;s (including hourly weather maps).
+
+This site accepts anonymous FTP&#x27;s, which means to log in as the user
+&quot;anonymous&quot; and give your email address as the password.  Questions and
+comments concerning this site can be directed to the FTP site maintainer
+Eric Johnson, esj@afn.org. Feel free to upload non-copyrighted
+materials/pictures into /upload, but please email esj@afn.org when you
+do!
+
+Email-only access to the FTP site is also supported.  Send the text &quot;help&quot;
+as the message body (not in the Subject:) to ftpmail@afn.org for
+details.
+
+(*) DZ Prices also at http://www-leland.stanford.edu/~eap/prices
+
+If you don&#x27;t know anything about WWW, FTP or Telnet, see your local
+computer guru for further details.
+
+
+Information about obtaining rec.skydiving/FTP via Email
+
+-------------------------------------------------------
+To receive rec.skydiving via email you send a message to
+skydive-request@afn.org with the body containing the word &quot;subscribe&quot;.
+
+To remove yorself from the mailing list send a message to
+skydive-request@afn.org with the body containing the word &quot;unsubscribe&quot;.
+
+To post to rec.skydiving via email, send messages to skydive@afn.org.
+
+Please note the FAQ maintainer does not run this mail-to-news-to-mail
+gateway. Questions concerning it should be directed to esj@afn.org.
+
+Email-only access to the FTP site is also supported.  See the section
+on the FTP site for more information.
+
+
+Information about Learning to jump outside of the USA
+
+-----------------------------------------------------
+Admittedly, this FAQ is directed primarily at the United States. Since jumping
+takes place all over the world, it seems appropriate to list contact
+information for the national skydiving organization for other countries.  I
+encourage jumpers outside of the USA to submit information which can be added
+to the file. Also, information about magazines outside the US are welcome!
+Contact belboz@cs.cmu.edu. Email addresses below are typically individuals in
+the country who are willing to answer questions concering jumping there, rather
+than representatives of the country&#x27;s parachuting association. However, if
+a national parachuting organzation has an email address, this is used.
+
+Australia:                              Belgium:
+Australian Parachute Federation         Para-Flight School
+PO Box 144                              Beekstraat 18
+Curtin 2605                             B-1933 Sterrebeek
+Australian Capital Territory            Phone: +32 (0)2 731 49 96
+Phone: +61 6 281 6830                   Fax:   +32 (0)2 731 97 98
+Fax:   +61 6 285 3989                   E-mail: bormans@imec.be
+Email: apf@ozemail.com.au
+www.apf.asn.au/~apf/homepage.htm
+
+Canada:                                 Denmark:
+Canadian Sport Parachuting Assoc.       Dansk Faldskaerms Union.
+4185 Dunning Road                       Idraettens hus.
+Rural Route #3                          Broendby Stadion 20
+Navan, ON                               DK-2605 Broendby.
+K4B 1J1                                 Phone: +45 4326 2626 (M-Th 2-4pm)
+Phone/Fax: (613) 835-3731               Fax:   +45 4343 0345
+Email: cspa@travel-net.com              Email: skywalker@post1.com
+www.islandnet.com/~murrays/cspa.html    /www.dfu.dk/spring/index.htm
+
+France:                                 Great Britain:
+Federation Francaise de Parachutisme    British Paraachute Association
+35 rue St-Georges                       Wharf Way, Glen Parva
+75009 Paris                             Leicester
+Phone: +33.1.44.53.75.00                LE2 9TF
+Fax:   +33.1.48.78.45.42                Phone: +44 (0)1162 785271
+Minitel: 3615 code FFP                  Fax:   +44 (0)1162 477662
+
+Iceland:                                Italy:
+Fallhlifasamband Island                 Associazione Nazionale ...
+Box 992                                 ... Paracadutisti d&#x27;Italia
+101 Reykjavik                           via Sforza 5
+Email: nhobsi@nho.hydro.com             00184
+Rome
+Phone: ++39-6-4815720
+
+Ireland (Eire):                         Germany:
+The Irish Parachute Club                DFV e.V
+Clonbollogue, Edenderry,                Comotorstr. 5
+Co. Offaly                              66802 Ueberherrn
+Phone: +353 1 450 5448                  Phone: +49/6836-6382
+Email: skydive@indigo.ie                Fax:   +49/6836-6391
+//indigo.ie/~skydive                   Email: DFV1992@aol.com
+
+
+Netherlands:                            Switzerland:
+Koninklijke Nederlandse Vereniging voor  Aeroclub der Schweiz
+Luchtvaart Afdeling Parachutespringen    Lidostr. 5
+Jozef Israelsplein 8                     6006 Luzern
+2596 AS Den Haag                         Phone: +41-41-312121
+Phone: +31-(0)70-3245457                 Fax:   +41-41-311453
+Fax  : +31-(0)70-3240230                 Email:  thkuehne@iiic.ethz.ch
+Email: KNVvL@sportnet.nl                 www.skydive.net/fsp/
+WWW: www.sportnet.nl/bonden/luchtvaart
+
+Sweden:                                 Norway:
+Svenska fallskarmsforbundet             Norsk Aero Klubb - Parachute Section
+Idrottens Hus                           P.O. Box  3869, Ulleval Hageby
+123 87  FARSTA                          N - 0805 Oslo
+Phone: +46-8-6056515                    Phone: (+47) 2293 0330/33
+Fax:   +46-8-6056514                    Fax:   (+47) 2269 5942
+Email:  info@sff.se                     Street Addr: Moellesvingen 2
+Email: fnlf@nak.no
+www.stud.unit.no/studorg/nthfsk/fnlf
+/fnlf.html
+
+
+Disclaimer.
+
+-----------
+
+All information provided herein is offered on an &quot;as is&quot; basis.  There is no
+warranty expressed or implied concerning its applicability or fitness for any
+particular purpose.  Consult a trained professional before attempting any of
+the activities described in this document; it is not intended to be a
+substitute for proper professional instruction.
+
+--------      End       ---------
+Rec.Skydiving F.A.Q. Sheet
+
+
+Barry L. Brumitt    |     belboz@frc2.frc.ri.cmu.edu     |Disclaimer: Opinions
+Robotics GradStudent|    Skydive! D-15427,SL/AFF I&#x27;96    |given herein may not
+Carnegie Mellon     |        Babylon 5: Watch it!        |be the opinions of
+&quot;Who is John Galt?&quot; | http://www.frc.ri.cmu.edu/~belboz/ |FRC, SCS, RI, or CMU
+/// Tired of Clinton, Dole,  and the entire Farce which is the Status Quo? \\\
+\\\ Consider voting Libertarian in &#x27;96!  See http://www.harrybrowne96.org/ ///</pre></article><article class="chapter" id="ch4" data-title="Описание вида SKY DIVER"><h2>Описание вида SKY DIVER</h2><div class="source">fidoskydiver.txt.htm</div><pre>Описание вида SKY DIVER
+
+
+Описание вида SKY DIVER из fido7.ru.jum
+
+
+Оригинал этого текста расположен на
+сайте &quot;Российская Паращютная страница&quot;
+
+http://www.skydive.ru/
+
+
+Скайдайвер  оборудован  парашютом.  Парашют  у него иногда
+казенный, иногда собственный.  Скайдайвер  с  ним  прыгает.  Не
+прыгать  он  не  может.  Потому  что  если надел парашют - надо
+прыгать. Если скайдайвер не прыгает, то значит нет  погоды  или
+он  пьян,  а  чаще  и  то  и другое вместе. Кода он прыгает, на
+аэродроме  раздается.  Если  раздается  громко  -  это  хороший
+скайдайвер. Если негромко - плохой, непьющий скайдайвер.
+
+Скайдайвер  может скакать из взлета во взлет так же ловко,
+как матрос брамселя на бушприт. Умело захук-терненый скайдайвер
+пролетает  над землей не менее 30 метров, зарывается в землю по
+пояс и торчит 2 часа, т.к. скорая быстрее все равно не приедет.
+Мнение у скайдайверов всегда предвзятое.
+
+Сильный  скайдайвер  может  прыгать  за  двоих. Гигантский
+скайдайвер ( в природе почти не  встречающийся)  может  прыгать
+один вместо целого взлета мелких скайдайверов.
+
+Синхронно-групповые  скайдайверы встречаются практически в
+любом  месте  где  прыгают,  и  работают  парами,   четверками,
+восьмерками  и  т.д.,  вплоть  до  полка. Перносимая без особых
+последствий скайдайвером доза - 250  прыжков,  либо  400  грамм
+водки, либо 15 банок пива, либо 4 втыка от инструктора.
+
+В  литровой  банке  пива  скайдайвера  утопить невозможно.
+Скайдайвер-самец, выполненый в масштабе 32:1 из  пустых  пивных
+банок,   является   наилучшим  памятником  выкинутым  на  ветер
+деньгам. Формация из 200 скайдайверов, которые так и не открыли
+парашюты, являет собой на земле роскошное зрелище.
+
+Российский  барный скайдайвер является единственным в мире
+непохмеляемым скайдайвером,  а  его  самка,  согласно  поверью,
+способна высовываться из аэродромного бара на три четверти.
+
+Живой    скайдайвер    отличается   от   обычного   только
+температурой,  т.к.  он  работоспособен   в   любом   состояни.
+Незрячие  скайдайверы прыгают по памяти и на ощупь. Их предками
+были обычные скайдаверы, которые слишком увлекались прыжками  в
+темных очках.
+
+Отдельного вида бешеных скайдайверов не существует, однако
+количество таковых в любой популяции - 99%.  Краснорожий поющий
+скайдайвер,   как  и  его  посиневшая  пляшущая  разновидность,
+встречается на аэродроме практически каждый вечер по  окончании
+прыжков или при отсутствии погоды.
+
+Почти   все   начинающие   скайдайверы  -  перворазные,  в
+пластмассовом шлеме шлеме &quot;Смерть  Мотоциклиста&quot;  и  изменяемой
+при   приземлении   геометрией   ног.  Начинающй  скайдайвер  в
+промышленных  масштабах  до  сих  пор  вызывает   споры   среди
+скайдайвероведов  и  скайдайверолюбов. В частности подвергается
+сомнению его способнсть к размножению, хотя в  Подмосковье  так
+называеме  &quot;одноразники&quot;  бродят  толпами  по аэродромам и даже
+пользуются некоторыми гражданскими правами наряду с аэродромным
+инвентарем.
+
+Основной  пищей  скайдайверов  являются  талоны на прыжки,
+иногда сбрызнутые пивом и смазаные кетчупом.  Талоны проношеные
+в  кармане  не  менее  3-х месяцев являют собой редкий по вкусу
+деликатес.  Описаны  также  случаи  нападения  скайдайверов  на
+костры  где  готовят  шашлыки и аэродромные бары. Питаться друг
+другом скайдайверы брезгают, а так - нет.
+
+Случаи  конфликтов  скайдайверов  с  людьми  крайне редки,
+однако   на   аэродромах   следует    опасаться    &quot;точностных&quot;
+скайдайверов,  основная  цель  которых  - точное приземление на
+ничего  не  подозревающих  зрителей.  Скорость  полета   такого
+скайдайвера   непредсказуема,   он   наводится  по  одному  ему
+известным признакам, не реагирует на  крики  и  всегда  доводит
+дело  до  конца.  Полная  противоположность  ему  - безмятежный
+скайдайвер-созерцатель, который, как правило, проводит время на
+аэродроме  задумчиво  созерцая  прыжки  и  рассказывая страшные
+истории   &quot;одноразникам&quot;.   Имеет   все   признаки   настоящего
+скайдайвера,  но  его  выдает  протертый от долгого сиденья зад
+комбинезона. Прыгает по большим праздникам, а так же с  перепою
+и с перепугу.
+
+Выраженой иерархии среди скайдайверов не наблюдается, хотя
+крупный скайдайвер может легко  упрыгать  вдребеги  мелкого.  В
+случае  внешней  угрозы  коллектив скайдайверов неизученым пока
+способом выделяет из себя начальника ( обычно с лицензией Д)  и
+обороняется  под его руководством. После отражения угрозы такой
+скайдайвер  обычно  становится  инструктором  и   выпадает   из
+коллектива.
+
+Срок  полного  созревания  скайдайвера  - 10 мин с момента
+отрыва самолета от  земли.  Выпавший  первый  раз  из  самолета
+скайдайвер  делает  все  что  ему  подсказывают,  если  он  эти
+подсказки слышит. Основная ошибка  скайдайверов  -  черезмерное
+запугивание  &quot;одноразников&quot;, из-за чего некоторые из них гибнут
+так и не родившись, т.к. не могут покинуть самолет.
+
+Ручной скайдайвер - явление столь же редкое, как и ножной,
+хотя с ногами проблем у скайдайверов гораздо больше.  Приручить
+его  можно  было  тремя широко известными ныне словами, которые
+ввиду частой употребляемости потеряли действенность. Скайдайвер
+на  аэродроме хранится там, куда он сумел дойти после вечеринки
+с возлияниями, а если он к тому же еще во что нибудь завернут -
+значит  у  него  хороший  &quot;автопилот&quot;,  и  если  его  сильно не
+кантовать то он не просыпается.
+
+В  древности  на  Руси  скайдайверы  служили  на княжеских
+дворах в качестве наглядного пособия  для  детей:  &quot;смотри,  не
+будешь   слушатся   -  скайдайвером  станешь!&quot;,  а  голодный  и
+неопохмеленый  скайдайвер  служил  украшением  любой  компании.
+Редкостная  по красоте самка скайдайвера, разыскивающая ночью в
+лесу свой купол после отцепки, послужила прототипом для  статуи
+Свободы.  И  последнее.  Если  на  каком  нибудь  аэродроме  вы
+нарядитесь скайдайвером - вас ждут травмированые ноги,  отекшая
+от  выпивки  печень,  постоянные втыки от инструкторов и пустые
+карманы. Кроме того вы можете забыть  о  любви,  ибо  любовь  и
+скайдайвинг (то чем занимаются скайдайверы) малосовместимы.
+
+
+Рекомендуемая литература:
+
+
+&quot;Эмиссары неба&quot;. М. 1963
+&quot;Наш маленький прыгун&quot;. Детгиз. 1932
+&quot;Скайдайвер против джампмастера&quot;. Sky Books. 1990
+&quot;Дурашка с парашютом&quot; Учпедгиз. 1975</pre></article><article class="chapter" id="ch5" data-title="404 Not Found"><h2>404 Not Found</h2><div class="source">mit#U044cka.jpg.htm</div><pre>404 Not Found
+
+
+The requested URL:
+
+http://moshkow.relline.ru/win/PARACHUTE/mitьka.jpg
+was not found on this server.
+
+
+Referer:
+http://moshkow.relline.ru:5000/win/PARACHUTE/
+
+
+You can mail all problems about this library to
+moshkow@ipsun.ras.ru
+
+
+Back to the library
+
+
+Or try this page at
+Library mirrors</pre></article><article class="chapter" id="ch6" data-title="Newsgroups: rec.skydiving"><h2>Newsgroups: rec.skydiving</h2><div class="source">sexvssky.txt.htm</div><pre>Newsgroups: rec.skydiving
+From: Charolyn_Babichuk@darwin.biochem.ualberta.ca
+Subject: Sex vs Skydiving?
+Date: Fri, 12 Nov 1993 00:21:24 GMT
+
+This appeared in this last issue of Canpara.  It was courtesy of &quot;Rambling On&quot;
+magazine in Australia.  Maybe you&#x27;ve seen this before or maybe not.  The last
+thread we had on sex vs skydiving was hilarious so here&#x27;s some more.
+
+
+Is Skydiving Better Than Sex?
+
+
+1.	You can have six skydives a day and still want more.
+
+2.	Finding partners for skydiving is much easier - physical attraction is 		not as important.
+
+3.	Skydiving is much safer;  no diseases and no kids.
+
+4.	Finding good partners is much easier - everyone knows in advance how 		good a skydiver you are.
+
+5.	It&#x27;s socially acceptable to do 4-ways, 8-ways, 16-ways...
+
+6.	Everyone involved is usually satisfied or not with a skydive.
+
+7.	You can ask skydivers if they&#x27;ve put on weight without offending them.
+
+8.	You rarely get told by your partner(s) that they&#x27;ve had enough.
+
+9.	Solo skydiving is not embarrassing. (Right Tim? ;-)
+
+10.	Everyone is ugly in freefall.</pre></article><article class="chapter" id="ch7" data-title="Blood on the risers"><h2>Blood on the risers</h2><div class="source">song.txt.htm</div><pre>Blood on the risers
+
+(TO THE TUNE OF&quot;GLORY, GLORY, HALLELUJAH&quot;)
+
+He was just a rookie trooper,
+And he surely shook with fright
+As he checked all his equipment
+And he made sure his pack was tight.
+
+&quot;Is everyone happy?&quot;, cried the sargeant, looking up,
+Our hero feebly answered &quot;Yes,&quot; and then they stood him up
+He leaped right out into the blast, his static line unhooked,
+HE AIN&#x27;T GONNA JUMP NO MORE!
+
+(CHORUS)
+
+He counted long, he counted loud, he waited for the shock
+He felt the wind, he felt the clouds, he felt the awful drop,
+He jerked his cord, the silk spilled out and wrapped around his legs,
+HE AIN&#x27;T GONNA JUMP NO MORE!
+
+(CHORUS)
+
+The risers wrapped around his neck, connectors cracked his dome
+The lines were snarled and tied in knots, around his skinny bones
+The canopy became his shroud, he hurtled to the ground,
+HE AIN&#x27;T GONNA JUMP NO MORE!
+
+(CHORUS)
+
+The days he&#x27;s lived and loved and laughed kept running through his mind,
+He thought about his girl back home, the one he left behind,
+He thought about the medics and wondered what they&#x27;d find,
+HE AIN&#x27;T GONNA JUMP NO MORE!
+
+(CHORUS)
+
+The ambulance was on the spot, the jeeps were running wild,
+The medics jumped and screamed with glee, they rolled their sleeves and
+smiled
+For it had been a week or more since last a &#x27;chute had failed
+HE AIN&#x27;T GONNA JUMP NO MORE!
+
+(CHORUS)
+
+He hit the ground, the sound was &quot;SPLATT&quot;, his blood went spurting high
+His comrades then were heard to say &quot;A helluva way to die!&quot;
+He lay there  rolling &#x27;round in the welter of his gore
+HE AIN&#x27;T GONNA JUMP NO MORE!
+
+(CHORUS)
+
+There was blood upon the risers, there were brains upon his &#x27;chute
+Intestines were  a&#x27;dangling from his Paratrooper&#x27;s boots,
+They picked him up, still in his &#x27;chute and poured him from his boots.
+HE AIN&#x27;T GONNA JUMP NO MORE!
+
+(CHORUS)
+
+GORY, GORY, WHAT A HELLUVA WAY TO DIE!
+GORY, GORY, WHAT A HELLUVA WAY TO DIE!
+GORY, GORY, WHAT A HELLUVA WAY TO DIE!
+HE AIN&#x27;T GONNA JUMP NO MORE!!!!!</pre></article><article class="chapter" id="ch8" data-title="You know you&#x27;re a skydiver when..."><h2>You know you&#x27;re a skydiver when...</h2><div class="source">when.txt.htm</div><pre>You know you&#x27;re a skydiver when...
+
+
+BOC goes from meaning &quot;Blue Oyster Cult&quot; to meaning &quot;Bottom of Container&quot;.
+
+You&#x27;re making love to your partner and they whisper &quot;I&#x27;ve never done
+this before&quot; and you yell out &quot;THAT&#x27;S a case of beer!&quot;.
+
+On cloudy/windy days you go to the drop zone anyway and bitch about the
+weather.
+
+On cloudy/windy days you pull out your parachute and pack it just to
+say that you&#x27;ve done something skydiving-related.
+
+You &quot;dirt-dive&quot;, &quot;post-dive&quot; and critique your love-making sessions.
+
+The smell of bug spray makes you think of skydiving.
+
+Whenever a passenger in a fast-moving car, you stick your head out the
+window and yell &quot;FIVE LEFT&quot; to the driver.
+
+Whenever leaving an establishment you yell &quot;DOOR&quot; to all the patrons
+before opening the door.
+
+You don&#x27;t own any clothing that you didn&#x27;t get at a boogie.
+
+Every single one of your whuffo friends is to the point of wanting to
+kill you every time you mention skydiving.
+
+You think of Jack Jeffries, Tamara Koyn and Norm Kent as &quot;famous&quot;.
+
+You analyze every flag you see in terms of it&#x27;s too windy/not too windy
+to jump.
+
+You analyze every flag you see in terms of which direction you&#x27;d face
+to land.
+
+It&#x27;s a dark sky with low clouds and you&#x27;re thinking &quot;Hop -n- Pops!&quot;.
+
+It&#x27;s so windy that trees are bending over and you&#x27;re thinking &quot;Cross
+country!&quot;.
+
+You allow a maximum 55 seconds of &quot;working time&quot; when making love.
+
+You can&#x27;t think of a good reason to pick up your mail for three weeks
+after your issues of &quot;Skydiving&quot; and &quot;Parachutist&quot; arrive.
+
+You feel naked without at least one jump ticket in your wallet.
+
+You sign your checks with your name and USPA number.
+
+You know to the tenth of a mile how far it is from your driveway to the
+drop zone&#x27;s driveway.
+
+Every time someone&#x27;s beeper goes off you look at your watch to see if
+it&#x27;s break-off altitude.
+
+You don&#x27;t remember your anniversary or your mother&#x27;s birthday, but you
+know down to the second how much accumulated freefall time you have.
+
+You analyze sessions of love-making in terms of &quot;points turned&quot;.
+
+You refer to your recent break-up as an &quot;intentional cut-away&quot;.
+
+You can&#x27;t remember the true meanings of the words &quot;Stilletto&quot; &quot;Javelin&quot;
+&quot;Talon&quot; &quot;Racer&quot; .....
+
+You walk everywhere watching the sky.
+
+You show up at the dz even on the worst-weather days because at least
+you can sit around drinking beer.
+
+You can&#x27;t mention the word &quot;first&quot; in casual conversation, at work, or
+ever in reference to yourself.
+
+You have your paycheck direct-deposited into the dz account.
+
+You plan your vacations around skydiving boogies.
+
+On a full moon night, you look up and think &quot;Night jumps!&quot;
+
+You know the dz phone number while you don&#x27;t even know your own.
+
+Anytime you have sex with someone for the first time you think &quot;Beer!&quot;
+
+You&#x27;ve kissed more people in freefall than you have on the ground.
+
+Your whuffo friends just don&#x27;t understand why you would want to &quot;do&quot; a
+horny gorilla.
+
+You drive a beaten-up car because you really need that new canopy more.
+
+You have no idea what is happening on the weekends in your town.
+
+You have more pairs of Tevas than you do sneakers.
+
+You catch yourself flaking the bed instead of making it
+
+The term &quot;PC&quot; makes you think of pilot chutes, not personal computers
+
+You name your dog &quot;Toggles&quot;
+
+You wonder what whuffos _DO_ with themselves on gorgeous summer weekends
+
+You look at your VCR and think, &quot;Hmm, that&#x27;s gotta be worth a few jumps.
+
+You forget to lower your voice when talking to your jumper friends in
+a restaurant about the weekend&#x27;s lost dildos, loose legstraps and lack
+of penetration
+
+You refer to Weddings, Funerals, Birthdays, etc. as &#x27;Relative Work&#x27;
+
+You wish for wind, rain, snow, earthquakes, locusts, tornados, etc.  on
+days you have to work or have other &#x27;Relative Work&#x27; to do.
+
+You can&#x27;t imagine how anyone can go on vacation without a parachute.
+
+Your rig costs more than your trailer.
+
+You love the smell of &#x27;Jet A&#x27; in the morning!
+
+Losing your job is a reason for celebration!
+
+Your &#x27;work&#x27; clothes have grippers.
+
+You ware a Skydiving T-shirt and bring a six pack to a job interview.
+
+You try to convince the State Trooper that your &quot;D&quot; license allows you to
+do ANYTHING!
+
+Your log book is thicker than any book you&#x27;ve ever read.
+
+You stop by the New River Bridge and take a look.
+All the others are saying
+&#x27;damn, look how high it is&#x27; and you&#x27;re saying &#x27;damn, look how low it
+is&#x27;.
+
+When you buy anything you calculate how many skydives it will cost.
+
+When you wear your rig on commercial passenger flights, just in case.
+
+When seeing seats in a twin otter gives you the willies.
+
+When you go to divorce court and give your ex everything as long as
+you can keep all your skydiving gear.
+
+When buying a house seems like a terrible waste of jump money.
+
+When you own three rigs, three altimeters, three dytters....
+
+When you log a jump on December 25 and the fact it is Christmas
+doesn&#x27;t enter your mind.
+
+Your six year old son can teach the first jump course.
+
+You put your arms down and back in a full track when running
+down stairs.
+
+You estimate your chances of pulling off a hard front riser
+turn when looking out any window above four stories.
+
+When you wake up with a mean hangover in a tent, the first
+thing you check is your rig. Then the person sleeping next to you.
+
+You find yourself mentally telling the pilot when to flare
+while landing on a commercial flight.
+
+Your christmas tree has more skydivers on it that an Otter can
+carry.
+
+Your thinking about taking all the but the driver&#x27;s seats out
+of your car.
+
+Everytime you get pulled over for speeding you tell the cop you
+just made your first skydive in the hopes that he will let you
+go.
+
+Your favorite movie in the world is just over sixty seconds
+long.
+
+Your whuffo friends only call if the weather man says the
+weekend will be shitty.
+
+Your friends look at the sky and say, &quot;look at all those clouds&quot;, and
+you say, &quot;look at all those holes!&quot;.
+
+You wake up in the morning feeling like death warmed over, after having a
+few too many beers the night before, and your solution to this consists of
+riding in an extremely loud vehicle for about twenty minutes, throwing
+yourself out the door and NOT! killing yourself.
+
+You can&#x27;t think of a better way to relax other than falling 10,000 feet.
+
+You fill out your packing data card in braille and try to convince the drop
+zone owner it&#x27;s legal.
+
+You consider sleeping in a slanted plane as comfortable.
+
+You see an incredibly beautiful woman and you think, &quot;hmm, I wonder if I
+can talk her into......skydiving!&quot;.
+
+Your girlfriend holds out her left hand and says the word diamond.You
+picture a fourway formation, look at your girlfriends hand realize the
+diamond she&#x27;s talking about is going to cost over 200 jumps, and then,
+with a smile, picture your girlfriends suitcases on the porch.
+
+Your friend says &quot;let&#x27;s go to the beach&quot;, and you grab your rig.
+
+You try to convince the flight attendant on a commercial flight that you
+really! would be much more comfortable sitting on the floor.
+
+Your friends think it&#x27;s funny to, when you are sleeping, blow a fan in
+your face and set a beeper off near your ear.
+
+When someone asks you where you&#x27;re from, you reply with the name of
+your dz, not your hometown.
+
+
+You are old skydiver when....
+
+
+You think PC stands for ParaCommander.
+
+You still call them AOD&#x27;s
+
+You know the rules for SCS and SCR.
+
+You HAVE and SCS AND and SCR #.
+
+You call it &quot;Freak Flying&quot; instead of &quot;Sit Fly&quot; and can do it without a
+special jump suit.&#x27;
+
+You still call it the &quot;Freak Brothers&quot; convention.
+
+You remember when safety meetings weren&#x27;t.
+
+You can&#x27;t tell the difference between BOC and a &quot;pull out&quot; except
+you don&#x27;t get to pull your own pin.
+
+You remember when turf surfing was something students did, not hot dogs.
+
+You think Pink is a stupid gear color for guys.
+
+You KNOW what else to do on a weekend.
+
+You think they are ALL &quot;fun&quot; jumps.
+
+You think a collapsable pilot chute is something bad.
+
+You think diapers go on mains.
+
+You don&#x27;t call a jump from 9,500 a &quot;cloud base&quot; jump.
+
+When &quot;pro&quot; packing is something your rigger does.
+
+When paying someone to pack your main is a waste of perfectly
+good jumping money
+
+When you lament the loss of the need to &quot;stand tension&quot; cause it
+gave your girl friend something to do.
+
+You know who Lew Sanborn is and can spell his first name.
+
+You still call them ASOs.
+
+You know what a &quot;jesus string&quot; is.
+
+You remember when you actually wanted to buy a Paraflite main.
+
+You catch yourself using the term &quot;snoot&quot; every once in a while.
+
+Camera suits were used for RW.
+
+Waivers were on a 3&quot;x5&quot; index card...along with the rest of your info.
+
+Competition judges actually had to stand outside.
+
+You remember when a 5-cell canopy was the cat&#x27;s meow.
+
+You can remember when $7.00 to 12,000 ft was highway robbery.
+
+You remember deliberately doing hook turns downwind into the ground
+to stomp a disk.
+
+You remember why the pea gravel pit was invented.
+
+You remember swearing never to remove *any* padding off of a harness.</pre></article>
+</main>
+</div>
+<div class="planet" id="planet" title="Зелёная планетка-закладка"></div>
+<script>
+(function(){
+ var BOOK_KEY='NEX_SCROLL_PARACHUTE_V1';
+ var chapters=document.querySelectorAll('.chapter');
+ var buttons=document.querySelectorAll('.tocBtn');
+ var pos=document.getElementById('pos');
+ var planet=document.getElementById('planet');
+ var saveMark=document.getElementById('saveMark');
+ var idx=Number(localStorage.getItem(BOOK_KEY+'_chapter')||0);
+ if(idx<0||idx>=chapters.length)idx=0;
+ function show(i,top){
+   if(i<0)i=chapters.length-1; if(i>=chapters.length)i=0; idx=i;
+   localStorage.setItem(BOOK_KEY+'_chapter',idx);
+   for(var k=0;k<chapters.length;k++){chapters[k].className='chapter'+(k===idx?' active':''); buttons[k].className='tocBtn'+(k===idx?' active':'');}
+   pos.innerHTML='Глава '+(idx+1)+' из '+chapters.length;
+   document.title=chapters[idx].getAttribute('data-title')+' — Парашютные тексты';
+   if(top!==false)window.scrollTo({top:0,behavior:'smooth'});
+   updatePlanet();
+ }
+ function savePlace(){
+   localStorage.setItem(BOOK_KEY+'_chapter',idx);
+   localStorage.setItem(BOOK_KEY+'_scroll',String(window.scrollY));
+   updatePlanet();
+ }
+ function restorePlace(){
+   var ch=Number(localStorage.getItem(BOOK_KEY+'_chapter')||0);
+   var sy=Number(localStorage.getItem(BOOK_KEY+'_scroll')||0);
+   show(ch,false);
+   setTimeout(function(){window.scrollTo({top:sy,behavior:'smooth'});},80);
+ }
+ function updatePlanet(){
+   var sy=Number(localStorage.getItem(BOOK_KEY+'_scroll')||0);
+   var max=Math.max(1,document.body.scrollHeight-window.innerHeight);
+   var pct=Math.min(.88,Math.max(.12,sy/max));
+   if(planet)planet.style.top=(pct*100)+'vh';
+ }
+ for(var b=0;b<buttons.length;b++){buttons[b].onclick=function(){show(parseInt(this.getAttribute('data-i'),10),true);};}
+ document.getElementById('prevBtn').onclick=function(){show(idx-1,true);};
+ document.getElementById('nextBtn').onclick=function(){show(idx+1,true);};
+ if(saveMark)saveMark.onclick=savePlace;
+ if(planet)planet.onclick=restorePlace;
+ window.addEventListener('scroll',function(){clearTimeout(window.__nexMarkTimer);window.__nexMarkTimer=setTimeout(savePlace,260);});
+ document.onkeydown=function(e){e=e||window.event; var c=e.keyCode; if(c===37)show(idx-1,true); if(c===39)show(idx+1,true);};
+ show(idx,false);
+ setTimeout(restorePlace,120);
+})();
+</script>
+</body>
+</html>
