@@ -898,7 +898,7 @@ border: none;
     <div class="back-wall"></div>
     <div class="floor"></div>
 
-    
+    <div id="nex_core_mount"></div>
 
     <section class="mirror-zone" aria-label="Большое зеркало Большого Некса">
       <div class="mirror-frame">
@@ -1259,7 +1259,10 @@ function openSafeNex() {
     function openBigNex(event) {
       showInfo('Белое яблочко открывает Большого Некса в ChatGPT.');
     }
-
+function injectNex(html){
+    const mount = document.getElementById("nex_core_mount");
+    mount.innerHTML = html;
+}
   </script>
 </body>
 </html>
