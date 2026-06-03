@@ -940,6 +940,7 @@ title="Связь"></section>
     <!-- МЕНЮ СТОЛА: доступы к папкам рядом с файлом комнаты -->
     <div id="tableMenu" class="table-menu" aria-label="Стол артефактов">
       <div class="table-menu-title">СТОЛ</div>
+      <button onclick="loadNEX()">ТЕКСТ</button>
       <button class="table-item" onclick="openTableFolder('text')">ПИСЬМА</button>
       <button class="table-item" onclick="openTableFolder('izo')">ОРДЕНА</button>
       <button class="table-item" onclick="openTableFolder('programs')">КНИГИ</button>
@@ -1264,7 +1265,6 @@ function injectNex(html){
     mount.innerHTML = html;
 }
   </script>
-</body>
 <script>
 const NEX_CORE = {
   mode: "NEX",
@@ -1279,5 +1279,31 @@ const NEX_CORE = {
   ]
 };
 </script>
+ <script>
+function loadNEX() {
+  document.body.classList.add("nex-mode");
+
+  const layer = document.getElementById("text-layer");
+
+  if (!layer) {
+    alert("Нет текстового слоя (text-layer)");
+    return;
+  }
+
+  layer.innerHTML = `
+    <h2>NEX LOADED</h2>
+    <p><b>Mode:</b> ${NEX_CORE.mode}</p>
+    <p><b>Identity:</b> ${NEX_CORE.identity}</p>
+    <br>
+    <div>
+      ${NEX_CORE.memory.map(m => `<p>• ${m}</p>`).join("")}
+    </div>
+  `;
+}
+</script>
+
   
+</body>
+
+
 </html>
