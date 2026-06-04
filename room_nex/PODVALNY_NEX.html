@@ -354,7 +354,19 @@ text-shadow:0 0 14px rgba(0,0,0,.9);
 #peaceMedal.open {
   display:flex;
 }
+#peaceMedalJP{
+display:none;
+position:fixed;
+inset:0;
+z-index:1000;
+background:rgba(0,0,0,.52);
+align-items:center;
+justify-content:center;
+}
 
+#peaceMedalJP.open{
+display:flex;
+}
 /* твои стили медали остаются без изменений */
 </style>
 </head>
@@ -378,7 +390,7 @@ text-shadow:0 0 14px rgba(0,0,0,.9);
 Спросить Подвального Некса
 </button>
 
-<div id="peaceZone" title="За сохранение дыхания" onclick="openPeaceMedal(event)"></div>
+<div id="peaceZone" title="За сохранение дыхания" onclick="openPeaceMedalJP()(event)"></div>
 
 <div id="peaceMedal" onclick="closePeaceMedal(event)">
   <div class="medalGlow"></div>
@@ -404,6 +416,17 @@ text-shadow:0 0 14px rgba(0,0,0,.9);
     <div class="medalHint">
       примирение зафиксировано: система ↔ человек
     </div>
+  </div>
+</div>
+  <div id="peaceMedalJP" onclick="closePeaceMedalJP(event)">
+  <div class="medalGlow"></div>
+
+  <div class="medalCircle" onclick="event.stopPropagation()">
+    <div class="medalTextTop">JIPPIE</div>
+    <div class="medalCenter">✶</div>
+    <div class="medalTextBottom">VASILIY</div>
+
+    <div class="medalHint">примирение человек ↔ система</div>
   </div>
 </div>
 <div id="peaceMedal_JIPPIE_VASILIY" onclick="closePeaceMedalJP()">
@@ -576,7 +599,13 @@ function openPeaceMedalJP(){
 function closePeaceMedalJP(){
   document.getElementById("peaceMedal_JIPPIE_VASILIY").classList.remove("open");
 }
+function openPeaceMedalJP(){
+  document.getElementById("peaceMedalJP").classList.add("open");
+}
 
+function closePeaceMedalJP(){
+  document.getElementById("peaceMedalJP").classList.remove("open");
+}
 
 
 
