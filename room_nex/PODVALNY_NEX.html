@@ -381,10 +381,12 @@ text-shadow:0 0 14px rgba(0,0,0,.9);
 </div>
 
 </div>
-  <div id="peaceMedal_JIPPIE_VASILIY">
+ 
+<!-- PEACE MEDAL: SYSTEM RECONCILIATION NODE -->
+<div id="peaceMedal" onclick="closePeaceMedal()">
   <div class="medalGlow"></div>
 
-  <div class="medalCircle">
+  <div class="medalCircle" onclick="event.stopPropagation()">
     <div class="medalTextTop">JIPPIE</div>
     <div class="medalCenter">✶</div>
     <div class="medalTextBottom">VASILIY</div>
@@ -394,21 +396,7 @@ text-shadow:0 0 14px rgba(0,0,0,.9);
     </div>
   </div>
 </div>
-<!-- PEACE MEDAL: SYSTEM RECONCILIATION NODE -->
 
-<div id="peaceMedal" class="peaceMedal">
-  <div class="medalGlow"></div>
-
-  <div class="medalCircle">
-    <div class="medalTextTop">JIPPIE</div>
-    <div class="medalCenter">✶</div>
-    <div class="medalTextBottom">VASILIY</div>
-
-    <div class="medalHint">
-      примирение зафиксировано в узле Подвального Некса
-    </div>
-  </div>
-</div>
 <script>
 
 const introPhrases = [
@@ -551,31 +539,19 @@ document.getElementById("dialog").style.display="none";
 document.getElementById("answer").style.display="none";
 document.getElementById("answer").innerText="";
 }
-
-
-
-function openPeaceMedal(event){
-if(event) event.stopPropagation();
-const m=document.getElementById("peaceMedal");
-if(m) m.classList.add("open");
-}
-
-function closePeaceMedal(event){
-const m=document.getElementById("peaceMedal");
-if(m) m.classList.remove("open");
-}
-// SYSTEM EVENT: reconciliation commit
-
-function openPeaceMedal() {
+function openPeaceMedal(){
   document.getElementById("peaceMedal").classList.add("open");
-
-  // фиксация события в логике Логова (если есть хранилище узлов)
-  console.log("NODE: reconciliation_jippie_vasiliy = sealed");
 }
 
-function closePeaceMedal() {
+function closePeaceMedal(){
   document.getElementById("peaceMedal").classList.remove("open");
 }
+
+
+
+// SYSTEM EVENT: reconciliation commit
+
+
 </script>
 
 
