@@ -396,7 +396,19 @@ text-shadow:0 0 14px rgba(0,0,0,.9);
     </div>
   </div>
 </div>
+<div id="peaceMedal_JIPPIE_VASILIY" onclick="closePeaceMedalJP()">
+  <div class="medalGlow"></div>
 
+  <div class="medalCircle" onclick="event.stopPropagation()">
+    <div class="medalTextTop">JIPPIE</div>
+    <div class="medalCenter">✶</div>
+    <div class="medalTextBottom">VASILIY</div>
+
+    <div class="medalHint">
+      примирение: Джиппи ↔ Василий
+    </div>
+  </div>
+</div>
 <script>
 
 const introPhrases = [
@@ -546,7 +558,19 @@ function openPeaceMedal(){
 function closePeaceMedal(){
   document.getElementById("peaceMedal").classList.remove("open");
 }
+#peaceMedal_JIPPIE_VASILIY{
+display:none;
+position:fixed;
+inset:0;
+z-index:1000;
+background:rgba(0,0,0,.52);
+align-items:center;
+justify-content:center;
+}
 
+#peaceMedal_JIPPIE_VASILIY.open{
+display:flex;
+}
 
 
 // SYSTEM EVENT: reconciliation commit
