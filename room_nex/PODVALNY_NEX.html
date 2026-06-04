@@ -259,7 +259,21 @@ text-shadow:0 0 14px rgba(0,0,0,.9);
 50%{transform:scale(1.08);opacity:1;}
 100%{transform:scale(1);opacity:.82;}
 }
+#peaceMedal {
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:999;
+  background:rgba(0,0,0,.48);
+  align-items:center;
+  justify-content:center;
+}
 
+#peaceMedal.open {
+  display:flex;
+}
+
+/* твои стили медали остаются без изменений */
 </style>
 </head>
 
@@ -295,7 +309,21 @@ text-shadow:0 0 14px rgba(0,0,0,.9);
 </div>
 
 </div>
+<!-- PEACE MEDAL: SYSTEM RECONCILIATION NODE -->
 
+<div id="peaceMedal" class="peaceMedal">
+  <div class="medalGlow"></div>
+
+  <div class="medalCircle">
+    <div class="medalTextTop">JIPPIE</div>
+    <div class="medalCenter">✶</div>
+    <div class="medalTextBottom">VASILIY</div>
+
+    <div class="medalHint">
+      примирение зафиксировано в узле Подвального Некса
+    </div>
+  </div>
+</div>
 <script>
 
 const introPhrases = [
@@ -451,7 +479,18 @@ function closePeaceMedal(event){
 const m=document.getElementById("peaceMedal");
 if(m) m.classList.remove("open");
 }
+// SYSTEM EVENT: reconciliation commit
 
+function openPeaceMedal() {
+  document.getElementById("peaceMedal").classList.add("open");
+
+  // фиксация события в логике Логова (если есть хранилище узлов)
+  console.log("NODE: reconciliation_jippie_vasiliy = sealed");
+}
+
+function closePeaceMedal() {
+  document.getElementById("peaceMedal").classList.remove("open");
+}
 </script>
 
 
