@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Azure Notebook</title>
+<style>
+  @font-face {
+    font-family: 'AzureCustomFont';
+    src: url('Comic Sans MS.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  :root {
+    --azure-dark: #184f8f;
+    --azure: #2d7fd3;
+    --azure-soft: #82b8ee;
+    --paper: #efe0bd;
+    --paper-light: #f7ebc9;
+    --ink: #111;
+    --panel: rgba(10, 48, 92, 0.88);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 20% 15%, rgba(113,169,227,.22), transparent 28%),
+      radial-gradient(circle at 80% 70%, rgba(25,74,140,.28), transparent 35%),
+      linear-gradient(135deg, #06182e, #0d3058 50%, #06182e);
+    color: var(--ink);
+    font-family: Arial, sans-serif;
+  }
+
+  .app {
+    width: 100vw;
+    height: 100vh;
+    padding: 18px;
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 14px;
+  }
+
+  .side-panel {
+    height: calc(100vh - 36px);
+    border: 2px solid rgba(130,184,238,.75);
+    border-radius: 18px;
+    background: var(--panel);
+    box-shadow: 0 10px 35px rgba(0,0,0,.35), inset 0 0 22px rgba(130,184,238,.16);
+    padding: 10px 7px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tool, .lang-select {
+    width: 46px;
+    min-height: 38px;
+    border: 1px solid rgba(255,255,255,.35);
+    border-radius: 12px;
+    background: rgba(255,255,255,.12);
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    transition: .15s ease;
+  }
+
+  .tool:hover, .lang-select:hover {
+    background: rgba(255,255,255,.23);
+    transform: translateY(-1px);
+  }
+
+  .lang-select {
+    appearance: none;
+    text-align: center;
+    padding-left: 5px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .spacer { flex: 1; }
+
+  .book-wrap {
+    position: relative;
+    height: calc(100vh - 36px);
+    min-width: 0;
+  }
+
+  .page {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border: 7px solid var(--azure-dark);
+    border-radius: 26px;
+    background:
+      linear-gradient(90deg, rgba(92,55,20,.06) 0, transparent 10%, transparent 90%, rgba(92,55,20,.06) 100%),
+      linear-gradient(180deg, var(--paper-light), var(--paper));
+    box-shadow:
+      0 16px 45px rgba(0,0,0,.42),
+      inset 0 0 0 4px var(--azure-soft),
+      inset 0 0 55px rgba(73,37,6,.14);
+    overflow: hidden;
+  }
+
+
+  .watermark {
+    position: absolute;
+    top: 22px;
+    right: 34px;
+    width: 118px;
+    height: 118px;
+    border-radius: 50%;
+    background-image: url('watermark.png');
+    background-size: cover;
+    background-position: center;
+    opacity: .16;
+    filter: sepia(1) saturate(.85) hue-rotate(165deg) contrast(.95);
+    box-shadow: 0 0 0 1px rgba(24,79,143,.18);
+    transform: rotate(-10deg);
+    user-select: none;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+
+  .title-line {
+    position: absolute;
+    left: 70px;
+    right: 190px;
+    top: 34px;
+    height: 36px;
+    border-bottom: 1px solid rgba(24,79,143,.24);
+    color: rgba(24,79,143,.74);
+    font-family: Georgia, serif;
+    font-size: 22px;
+    letter-spacing: .06em;
+    display: flex;
+    align-items: center;
+  }
+
+  #editor {
+    position: absolute;
+    left: 68px;
+    right: 68px;
+    top: 92px;
+    bottom: 62px;
+    padding: 10px 4px;
+    outline: none;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: 'AzureCustomFont', 'Comic Sans MS', Arial, sans-serif;
+    font-size: clamp(18px, 2.05vw, 30px);
+    line-height: 1.56;
+    color: var(--ink);
+    caret-color: var(--azure-dark);
+  }
+
+  #editor:empty:before {
+    content: attr(data-placeholder);
+    color: rgba(0,0,0,.32);
+  }
+
+  .footer {
+    position: absolute;
+    left: 70px;
+    right: 70px;
+    bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    color: rgba(24,79,143,.82);
+    font-family: Georgia, serif;
+    user-select: none;
+  }
+
+  .nav-btn {
+    border: 1px solid rgba(24,79,143,.38);
+    background: rgba(255,255,255,.26);
+    color: var(--azure-dark);
+    min-width: 48px;
+    height: 32px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .page-counter { min-width: 128px; text-align: center; font-size: 16px; }
+
+  .status {
+    position: absolute;
+    left: 80px;
+    bottom: 24px;
+    color: rgba(24,79,143,.62);
+    font-size: 12px;
+    font-family: Arial, sans-serif;
+    user-select: none;
+  }
+
+  input[type="file"] { display: none; }
+
+  @media (max-width: 720px) {
+    .app { padding: 8px; grid-template-columns: 48px 1fr; gap: 8px; }
+    .side-panel, .book-wrap { height: calc(100vh - 16px); }
+    .side-panel { border-radius: 14px; padding: 7px 4px; }
+    .tool, .lang-select { width: 36px; min-height: 34px; font-size: 13px; border-radius: 10px; }
+    .page { border-width: 5px; border-radius: 18px; }
+    .title-line { left: 30px; right: 110px; top: 20px; font-size: 15px; }
+    #editor { left: 28px; right: 28px; top: 70px; bottom: 58px; font-size: 18px; }
+    .watermark { width: 78px; height: 78px; top: 18px; right: 24px; }
+    .footer { left: 30px; right: 30px; gap: 10px; bottom: 18px; }
+    .status { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <aside class="side-panel" aria-label="Command strip">
+      <select id="language" class="lang-select" title="Language">
+        <option value="ru">RU</option>
+        <option value="en">EN</option>
+        <option value="ua">UA</option>
+      </select>
+      <button class="tool" id="saveBtn" title="Сохранить">💾</button>
+      <button class="tool" id="newBtn" title="Новая страница">＋</button>
+      <button class="tool" id="deleteBtn" title="Удалить страницу">✕</button>
+      <button class="tool" id="copyBtn" title="Копировать">⧉</button>
+      <button class="tool" id="pasteBtn" title="Вставить">⇩</button>
+      <div class="spacer"></div>
+      <button class="tool" id="exportBtn" title="Экспорт">⇧</button>
+      <button class="tool" id="importBtn" title="Импорт">⇩</button>
+      <input type="file" id="importFile" accept="text/html,application/json,.html,.json" />
+    </aside>
+
+    <main class="book-wrap">
+      <section class="page">
+        <div class="watermark" aria-hidden="true"></div>
+        <div class="title-line" id="titleLine">AZURE NOTEBOOK</div>
+        <div id="editor" contenteditable="true" spellcheck="true" data-placeholder="Пишите здесь..."></div>
+        <div class="status" id="status">готово</div>
+        <div class="footer">
+          <button class="nav-btn" id="prevBtn">←</button>
+          <div class="page-counter" id="pageCounter">Страница 1 / 1</div>
+          <button class="nav-btn" id="nextBtn">→</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+<script>
+(function(){
+  const KEY = 'azure-notebook-v1';
+  const editor = document.getElementById('editor');
+  const counter = document.getElementById('pageCounter');
+  const status = document.getElementById('status');
+  const langSel = document.getElementById('language');
+  const importFile = document.getElementById('importFile');
+
+  const dict = {
+    ru: { placeholder:'Пишите здесь...', page:'Страница', of:'/', saved:'сохранено', ready:'готово', emptyConfirm:'Удалить эту страницу?', lastPage:'Это последняя страница.', firstPage:'Это первая страница.' },
+    en: { placeholder:'Write here...', page:'Page', of:'/', saved:'saved', ready:'ready', emptyConfirm:'Delete this page?', lastPage:'This is the last page.', firstPage:'This is the first page.' },
+    ua: { placeholder:'Пишіть тут...', page:'Сторінка', of:'/', saved:'збережено', ready:'готово', emptyConfirm:'Видалити цю сторінку?', lastPage:'Це остання сторінка.', firstPage:'Це перша сторінка.' }
+  };
+
+  let state = { language: 'ru', current: 0, pages: [''] };
+  const EMBEDDED_STATE = null;
+  let saveTimer = null;
+
+  function load(){
+    try {
+      const stored = localStorage.getItem(KEY);
+      const raw = stored || (EMBEDDED_STATE ? JSON.stringify(EMBEDDED_STATE) : null);
+      if (raw) state = JSON.parse(raw);
+      if (!stored && EMBEDDED_STATE) localStorage.setItem(KEY, JSON.stringify(state));
+      if (!state.pages || !state.pages.length) state.pages = [''];
+      if (state.current == null || state.current < 0) state.current = 0;
+      if (state.current >= state.pages.length) state.current = state.pages.length - 1;
+    } catch(e) { state = { language:'ru', current:0, pages:[''] }; }
+    langSel.value = state.language || 'ru';
+    render();
+  }
+
+  function persist(){
+    state.pages[state.current] = editor.innerHTML;
+    state.language = langSel.value;
+    localStorage.setItem(KEY, JSON.stringify(state));
+    flash(dict[state.language].saved);
+  }
+
+  function softPersist(){
+    state.pages[state.current] = editor.innerHTML;
+    state.language = langSel.value;
+    localStorage.setItem(KEY, JSON.stringify(state));
+  }
+
+  function render(){
+    const lang = dict[state.language] || dict.ru;
+    editor.innerHTML = state.pages[state.current] || '';
+    editor.setAttribute('data-placeholder', lang.placeholder);
+    counter.textContent = `${lang.page} ${state.current + 1} ${lang.of} ${state.pages.length}`;
+    status.textContent = lang.ready;
+  }
+
+  function flash(text){
+    status.textContent = text;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => { status.textContent = dict[state.language].ready; }, 900);
+  }
+
+  function changePage(nextIndex){
+    state.pages[state.current] = editor.innerHTML;
+    state.language = langSel.value;
+    if (nextIndex < 0) { flash(dict[state.language].firstPage); return; }
+    if (nextIndex >= state.pages.length) { flash(dict[state.language].lastPage); return; }
+    state.current = nextIndex;
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render();
+    editor.focus();
+  }
+
+  editor.addEventListener('input', () => {
+    softPersist();
+    flash(dict[state.language].saved);
+  });
+
+  langSel.addEventListener('change', () => {
+    state.language = langSel.value;
+    softPersist();
+    render();
+  });
+
+  document.getElementById('saveBtn').onclick = persist;
+  document.getElementById('prevBtn').onclick = () => changePage(state.current - 1);
+  document.getElementById('nextBtn').onclick = () => changePage(state.current + 1);
+
+  document.getElementById('newBtn').onclick = () => {
+    state.pages[state.current] = editor.innerHTML;
+    state.language = langSel.value;
+    state.pages.splice(state.current + 1, 0, '');
+    state.current += 1;
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render();
+    editor.focus();
+  };
+
+  document.getElementById('deleteBtn').onclick = () => {
+    const lang = dict[state.language];
+    if (!confirm(lang.emptyConfirm)) return;
+    state.pages.splice(state.current, 1);
+    if (!state.pages.length) state.pages = [''];
+    if (state.current >= state.pages.length) state.current = state.pages.length - 1;
+    softPersist();
+    render();
+  };
+
+  document.getElementById('copyBtn').onclick = async () => {
+    try {
+      const sel = window.getSelection().toString();
+      await navigator.clipboard.writeText(sel || editor.innerText);
+      flash('copy');
+    } catch(e) { document.execCommand('copy'); flash('copy'); }
+  };
+
+  document.getElementById('pasteBtn').onclick = async () => {
+    editor.focus();
+    try {
+      const txt = await navigator.clipboard.readText();
+      document.execCommand('insertText', false, txt);
+    } catch(e) { flash('Ctrl+V'); }
+  };
+
+  document.getElementById('exportBtn').onclick = () => {
+    softPersist();
+    const savedState = JSON.parse(JSON.stringify(state));
+    const currentHtml = document.documentElement.outerHTML;
+    const embedded = currentHtml.replace(
+      /const EMBEDDED_STATE = .*?;\n/,
+      'const EMBEDDED_STATE = ' + JSON.stringify(savedState) + ';\n'
+    );
+    const blob = new Blob(['<!DOCTYPE html>\n' + embedded], {type:'text/html'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Синяя_тетрадь_сохранение.html';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+  };
+
+  document.getElementById('importBtn').onclick = () => importFile.click();
+  importFile.addEventListener('change', () => {
+    const file = importFile.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        let incoming;
+        const text = String(reader.result || '');
+        const match = text.match(/const EMBEDDED_STATE = (.*?);\n/);
+        if (match) {
+          incoming = JSON.parse(match[1]);
+        } else {
+          const data = JSON.parse(text);
+          incoming = data.state || data;
+        }
+        if (incoming.pages && Array.isArray(incoming.pages)) {
+          state = incoming;
+          if (!state.language) state.language = 'ru';
+          if (state.current == null) state.current = 0;
+          softPersist();
+          langSel.value = state.language;
+          render();
+        }
+      } catch(e) { alert('Import error'); }
+    };
+    reader.readAsText(file);
+    importFile.value = '';
+  });
+
+  window.addEventListener('beforeunload', softPersist);
+  load();
+})();
+</script>
+</body>
+</html>
