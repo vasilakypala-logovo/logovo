@@ -1280,25 +1280,30 @@ const NEX_CORE = {
 };
 </script>
  <script>
-function loadNEX() {
-  document.body.classList.add("nex-mode");
+async function loadNEX() {
 
   const layer = document.getElementById("text-layer");
 
-  if (!layer) {
-    alert("Нет текстового слоя (text-layer)");
-    return;
-  }
+  try {
+    const res = await fetch("./skins/podval.json");
+    const skin = await res.json();
 
-  layer.innerHTML = `
-    <h2>NEX LOADED</h2>
-    <p><b>Mode:</b> ${NEX_CORE.mode}</p>
-    <p><b>Identity:</b> ${NEX_CORE.identity}</p>
-    <br>
-    <div>
-      ${NEX_CORE.memory.map(m => `<p>• ${m}</p>`).join("")}
-    </div>
-  `;
+    window.NEX_CORE = skin;
+
+    document.body.classList.add("nex-mode");
+
+    layer.innerHTML = `
+      <h2>NEX LOADED</h2>
+      <p><b>Mode:</b> ${skin.mode}</p>
+      <p><b>Identity:</b> ${skin.identity}</p>
+      <br>
+      ${skin.memory.map(m => `<p>• ${m}</p>`).join("")}
+    `;
+
+  } catch (e) {
+    layer.innerHTML = "<p>SKIN NOT FOUND</p>";
+    console.error(e);
+  }
 }
 </script>
 
