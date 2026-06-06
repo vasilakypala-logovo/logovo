@@ -1459,11 +1459,12 @@ showInfo("ЯДРО: шкура подключена");
     return;
   }
 
-  const packet = {
-    type: "NEX_CHAT_PACKET",
-    time: new Date().toISOString(),
-    payload: core
-  };
+const packet = {
+  type: "NEX_CHAT_PACKET",
+  intent: "CORE_EXECUTION",
+  time: new Date().toISOString(),
+  payload: core
+};
 
   const text = JSON.stringify(packet, null, 2);
 
