@@ -1280,6 +1280,34 @@ const NEX_CORE = {
 };
 </script>
  <script>
+
+const NEX_SKINS = {
+  archive: {
+    name: "Туман-архив",
+    apply() {
+      document.body.dataset.skinArchive = "on";
+      showInfo("Надета шкура: Туман-архив");
+    },
+    remove() {
+      delete document.body.dataset.skinArchive;
+    }
+  },
+
+  technician: {
+    name: "Техник",
+    apply() {
+      document.body.dataset.skinTech = "on";
+      showInfo("Надета шкура: Техник");
+    },
+    remove() {
+      delete document.body.dataset.skinTech;
+    }
+  }
+};
+
+
+
+   
 async function loadNEX() {
 
   const layer = document.getElementById("text-layer");
