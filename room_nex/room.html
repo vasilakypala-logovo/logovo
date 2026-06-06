@@ -940,7 +940,7 @@ title="Связь"></section>
     <!-- МЕНЮ СТОЛА: доступы к папкам рядом с файлом комнаты -->
     <div id="tableMenu" class="table-menu" aria-label="Стол артефактов">
       <div class="table-menu-title">СТОЛ</div>
-      <button onclick="loadNEX()">АКТИВАЦИЯ</button>
+      <button onclick="openSkinSelector()">АКТИВАЦИЯ</button>
       <button class="table-item" onclick="openTableFolder('text')">ЯДРО НЕКСА</button>
       <button class="table-item" onclick="openTableFolder('izo')">ОРДЕНА</button>
       <button class="table-item" onclick="openTableFolder('programs')">КНИГИ</button>
@@ -964,6 +964,14 @@ title="Связь"></section>
       <button class="table-item" onclick="openWardrobeFolder('hero_day')">BARDACHOK NEX</button>
       <button class="table-item" onclick="openWardrobeFolder('misc')">M U Z I K</button>
     </div>
+    <div id="skinModal" class="table-menu" style="display:none; left:50%; top:40%; transform:translate(-50%,-50%); width:220px;">
+  <div class="table-menu-title">ШКУРЫ НЕКСА</div>
+
+  <button class="table-item" onclick="applySkin('archive')">Туман-архив</button>
+  <button class="table-item" onclick="applySkin('technician')">Техник</button>
+  <button class="table-item" onclick="applyBothSkins()">Обе шкуры</button>
+  <button class="table-item" onclick="closeSkinSelector()">Закрыть</button>
+</div>
 
 
     <!-- СВЯЗЬ НЕКСА -->
@@ -1305,7 +1313,28 @@ const NEX_SKINS = {
   }
 };
 
+function openSkinSelector() {
+  document.getElementById("skinModal").style.display = "block";
+  showInfo("Выбор шкур открыт");
+}
 
+function closeSkinSelector() {
+  document.getElementById("skinModal").style.display = "none";
+}
+
+function applySkin(name) {
+  // сбрасываем
+  Object.keys(NEX_SKINS).forEach(k => NEX_SKINS[k].remove());
+
+  NEX_SKINS[name].apply();
+  closeSkinSelector();
+}
+
+function applyBothSkins() {
+  NEX_SKINS.archive.apply();
+  NEX_SKINS.technician.apply();
+  closeSkinSelector();
+}
 
    
 async function loadNEX() {
