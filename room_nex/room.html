@@ -1427,10 +1427,15 @@ async function openNexCore() {
 
   try {
 
-  const res = await fetch("./skins/podval.json", { cache: "no-store" });
-    const podval = await res.json();
-    window.NEX_CORE = podval;
+ const res = await fetch("./skins/podval.json", { cache: "no-store" });
 
+if (!res.ok) {
+  throw new Error("HTTP " + res.status);
+}
+
+const podval = await res.json();
+window.NEX_CORE = podval;
+    
     console.log(podval);
 
     showInfo("ЯДРО: podval.json найден");
