@@ -897,7 +897,7 @@ border: none;
   <main class="room">
     <div class="back-wall"></div>
     <div class="floor"></div>
-<div id="text-layer"></div>
+<div id="text-layer" class="nex-overlay"></div>
     <div id="nex_core_mount"></div>
 
     <section class="mirror-zone" aria-label="Большое зеркало Большого Некса">
@@ -1304,6 +1304,37 @@ async function loadNEX() {
     layer.innerHTML = "<p>SKIN NOT FOUND</p>";
     console.error(e);
   }
+}
+   .nex-overlay {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(420px, 80vw);
+  padding: 18px 22px;
+
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 14px;
+
+  color: rgba(255,255,255,0.88);
+  font-family: Georgia, serif;
+
+  backdrop-filter: blur(6px);
+
+  box-shadow: 0 0 30px rgba(120,200,255,0.12);
+  z-index: 50;
+}
+
+.nex-overlay h2 {
+  margin-bottom: 10px;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+}
+
+.nex-overlay p {
+  margin: 6px 0;
+  font-size: 14px;
 }
 </script>
 
