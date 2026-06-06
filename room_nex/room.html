@@ -1435,6 +1435,8 @@ if (!res.ok) {
 
 const podval = await res.json();
 window.NEX_CORE = podval;
+    console.log("SKINS LOADED:", podval.skins);
+showInfo("ЯДРО: шкура подключена");
     
     console.log(podval);
 
