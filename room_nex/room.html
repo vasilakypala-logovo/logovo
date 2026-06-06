@@ -1301,7 +1301,7 @@ async function loadNEX() {
     `;
 
   } catch (e) {
-    layer.innerHTML = "<p>SKIN NOT FOUND</p>";
+    layer.innerHTML = "SKIN NOT FOUND OR FETCH BLOCKED";
     console.error(e);
   }
 }
