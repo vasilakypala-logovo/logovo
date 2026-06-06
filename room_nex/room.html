@@ -940,7 +940,7 @@ title="Связь"></section>
     <!-- МЕНЮ СТОЛА: доступы к папкам рядом с файлом комнаты -->
     <div id="tableMenu" class="table-menu" aria-label="Стол артефактов">
       <div class="table-menu-title">СТОЛ</div>
-      <button onclick="openSkinSelector()">АКТИВАЦИЯ</button>
+      <button onclick="activateNexBridge()">АКТИВАЦИЯ</button>
      <button class="table-item" onclick="openNexCore()">ЯДРО НЕКСА</button>
       <button class="table-item" onclick="openTableFolder('izo')">ОРДЕНА</button>
       <button class="table-item" onclick="openTableFolder('programs')">КНИГИ</button>
@@ -1449,6 +1449,56 @@ showInfo("ЯДРО: шкура подключена");
     showInfo("ЯДРО: шкура загружена в NEX_CORE");
 
   }
+}
+  function activateNexBridge() {
+
+  const core = window.NEX_CORE;
+
+  if (!core) {
+    showInfo("АКТИВАЦИЯ: ядро не загружено");
+    return;
+  }
+
+  const packet = {
+    type: "NEX_CHAT_PACKET",
+    time: new Date().toISOString(),
+    payload: core
+  };
+
+  const text = JSON.stringify(packet, null, 2);
+
+  const win = window.open("", "NEX_PACKET", "width=520,height=700");
+
+  win.document.write(`
+    <html>
+    <head>
+      <title>NEX PACKET</title>
+      <style>
+        body { background:#0b0f14; color:#d9f1ff; font-family:monospace; padding:14px; }
+        pre { white-space:pre-wrap; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; }
+        button { margin-top:10px; width:100%; padding:10px; cursor:pointer; }
+      </style>
+    </head>
+    <body>
+
+      <h3>NEX PACKET</h3>
+
+      <pre id="data">${text}</pre>
+
+      <button onclick="
+        navigator.clipboard.writeText(document.getElementById('data').innerText);
+        alert('Скопировано');
+      ">
+        КОПИРОВАТЬ
+      </button>
+
+    </body>
+    </html>
+  `);
+
+  win.document.close();
+
+  showInfo("ПАКЕТ готов → копируй и вставь в чат");
 }
 </script>
 
