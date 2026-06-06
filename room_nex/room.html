@@ -1423,8 +1423,26 @@ function loadNEX() {
   document.getElementById("text-layer").innerHTML = "LOADNEX WORKS";
 }
 
-  function openNexCore() {
-  showInfo("ЯДРО: запуск...");
+async function openNexCore() {
+
+  showInfo("ЯДРО: читаю podval.json...");
+
+  try {
+
+    const res = await fetch("./skins/podval.json");
+    const podval = await res.json();
+
+    console.log(podval);
+
+    showInfo("ЯДРО: podval.json найден");
+
+  } catch (e) {
+
+    console.error(e);
+
+    showInfo("ЯДРО: не удалось прочитать podval.json");
+
+  }
 }
 </script>
 
