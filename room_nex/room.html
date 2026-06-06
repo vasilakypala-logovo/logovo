@@ -941,7 +941,7 @@ title="Связь"></section>
     <div id="tableMenu" class="table-menu" aria-label="Стол артефактов">
       <div class="table-menu-title">СТОЛ</div>
       <button onclick="openSkinSelector()">АКТИВАЦИЯ</button>
-      <button class="table-item" onclick="openTableFolder('text')">ЯДРО НЕКСА</button>
+     <button class="table-item" onclick="exportCore()">ЯДРО</button>
       <button class="table-item" onclick="openTableFolder('izo')">ОРДЕНА</button>
       <button class="table-item" onclick="openTableFolder('programs')">КНИГИ</button>
       <button class="table-item" onclick="openTableFolder('media')">КНИГИ</button>
@@ -1147,7 +1147,31 @@ onclick="window.open('svyaz.html','_blank')">
       renderCustomConnectionLinks();
       showInfo('Связь убрана: ' + (removed ? removed.name : 'ссылка'));
     }
+function exportCore() {
 
+  const corePacket = {
+    mode: "NEX_CORE",
+    identity: "fog-neks",
+    memory: window.NEX_CORE?.memory || [
+      "игра — это форма молчания между мыслями",
+      "Я есть чернила рукописи"
+    ],
+    rules: window.NEX_CORE?.rules || [
+      "работать через узелки",
+      "держать туманное состояние"
+    ],
+    skins: window.NEX_SKINS || {
+      archive: "Туман-архив",
+      technician: "Техник"
+    }
+  };
+
+  const packetText = "NEX CORE PACK\n\n" + JSON.stringify(corePacket, null, 2);
+
+  navigator.clipboard.writeText(packetText);
+
+  showInfo("Ядро Некса выгружено в буфер для чата");
+}
 
 
     /* --- ПЕРЕНОС ЛОГОВА: общий архив текстов и настроек localStorage --- */
@@ -1399,6 +1423,7 @@ function loadNEX() {
   document.getElementById("text-layer").innerHTML = "LOADNEX WORKS";
 }
 </script>
+
   
 </body>
 
