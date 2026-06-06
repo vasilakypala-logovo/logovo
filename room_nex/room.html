@@ -1419,9 +1419,7 @@ async function loadNEX() {
 }
 </script>
 <script>
-function loadNEX() {
-  document.getElementById("text-layer").innerHTML = "LOADNEX WORKS";
-}
+
 
 async function openNexCore() {
 
@@ -1429,8 +1427,9 @@ async function openNexCore() {
 
   try {
 
-    const res = await fetch("./skins/podval.json");
+    const res = await fetch("./skins/podval.json", { cache: "no-store" });
     const podval = await res.json();
+    window.NEX_CORE = podval;
 
     console.log(podval);
 
