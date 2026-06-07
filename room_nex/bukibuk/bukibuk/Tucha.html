@@ -1,0 +1,259 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Tucha Archive</title>
+
+<style>
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background:#0b0c0f;
+    color:#ddd;
+    overflow:hidden;
+}
+
+/* верхняя панель папок */
+#folders{
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    width:120px;
+    background:#15181d;
+    padding:10px;
+    overflow-y:auto;
+    border-right:1px solid #222;
+}
+
+.folderBtn{
+    width:100%;
+    padding:10px;
+    margin-bottom:6px;
+    background:#222831;
+    border:1px solid #333;
+    color:#ddd;
+    cursor:pointer;
+    text-align:center;
+}
+.folderBtn:hover{
+    background:#2f3a46;
+}
+
+/* список файлов */
+#files{
+    position:absolute;
+    left:120px;
+    top:0;
+    bottom:0;
+    width:280px;
+    background:#101217;
+    border-right:1px solid #222;
+    overflow-y:auto;
+    padding:10px;
+}
+
+.fileRow{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:6px;
+    margin-bottom:4px;
+    background:#1a1f27;
+    cursor:pointer;
+    border:1px solid #222;
+}
+.fileRow:hover{
+    background:#273040;
+}
+
+.num{
+    width:30px;
+    font-weight:bold;
+}
+
+.name{
+    flex:1;
+    margin-left:8px;
+    font-size:12px;
+    color:#aaa;
+}
+
+/* окно текста */
+#reader{
+    position:absolute;
+    left:400px;
+    right:0;
+    top:0;
+    bottom:0;
+    display:none;
+    background:#aeb5bb; /* сталь */
+    color:#000;
+    padding:25px;
+    overflow:auto;
+    font-size:22px;
+    line-height:1.6;
+    white-space:pre-wrap;
+}
+
+#closeReader{
+    position:fixed;
+    right:20px;
+    top:20px;
+    padding:10px 14px;
+    background:#111;
+    color:#fff;
+    border:none;
+    cursor:pointer;
+}
+
+/* заголовок */
+#title{
+    position:absolute;
+    left:120px;
+    top:0;
+    padding:10px;
+    font-size:14px;
+    color:#888;
+}
+</style>
+</head>
+
+<body>
+
+<div id="folders"></div>
+<div id="files"></div>
+<div id="title">Tucha Archive</div>
+
+<div id="reader"></div>
+<button id="closeReader" onclick="closeReader()">Закрыть</button>
+
+<script>
+const FOLDERS = Array.from({length:14}, (_,i)=>String(i+1).padStart(3,'0'));
+const FILES = Array.from({length:99}, (_,i)=>String(i+1).padStart(2,'0'));
+
+const foldersDiv = document.getElementById('folders');
+const filesDiv = document.getElementById('files');
+const reader = document.getElementById('reader');
+
+let currentFolder = null;
+let titles = JSON.parse(localStorage.getItem('tucha_titles') || '{}');
+
+function saveTitles(){
+    localStorage.setItem('tucha_titles', JSON.stringify(titles));
+}
+
+/* ====== FOLDERS ====== */
+FOLDERS.forEach(f=>{
+    const b = document.createElement('div');
+    b.className='folderBtn';
+    b.textContent=f;
+    b.onclick=()=>openFolder(f);
+    foldersDiv.appendChild(b);
+});
+
+function openFolder(folder){
+    currentFolder = folder;
+    renderFiles(folder);
+}
+
+/* ====== FILE LIST ====== */
+function renderFiles(folder){
+    filesDiv.innerHTML='';
+
+    FILES.forEach(num=>{
+        const row = document.createElement('div');
+        row.className='fileRow';
+
+        const n = document.createElement('div');
+        n.className='num';
+        n.textContent=num;
+
+        const name = document.createElement('div');
+        name.className='name';
+        name.textContent = titles[folder+num] || '';
+
+        row.appendChild(n);
+        row.appendChild(name);
+
+        row.onclick=()=>openFile(folder,num);
+
+        row.ondblclick=()=>{
+            const t = prompt("Название файла:", titles[folder+num] || '');
+            if(t===null) return;
+            titles[folder+num]=t;
+            saveTitles();
+            renderFiles(folder);
+        };
+
+        filesDiv.appendChild(row);
+    });
+}
+
+/* ====== FILE OPEN ====== */
+async function openFile(folder,num){
+    const path = `${folder}/${num}.txt`;
+
+    try{
+        const res = await fetch(path);
+        const buf = await res.arrayBuffer();
+
+        const text = decodeSmart(buf);
+
+        reader.style.display='block';
+        reader.textContent = text;
+
+    }catch(e){
+        reader.style.display='block';
+        reader.textContent = "Файл не найден: " + path;
+    }
+}
+
+/* ====== ENCODING DETECTOR ====== */
+function decodeSmart(buffer){
+    const encodings = [
+        'utf-8',
+        'windows-1251',
+        'koi8-r',
+        'ibm866',
+        'utf-16le',
+        'utf-16be'
+    ];
+
+    let best = '';
+    let bestScore = -1;
+
+    for(const enc of encodings){
+        try{
+            const dec = new TextDecoder(enc);
+            const txt = dec.decode(buffer);
+
+            const score = qualityScore(txt);
+
+            if(score > bestScore){
+                bestScore = score;
+                best = txt;
+            }
+        }catch(e){}
+    }
+
+    return best;
+}
+
+function qualityScore(txt){
+    let bad = (txt.match(/�/g)||[]).length;
+    return txt.length - bad*10;
+}
+
+/* ====== CLOSE ====== */
+function closeReader(){
+    reader.style.display='none';
+    reader.textContent='';
+}
+
+/* init */
+openFolder(FOLDERS[0]);
+</script>
+
+</body>
+</html>
