@@ -150,7 +150,7 @@ function saveFolderNames(){
 FOLDERS.forEach(f=>{
     const b = document.createElement('div');
     b.className='folderBtn';
-    b.textContent = "папка " + f;
+    b.textContent = folderNames[f] || ("папка " + f);
     b.onclick=()=>openFolder(f);
     foldersDiv.appendChild(b);
 });
