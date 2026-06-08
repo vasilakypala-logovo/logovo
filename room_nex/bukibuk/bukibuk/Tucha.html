@@ -138,11 +138,14 @@ const reader = document.getElementById('reader');
 
 let currentFolder = null;
 let titles = JSON.parse(localStorage.getItem('tucha_titles') || '{}');
+    let folderNames = JSON.parse(localStorage.getItem('tucha_folder_names') || '{}');
 
 function saveTitles(){
     localStorage.setItem('tucha_titles', JSON.stringify(titles));
 }
-
+function saveFolderNames(){
+    localStorage.setItem('tucha_folder_names', JSON.stringify(folderNames));
+}
 /* ====== FOLDERS ====== */
 FOLDERS.forEach(f=>{
     const b = document.createElement('div');
