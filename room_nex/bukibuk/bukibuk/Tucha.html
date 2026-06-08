@@ -147,7 +147,7 @@ function saveTitles(){
 FOLDERS.forEach(f=>{
     const b = document.createElement('div');
     b.className='folderBtn';
-    b.textContent=f;
+    b.textContent = "папка " + f;
     b.onclick=()=>openFolder(f);
     foldersDiv.appendChild(b);
 });
