@@ -152,6 +152,14 @@ FOLDERS.forEach(f=>{
     b.className='folderBtn';
     b.textContent = folderNames[f] || ("папка " + f);
     b.onclick=()=>openFolder(f);
+b.ondblclick = () => {
+    const t = prompt("Название папки:", folderNames[f] || "");
+    if (t === null) return;
+    folderNames[f] = t;
+    saveFolderNames();
+    b.textContent = t || ("папка " + f);
+};
+    
     foldersDiv.appendChild(b);
 });
 
