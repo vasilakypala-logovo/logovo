@@ -1561,52 +1561,7 @@ mirrorHitZone.addEventListener("click", () => {
     mirrorNeonText.classList.remove("show");
   }, 4000);
 });
- let MIRROR_QUOTES = [];
-let MIRROR_INDEX = 0;
 
-const mirrorHitZone = document.getElementById("mirrorHitZone");
-const mirrorNeonText = document.getElementById("mirrorNeonText");
-
-async function loadMirrorQuotes() {
-  try {
-    const res = await fetch("./skins/podval.json", { cache: "no-store" });
-    const data = await res.json();
-
-    // берём афоризмы из memory (если у тебя там они лежат)
-    MIRROR_QUOTES = data.memory || [];
-
-    if (!Array.isArray(MIRROR_QUOTES)) {
-      MIRROR_QUOTES = [];
-    }
-
-  } catch (e) {
-    console.error("Mirror load error:", e);
-    MIRROR_QUOTES = ["Зеркало молчит."];
-  }
-}
-
-function showNextMirrorQuote() {
-  if (!MIRROR_QUOTES.length) {
-    mirrorNeonText.textContent = "Память пуста.";
-  } else {
-    const quote = MIRROR_QUOTES[MIRROR_INDEX % MIRROR_QUOTES.length];
-    MIRROR_INDEX++;
-
-    mirrorNeonText.textContent = quote;
-  }
-
-  mirrorNeonText.classList.add("show");
-
-  clearTimeout(window.__mirrorTimeout);
-  window.__mirrorTimeout = setTimeout(() => {
-    mirrorNeonText.classList.remove("show");
-  }, 4500);
-}
-
-mirrorHitZone.addEventListener("click", showNextMirrorQuote);
-
-// загружаем афоризмы при старте комнаты
-window.addEventListener("load", loadMirrorQuotes); 
 </script>
 
   
