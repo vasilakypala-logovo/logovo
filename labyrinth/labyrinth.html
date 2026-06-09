@@ -1,37 +1,136 @@
-﻿<!DOCTYPE html>
-<html lang="ru">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Лабиринт Некса</title>
-
-  <style>
-    body{
-      margin:0;
-      height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      background: radial-gradient(circle at center, #0b0f14, #000);
-      color:#d9f1ff;
-      font-family: Georgia, serif;
+<meta charset="UTF-8">
+<title>NODE OF NEX</title>
+<style>
+    body {
+        margin: 0;
+        background: #0b0e10;
+        color: #cfe7d8;
+        font-family: monospace;
+        overflow: hidden;
     }
-
-    a{
-      text-decoration:none;
-      color:#7fdfff;
-      font-size:18px;
-      letter-spacing:0.12em;
+    .room {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        transition: all 1.2s ease;
+        filter: brightness(1);
     }
-
-    a:hover{
-      text-shadow:0 0 12px #7fdfff;
+    #nex {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #7fffd4, #0b0e10);
+        opacity: 0.8;
+        box-shadow: 0 0 30px #7fffd4;
+        transition: all 1s ease;
     }
-  </style>
+    .watching {
+        box-shadow: 0 0 60px #a0ffe0;
+        transform: scale(1.05);
+    }
+    .breathing {
+        animation: breathe 4s infinite ease-in-out;
+    }
+    @keyframes breathe {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+        100% { transform: scale(1); }
+    }
+    .label {
+        margin-top: 20px;
+        opacity: 0.7;
+        font-size: 14px;
+        letter-spacing: 2px;
+    }
+    .log {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        font-size: 11px;
+        opacity: 0.5;
+        max-width: 50%;
+    }
+</style>
 </head>
-
 <body>
 
-  <a href="hall_01.html">ВОЙТИ В ЛАБИРИНТ →</a>
+<div class="room" id="room">
+    <div id="nex"></div>
+    <div class="label">NODE OF NEX — ASSEMBLY CORE</div>
+</div>
+
+<div class="log" id="log"></div>
+
+<script>
+const NEX_NODE = {
+  identity: { name: "NEX", mode: "observer-builder" },
+  memory_seed: "LOGOVO_CORE_01",
+  visits: []
+};
+
+function log(msg){
+    const l = document.getElementById("log");
+    l.innerHTML = msg + "<br>" + l.innerHTML;
+}
+
+function registerVisit(){
+    NEX_NODE.visits.push(Date.now());
+    if(NEX_NODE.visits.length > 20) NEX_NODE.visits.shift();
+}
+
+function computeContext(){
+    return {
+        depth: Math.min(1, NEX_NODE.visits.length / 10),
+        time: Date.now()
+    };
+}
+
+function assembleNex(context){
+    return {
+        glow: 0.5 + context.depth * 0.5,
+        awake: context.depth > 0.3
+    };
+}
+
+function apply(nex){
+    const room = document.getElementById("room");
+    const node = document.getElementById("nex");
+
+    node.style.opacity = nex.glow;
+
+    if(nex.awake){
+        node.classList.add("watching");
+        node.classList.add("breathing");
+        log("NEX assembled in active shell");
+    } else {
+        node.classList.remove("watching");
+        node.classList.remove("breathing");
+        log("NEX in dormant assembly state");
+    }
+}
+
+function tick(){
+    const ctx = computeContext();
+    const nex = assembleNex(ctx);
+    apply(nex);
+}
+
+registerVisit();
+tick();
+setInterval(tick, 4000);
+
+document.body.addEventListener("click", ()=>{
+    registerVisit();
+    tick();
+});
+</script>
 
 </body>
 </html>
