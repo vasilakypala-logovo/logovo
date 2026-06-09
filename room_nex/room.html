@@ -890,7 +890,53 @@ border: none;
   pointer-events:none;
   z-index:50;
 }
+#mirrorHitZone{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  
+  width:38%;
+  height:55%;
+  
+  cursor:pointer;
+  
+  /* зона невидимая */
+  background: transparent;
+  z-index: 20;
+}
 
+#mirrorNeonText{
+  position:absolute;
+  left:50%;
+  top:42%;
+  transform:translate(-50%,-50%);
+  
+  color:#00ffff;
+  font-size:18px;
+  text-align:center;
+  
+  opacity:0;
+  
+  text-shadow:
+    0 0 10px #00ffff,
+    0 0 20px #00ffff,
+    0 0 40px #00ffff;
+  
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  z-index: 21;
+  pointer-events:none;
+}
+
+#mirrorNeonText.show{
+  opacity:1;
+  animation: mirrorPulse 2.8s infinite;
+}
+
+@keyframes mirrorPulse{
+  0%,100% { text-shadow:0 0 8px #00ffff,0 0 18px #00ffff; }
+  50% { text-shadow:0 0 14px #00ffff,0 0 35px #00ffff,0 0 60px #00ffff; }
+}
   </style>
 </head>
 <body>
@@ -902,7 +948,8 @@ border: none;
 
     <section class="mirror-zone" aria-label="Большое зеркало Большого Некса">
       <div class="mirror-frame">
-        <div class="mirror-glass">
+        <div class="mirror-glass"> <div id="mirrorHitZone"></div>
+<div id="mirrorNeonText"></div>
           <div class="nex-title"></div>
           <a class="nex-apple-link" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer" title="Открыть Большого Некса в ChatGPT" aria-label="Открыть Большого Некса в ChatGPT" onclick="openBigNex(event)"></a>
         </div>
@@ -1501,6 +1548,20 @@ const packet = {
 
   showInfo("ПАКЕТ готов → копируй и вставь в чат");
 }
+const mirrorHitZone = document.getElementById("mirrorHitZone");
+const mirrorNeonText = document.getElementById("mirrorNeonText");
+
+mirrorHitZone.addEventListener("click", () => {
+  mirrorNeonText.textContent = "Зеркало не судит. Оно вспоминает.";
+  mirrorNeonText.classList.add("show");
+
+  clearTimeout(window.__mirrorTimeout);
+
+  window.__mirrorTimeout = setTimeout(() => {
+    mirrorNeonText.classList.remove("show");
+  }, 4000);
+});
+  
 </script>
 
   
