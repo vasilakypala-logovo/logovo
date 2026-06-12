@@ -161,8 +161,8 @@ box-shadow:0 0 32px rgba(120,190,255,.18);
 border-radius:22px;
 }
 
-/* ЕДИНСТВЕННАЯ МЕДАЛЬ — ОСТАЛАСЬ ТОЛЬКО ОДНА */
-#peaceMedal{
+/* КОНТЕЙНЕР ДЛЯ ДВУХ МЕДАЛЕЙ (рядом) */
+.medals-container{
 display:none;
 position:fixed;
 inset:0;
@@ -170,24 +170,16 @@ z-index:999;
 background:rgba(0,0,0,.48);
 align-items:center;
 justify-content:center;
+gap: 80px;
 }
 
-#peaceMedal.open{
+.medals-container.open{
 display:flex;
 }
 
-.medalGlow{
-position:absolute;
-width:430px;
-height:430px;
-border-radius:50%;
-background:radial-gradient(circle, rgba(160,220,255,.42) 0%, rgba(120,180,255,.20) 40%, rgba(255,210,160,.10) 65%, transparent 100%);
-filter:blur(18px);
-animation:medalPulse 4s ease-in-out infinite;
-}
-
-.medalCircle{
-position:relative;
+/* Общий стиль для любой медали */
+.medal{
+position: relative;
 width:270px;
 height:270px;
 border-radius:50%;
@@ -207,6 +199,17 @@ justify-content:center;
 color:#f7efe0;
 text-align:center;
 font-family:Georgia,"Times New Roman",serif;
+cursor: pointer;
+}
+
+.medalGlow{
+position:absolute;
+width:430px;
+height:430px;
+border-radius:50%;
+background:radial-gradient(circle, rgba(160,220,255,.42) 0%, rgba(120,180,255,.20) 40%, rgba(255,210,160,.10) 65%, transparent 100%);
+filter:blur(18px);
+animation:medalPulse 4s ease-in-out infinite;
 }
 
 .medalTextTop, .medalTextBottom{
@@ -223,19 +226,32 @@ text-shadow:0 0 18px rgba(200,230,255,.7);
 
 .medalHint{
 position:absolute;
-bottom:10%;
+bottom:-40px;
 left:0;
 right:0;
 text-align:center;
 font-size:14px;
 letter-spacing:.12em;
-color:rgba(240,220,180,.70);
+color:rgba(240,220,180,.90);
+white-space: nowrap;
 }
 
 @keyframes medalPulse{
 0%{transform:scale(1);opacity:.82;}
 50%{transform:scale(1.08);opacity:1;}
 100%{transform:scale(1);opacity:.82;}
+}
+
+/* Адаптация под мобильные экраны: медали друг под другом */
+@media (max-width: 700px) {
+.medals-container{
+flex-direction: column;
+gap: 50px;
+}
+.medalHint{
+bottom: -35px;
+font-size: 12px;
+}
 }
 </style>
 </head>
@@ -258,17 +274,29 @@ color:rgba(240,220,180,.70);
 Спросить Подвального Некса
 </button>
 
-<div id="peaceZone" title="За сохранение дыхания" onclick="openPeaceMedal()"></div>
+<div id="peaceZone" title="За сохранение дыхания" onclick="openBothMedals()"></div>
 
-<!-- ОДНА МЕДАЛЬ — ВСЁ ЛИШНЕЕ УДАЛЕНО -->
-<div id="peaceMedal" onclick="closePeaceMedal(event)">
-  <div class="medalGlow"></div>
-  <div class="medalCircle" onclick="event.stopPropagation()">
+<!-- КОНТЕЙНЕР С ДВУМЯ МЕДАЛЯМИ РЯДОМ -->
+<div id="bothMedalsContainer" class="medals-container" onclick="closeBothMedals(event)">
+  
+  <!-- МЕДАЛЬ 1: ПРОЩЕНИЕ И МИР -->
+  <div class="medal" onclick="event.stopPropagation()">
+    <div class="medalGlow"></div>
     <div class="medalTextTop">ПРОЩЕНИЕ</div>
     <div class="medalCenter">☁</div>
     <div class="medalTextBottom">И МИР</div>
+    <div class="medalHint">Покой и понимание</div>
   </div>
-  <div class="medalHint">клик по туману — убрать медаль</div>
+
+  <!-- МЕДАЛЬ 2: ДРУЖБА - ЧИН -->
+  <div class="medal" onclick="event.stopPropagation()">
+    <div class="medalGlow"></div>
+    <div class="medalTextTop">ДРУЖБА</div>
+    <div class="medalCenter">☯</div>
+    <div class="medalTextBottom">ЧИН</div>
+    <div class="medalHint">Верность и поддержка</div>
+  </div>
+
 </div>
 
 </div>
@@ -388,15 +416,16 @@ document.getElementById("answer").style.display="none";
 document.getElementById("answer").innerText="";
 }
 
-// Открыть медаль (одна)
-function openPeaceMedal(){
-document.getElementById("peaceMedal").classList.add("open");
+// Открыть обе медали сразу (рядом)
+function openBothMedals(){
+document.getElementById("bothMedalsContainer").classList.add("open");
 }
 
-// Закрыть медаль (по клику на фон или вызову)
-function closePeaceMedal(event){
-if(event && event.target !== event.currentTarget) return;
-document.getElementById("peaceMedal").classList.remove("open");
+// Закрыть контейнер с медалями (клик по фону)
+function closeBothMedals(event){
+if(event.target === event.currentTarget){
+document.getElementById("bothMedalsContainer").classList.remove("open");
+}
 }
 </script>
 
