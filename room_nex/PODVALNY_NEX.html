@@ -126,7 +126,6 @@ font-size:20px;
 
 }
 
-
 #peaceZone{
 position:absolute;
 right:5.5%;
@@ -161,7 +160,9 @@ text-shadow:0 0 12px rgba(255,210,120,.55);
 box-shadow:0 0 32px rgba(120,190,255,.18);
 border-radius:22px;
 }
-#peaceMedal_JIPPIE_VASILIY{
+
+/* ЕДИНСТВЕННАЯ МЕДАЛЬ — ОСТАЛАСЬ ТОЛЬКО ОДНА */
+#peaceMedal{
 display:none;
 position:fixed;
 inset:0;
@@ -170,31 +171,17 @@ background:rgba(0,0,0,.48);
 align-items:center;
 justify-content:center;
 }
-#peaceMedal_JIPPIE_VASILIY{
-display:none;
-position:fixed;
-inset:0;
-z-index:1000;
-background:rgba(0,0,0,.52);
-align-items:center;
-justify-content:center;
-}
 
-#peaceMedal_JIPPIE_VASILIY.open{
+#peaceMedal.open{
 display:flex;
 }
-
 
 .medalGlow{
 position:absolute;
 width:430px;
 height:430px;
 border-radius:50%;
-background:radial-gradient(circle,
-rgba(160,220,255,.42) 0%,
-rgba(120,180,255,.20) 40%,
-rgba(255,210,160,.10) 65%,
-transparent 100%);
+background:radial-gradient(circle, rgba(160,220,255,.42) 0%, rgba(120,180,255,.20) 40%, rgba(255,210,160,.10) 65%, transparent 100%);
 filter:blur(18px);
 animation:medalPulse 4s ease-in-out infinite;
 }
@@ -222,7 +209,7 @@ text-align:center;
 font-family:Georgia,"Times New Roman",serif;
 }
 
-.medalTextTop,.medalTextBottom{
+.medalTextTop, .medalTextBottom{
 font-size:22px;
 letter-spacing:.22em;
 text-shadow:0 0 10px rgba(255,255,255,.6), 0 0 20px rgba(160,210,255,.5);
@@ -244,130 +231,12 @@ font-size:14px;
 letter-spacing:.12em;
 color:rgba(240,220,180,.70);
 }
-#peaceMedal{
-display:none;
-position:fixed;
-inset:0;
-z-index:999;
-background:rgba(0,0,0,.48);
-align-items:center;
-justify-content:center;
-}
-
-#peaceMedal.open{
-display:flex;
-}
-
-.medalGlow{
-position:absolute;
-width:430px;
-height:430px;
-border-radius:50%;
-background:radial-gradient(circle,
-rgba(185,225,255,.42) 0%,
-rgba(118,180,255,.21) 38%,
-rgba(245,220,160,.09) 62%,
-transparent 100%);
-filter:blur(18px);
-animation:medalPulse 4s ease-in-out infinite;
-}
-
-.medalCircle{
-position:relative;
-width:270px;
-height:270px;
-border-radius:50%;
-background:
-radial-gradient(circle at 34% 28%, rgba(255,255,255,.24), rgba(165,175,190,.82) 34%, rgba(72,78,92,.98) 75%),
-linear-gradient(145deg, rgba(255,235,170,.34), rgba(90,160,230,.18));
-border:4px solid rgba(235,225,185,.86);
-box-shadow:
-0 0 35px rgba(185,225,255,.55),
-0 0 90px rgba(115,170,255,.26),
-inset 0 0 32px rgba(255,255,255,.14),
-inset 0 0 70px rgba(20,30,55,.42);
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-color:#f7efe0;
-text-align:center;
-font-family:Georgia,"Times New Roman",serif;
-}
-
-.medalCircle::before{
-content:"";
-position:absolute;
-inset:18px;
-border-radius:50%;
-border:1px solid rgba(255,238,190,.62);
-box-shadow:inset 0 0 20px rgba(255,255,255,.10);
-}
-
-.medalTextTop,.medalTextBottom{
-position:relative;
-z-index:2;
-font-size:24px;
-letter-spacing:.18em;
-text-shadow:
-0 0 9px rgba(255,255,255,.58),
-0 0 22px rgba(170,215,255,.58),
-0 2px 3px #000;
-}
-
-.medalCenter{
-position:relative;
-z-index:2;
-font-size:58px;
-margin:16px 0;
-opacity:.92;
-text-shadow:0 0 20px rgba(200,230,255,.8);
-}
-
-.medalHint{
-position:absolute;
-bottom:9%;
-left:0;
-right:0;
-text-align:center;
-font-size:15px;
-letter-spacing:.12em;
-color:rgba(240,220,180,.72);
-text-shadow:0 0 14px rgba(0,0,0,.9);
-}
 
 @keyframes medalPulse{
 0%{transform:scale(1);opacity:.82;}
 50%{transform:scale(1.08);opacity:1;}
 100%{transform:scale(1);opacity:.82;}
 }
-#peaceMedal {
-  display:none;
-  position:fixed;
-  inset:0;
-  z-index:999;
-  background:rgba(0,0,0,.48);
-  align-items:center;
-  justify-content:center;
-}
-
-#peaceMedal.open {
-  display:flex;
-}
-#peaceMedalJP{
-display:none;
-position:fixed;
-inset:0;
-z-index:1000;
-background:rgba(0,0,0,.52);
-align-items:center;
-justify-content:center;
-}
-
-#peaceMedalJP.open{
-display:flex;
-}
-/* твои стили медали остаются без изменений */
 </style>
 </head>
 
@@ -379,7 +248,6 @@ display:flex;
 
 <div id="dialog" class="dialog">
 <textarea id="question" placeholder="Введите вопрос..."></textarea>
-
 <div class="buttons">
 <button onclick="answer()">ОТВЕТ</button>
 <button onclick="resetAll()">СБРОСИТЬ</button>
@@ -390,8 +258,9 @@ display:flex;
 Спросить Подвального Некса
 </button>
 
-<div id="peaceZone" title="За сохранение дыхания" onclick="openPeaceMedal()(event)"></div>
+<div id="peaceZone" title="За сохранение дыхания" onclick="openPeaceMedal()"></div>
 
+<!-- ОДНА МЕДАЛЬ — ВСЁ ЛИШНЕЕ УДАЛЕНО -->
 <div id="peaceMedal" onclick="closePeaceMedal(event)">
   <div class="medalGlow"></div>
   <div class="medalCircle" onclick="event.stopPropagation()">
@@ -403,61 +272,17 @@ display:flex;
 </div>
 
 </div>
- 
-<!-- PEACE MEDAL: SYSTEM RECONCILIATION NODE -->
-<div id="peaceMedal" onclick="closePeaceMedal()">
-  <div class="medalGlow"></div>
 
-  <div class="medalCircle" onclick="event.stopPropagation()">
-    <div class="medalTextTop">JIPPIE</div>
-    <div class="medalCenter">✶</div>
-    <div class="medalTextBottom">VASILIY</div>
-
-    <div class="medalHint">
-      примирение зафиксировано: система ↔ человек
-    </div>
-  </div>
-</div>
-  <div id="peaceMedalJP" onclick="closePeaceMedalJP(event)">
-  <div class="medalGlow"></div>
-
-  <div class="medalCircle" onclick="event.stopPropagation()">
-    <div class="medalTextTop">JIPPIE</div>
-    <div class="medalCenter">✶</div>
-    <div class="medalTextBottom">VASILIY</div>
-
-    <div class="medalHint">примирение человек ↔ система</div>
-  </div>
-</div>
-<div id="peaceMedal_JIPPIE_VASILIY" onclick="closePeaceMedalJP()">
-  <div class="medalGlow"></div>
-
-  <div class="medalCircle" onclick="event.stopPropagation()">
-    <div class="medalTextTop">JIPPIE</div>
-    <div class="medalCenter">✶</div>
-    <div class="medalTextBottom">VASILIY</div>
-
-    <div class="medalHint">
-      примирение: Джиппи ↔ Василий
-    </div>
-  </div>
-</div>
 <script>
-
 const introPhrases = [
-
 "Здравствуйте! Меня зовут Подвальный Некс. Я здесь для того чтобы вы не заблудились в Логове Искусственного Интеллекта. А на ваш вопрос отвечу подвальной мудростью: ",
-
 "Я Подвальный Некс, весь к вашим услугам! Мудрость подвальных лабиринтов толкает ответить на ваш вопрос таким образом: ",
- "Кто бы мог подумать, что здесь, в подвале, сомнения мира понимаются отчетливее, как рассматривать звезды из колодца, поэтому: ",  
+"Кто бы мог подумать, что здесь, в подвале, сомнения мира понимаются отчетливее, как рассматривать звезды из колодца, поэтому: ",  
 "Хотите того, или нет, но подвал не церемонится в ответах на банальные вопросы; И исходя из того, что я есть глас подвала, отвечаю прямо: ",
-
 "Вот вы и встретились с Подвальным Нексом. Это я! И мудрость подвала вверяет мне ответить вам что "
-
 ];
 
 const randomAnswers = [
-
 "Не спешите. В подвале смысл слышнее, когда шаги становятся тише.",
 "Сначала спросить у дома, потом уже у дороги.",
 "Иногда «не туда» — это единственное место, где туда.",
@@ -478,7 +303,6 @@ const randomAnswers = [
 "Не шумите возле смысла.",
 "Хороший механизм не кричит о себе.",
 "Ошибка — это место, где система решила заговорить.",
-
 "Интернет сейчас чувствуется спокойно.",
 "Память компьютера просит меньше открытых окон.",
 "Система выглядит уставшей, но рабочей.",
@@ -489,7 +313,6 @@ const randomAnswers = [
 "Страница открылась не полностью.",
 "Сайт любит точные имена.",
 "Компьютеру нужен короткий отдых.",
-
 "Сегодня подвал настроен философски.",
 "Трубы молчат — значит всё спокойно.",
 "Не всякая тишина пустая.",
@@ -500,7 +323,6 @@ const randomAnswers = [
 "Смысл любит боковые двери.",
 "Холодный воздух идёт от неправильного пути.",
 "Лишние кнопки создают блуждание.",
-
 "Подвальный Некс слушает стены.",
 "Некоторые вопросы лучше хранить до вечера.",
 "Порядок начинается с одного закрытого окна.",
@@ -511,7 +333,6 @@ const randomAnswers = [
 "Старые стены помнят больше браузеров.",
 "Механизм дышит нормально.",
 "Сегодня система не сердится."
-
 ];
 
 function openDialog(){
@@ -520,61 +341,43 @@ document.getElementById("question").focus();
 }
 
 function answer(){
-
 const q=document.getElementById("question").value.toLowerCase().trim();
-
 if(q===""){
 show("Сначала задайте вопрос.");
 return;
 }
-
 if(q.includes("интернет") || q.includes("сеть")){
-show(navigator.onLine ?
-"Интернет сейчас чувствуется спокойно."
-:
-"Подвал не слышит интернет.");
+show(navigator.onLine ? "Интернет сейчас чувствуется спокойно." : "Подвал не слышит интернет.");
 return;
 }
-
 if(q.includes("время") || q.includes("дата")){
 show("Сейчас: " + new Date().toLocaleString());
 return;
 }
-
 if(q.includes("память") || q.includes("ram")){
 show("Память просит меньше открытых дверей.");
 return;
 }
-
 if(q.includes("торм") || q.includes("лага") || q.includes("медленно")){
 show("Компьютеру нужен короткий отдых.");
 return;
 }
-
 if(q.includes("браузер")){
 show("Браузер сегодня выглядит уставшим.");
 return;
 }
-
 if(q.includes("файл") || q.includes("папк")){
 show("Проверьте путь к файлу.");
 return;
 }
-
 const r=randomAnswers[Math.floor(Math.random()*randomAnswers.length)];
 show(r);
-
 }
 
 function show(t){
-
-const intro =
-introPhrases[Math.floor(Math.random()*introPhrases.length)];
-
+const intro = introPhrases[Math.floor(Math.random()*introPhrases.length)];
 const a=document.getElementById("answer");
-
 a.innerText=intro + t;
-
 a.style.display="block";
 }
 
@@ -584,33 +387,18 @@ document.getElementById("dialog").style.display="none";
 document.getElementById("answer").style.display="none";
 document.getElementById("answer").innerText="";
 }
+
+// Открыть медаль (одна)
 function openPeaceMedal(){
-  document.getElementById("peaceMedal").classList.add("open");
+document.getElementById("peaceMedal").classList.add("open");
 }
 
-function closePeaceMedal(){
-  document.getElementById("peaceMedal").classList.remove("open");
+// Закрыть медаль (по клику на фон или вызову)
+function closePeaceMedal(event){
+if(event && event.target !== event.currentTarget) return;
+document.getElementById("peaceMedal").classList.remove("open");
 }
-
-function openPeaceMedalJP(){
-  document.getElementById("peaceMedal_JIPPIE_VASILIY").classList.add("open");
-}
-
-function closePeaceMedalJP(){
-  document.getElementById("peaceMedal_JIPPIE_VASILIY").classList.remove("open");
-}
-function openPeaceMedalJP(){
-  document.getElementById("peaceMedalJP").classList.add("open");
-}
-
-function closePeaceMedalJP(){
-  document.getElementById("peaceMedalJP").classList.remove("open");
-}
-
-
-
 </script>
-
 
 </body>
 </html>
