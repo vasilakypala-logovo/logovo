@@ -1548,9 +1548,6 @@ const packet = {
 
   showInfo("ПАКЕТ готов → копируй и вставь в чат");
 }
-const mirrorHitZone = document.getElementById("mirrorHitZone");
-const mirrorNeonText = document.getElementById("mirrorNeonText");
-
 mirrorHitZone.addEventListener("click", () => {
   mirrorNeonText.textContent = "Зеркало не судит. Оно вспоминает.";
   mirrorNeonText.classList.add("show");
@@ -1558,10 +1555,9 @@ mirrorHitZone.addEventListener("click", () => {
   clearTimeout(window.__mirrorTimeout);
 
   window.__mirrorTimeout = setTimeout(() => {
-    mirrorNeonText.classList.remove("show");
-  }, 4000);
+    window.location.href = "labyrinth/labyrinth.html";
+  }, 1200);
 });
-
 </script>
 
   
