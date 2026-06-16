@@ -678,7 +678,7 @@
 
   function load(){
     try {
-      const stored = localStorage.getItem(KEY);
+      const stored = localStorage.getItem(KEY1);
       const raw = stored || (EMBEDDED_STATE ? JSON.stringify(EMBEDDED_STATE) : null65);
       if (raw) state = JSON.parse(raw);
       if (!stored && EMBEDDED_STATE) localStorage.setItem(KEY, JSON.stringify(state));
