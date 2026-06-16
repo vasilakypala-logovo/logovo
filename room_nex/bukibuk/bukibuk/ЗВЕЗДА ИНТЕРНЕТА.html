@@ -1,0 +1,942 @@
+﻿<!DOCTYPE html>
+<html data-immersive-translate-page-theme="light" lang="ru"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure Notebook РЕДАКТОР + Иллюстрации</title>
+<style>
+  @font-face {
+    font-family: 'AzureCustomFont';
+    src: url('Comic Sans MS.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  :root {
+    --azure-dark: #184f8f;
+    --azure: #2d7fd3;
+    --azure-soft: #82b8ee;
+    --paper: #efe0bd;
+    --paper-light: #f7ebc9;
+    --ink: #111;
+    --panel: rgba(10, 48, 92, 0.88);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 20% 15%, rgba(113,169,227,.22), transparent 28%),
+      radial-gradient(circle at 80% 70%, rgba(25,74,140,.28), transparent 35%),
+      linear-gradient(135deg, #06182e, #0d3058 50%, #06182e);
+    color: var(--ink);
+    font-family: Arial, sans-serif;
+  }
+
+  .app {
+    width: 100vw;
+    height: 100vh;
+    padding: 18px;
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 14px;
+  }
+
+  .side-panel {
+    height: calc(100vh - 36px);
+    border: 2px solid rgba(130,184,238,.75);
+    border-radius: 18px;
+    background: var(--panel);
+    box-shadow: 0 10px 35px rgba(0,0,0,.35), inset 0 0 22px rgba(130,184,238,.16);
+    padding: 10px 7px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tool, .lang-select {
+    width: 46px;
+    min-height: 38px;
+    border: 1px solid rgba(255,255,255,.35);
+    border-radius: 12px;
+    background: rgba(255,255,255,.12);
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    transition: .15s ease;
+  }
+
+  .tool:hover, .lang-select:hover {
+    background: rgba(255,255,255,.23);
+    transform: translateY(-1px);
+  }
+
+  .lang-select {
+    appearance: none;
+    text-align: center;
+    padding-left: 5px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .spacer { flex: 1; }
+
+  .book-wrap {
+    position: relative;
+    height: calc(100vh - 36px);
+    min-width: 0;
+  }
+
+  .page {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border: 7px solid var(--azure-dark);
+    border-radius: 26px;
+    background:
+      linear-gradient(90deg, rgba(92,55,20,.06) 0, transparent 10%, transparent 90%, rgba(92,55,20,.06) 100%),
+      linear-gradient(180deg, var(--paper-light), var(--paper));
+    box-shadow:
+      0 16px 45px rgba(0,0,0,.42),
+      inset 0 0 0 4px var(--azure-soft),
+      inset 0 0 55px rgba(73,37,6,.14);
+    overflow: hidden;
+  }
+
+
+  .watermark {
+    position: absolute;
+    top: 22px;
+    right: 34px;
+    width: 118px;
+    height: 118px;
+    border-radius: 50%;
+    background-image: url('watermark.png');
+    background-size: cover;
+    background-position: center;
+    opacity: .16;
+    filter: sepia(1) saturate(.85) hue-rotate(165deg) contrast(.95);
+    box-shadow: 0 0 0 1px rgba(24,79,143,.18);
+    transform: rotate(-10deg);
+    user-select: none;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+
+  .title-line {
+    position: absolute;
+    left: 70px;
+    right: 190px;
+    top: 34px;
+    height: 36px;
+    border-bottom: 1px solid rgba(24,79,143,.24);
+    color: rgba(24,79,143,.74);
+    font-family: Georgia, serif;
+    font-size: 22px;
+    letter-spacing: .06em;
+    display: flex;
+    align-items: center;
+  }
+
+  #editor {
+    position: absolute;
+    left: 68px;
+    right: 68px;
+    top: 92px;
+    bottom: 62px;
+    padding: 10px 4px;
+    outline: none;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: 'AzureCustomFont', 'Comic Sans MS', Arial, sans-serif;
+    font-size: clamp(18px, 2.05vw, 30px);
+    line-height: 1.56;
+    color: var(--ink);
+    caret-color: var(--azure-dark);
+  }
+
+  #editor img {
+    max-width: min(100%, 400px);
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    margin: 8px 0;
+    display: block;
+    cursor: pointer;
+    transition: 0.1s ease;
+  }
+  #editor img:hover {
+    transform: scale(1.01);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  }
+
+  #editor:empty:before {
+    content: attr(data-placeholder);
+    color: rgba(0,0,0,.32);
+  }
+
+  .footer {
+    position: absolute;
+    left: 70px;
+    right: 70px;
+    bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    color: rgba(24,79,143,.82);
+    font-family: Georgia, serif;
+    user-select: none;
+  }
+
+  .nav-btn {
+    border: 1px solid rgba(24,79,143,.38);
+    background: rgba(255,255,255,.26);
+    color: var(--azure-dark);
+    min-width: 48px;
+    height: 32px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .page-counter { min-width: 128px; text-align: center; font-size: 16px; }
+
+  .status {
+    position: absolute;
+    left: 80px;
+    bottom: 24px;
+    color: rgba(24,79,143,.62);
+    font-size: 12px;
+    font-family: Arial, sans-serif;
+    user-select: none;
+  }
+
+  input[type="file"] { display: none; }
+
+  @media (max-width: 720px) {
+    .app { padding: 8px; grid-template-columns: 48px 1fr; gap: 8px; }
+    .side-panel, .book-wrap { height: calc(100vh - 16px); }
+    .side-panel { border-radius: 14px; padding: 7px 4px; }
+    .tool, .lang-select { width: 36px; min-height: 34px; font-size: 13px; border-radius: 10px; }
+    .page { border-width: 5px; border-radius: 18px; }
+    .title-line { left: 30px; right: 110px; top: 20px; font-size: 15px; }
+    #editor { left: 28px; right: 28px; top: 70px; bottom: 58px; font-size: 18px; }
+    #editor img { max-width: 100%; }
+    .watermark { width: 78px; height: 78px; top: 18px; right: 24px; }
+    .footer { left: 30px; right: 30px; gap: 10px; bottom: 18px; }
+    .status { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <aside class="side-panel" aria-label="Command strip">
+      <select id="language" class="lang-select" title="Language">
+        <option value="ru">RU</option>
+        <option value="en">EN</option>
+        <option value="ua">UA</option>
+      </select>
+      <button class="tool" id="saveBtn" title="Сохранить">💾</button>
+      <button class="tool" id="newBtn" title="Новая страница">＋</button>
+      <button class="tool" id="deleteBtn" title="Удалить страницу">✕</button>
+      <button class="tool" id="clearBtn" title="Очистить страницу">🧹</button>
+      <button class="tool" id="copyBtn" title="Копировать">⧉</button>
+      <button class="tool" id="pasteBtn" title="Вставить">⇩</button>
+      <button class="tool" id="imageBtn" title="Вставить иллюстрацию">🖼️</button>
+      <div class="spacer"></div>
+      <button class="tool" id="exportBtn" title="Экспорт">⇧</button>
+      <button class="tool" id="importBtn" title="Импорт">⇩</button>
+      <input type="file" id="importFile" accept="text/html,application/json,.html,.json">
+      <input type="file" id="imageUpload" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none">
+    </aside>
+
+    <main class="book-wrap">
+      <section class="page">
+        <div class="watermark" aria-hidden="true"></div>
+        <div class="title-line" id="titleLine">AZURE NOTEBOOK</div>
+        <div id="editor" spellcheck="true" data-placeholder="Пишите здесь..." contenteditable="true"><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:View>Normal</w:View>
+  <w:Zoom>0</w:Zoom>
+  <w:PunctuationKerning/>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SnapToGridInCell/>
+   <w:WrapTextWithPunct/>
+   <w:UseAsianBreakRules/>
+   <w:DontGrowAutofit/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" LatentStyleCount="156">
+ </w:LatentStyles>
+</xml><![endif]--><!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Обычная таблица";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-para-margin:0cm;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]-->
+
+<p class="MsoNormal">ПЕРЕВОД ЧИНА</p><img src="data:image/jpeg;base64,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" alt="illustration" style="max-width:100%; height:auto; border-radius:12px; margin:8px 0;">
+
+<p class="ds-markdown-paragraph"><strong>ЗВЕЗДА ИНТЕРНЕТА</strong></p>
+
+<p class="ds-markdown-paragraph">С самого детства Витюня Бурчик зачитывался
+журналами «Юный техник», «Техника молодёжи», «Радио», «Наука и жизнь», «Квант»
+и другой периодикой направления научно-технической революции. И хотя уже в
+зрелом возрасте никогда не пользовался компьютером, а видел его только на фото
+и по телевизору, он был готов воспринимать такую информативную технику хоть на
+молекулярном, хоть на генетическом уровне…<br>
+Витюня часто просиживал долгими зимними вечерами с паяльником в руках, соединяя
+повреждённые калькуляторы, создавая искусственный электронный интеллект. Он
+стаскивал в хату выброшенные на помойку старые телевизоры, радиоприёмники,
+пишущие машинки и весь ненужный хлам нынешней цивилизации. Упорство любителя
+электронной техники будило зависть у всех чокнутых космическими идеями крестьян
+провинциального села Бачковка.<br>
+Глава местного колхоза, глядя на несбыточные порывы сельского «Кулибина»,
+искренне хотел купить персональный компьютер и подарить его Витюне. Но с каждым
+новым урожаем он покупал для себя новую «Ниву» или «Газель», домашний кинотеатр
+или параболическую антенну, так что денег на ПК не хватало.<br>
+В конце концов колхоз распался на отдельные фермерские хозяйства, и лишь идея
+электронного интеллекта, лелеемая Витюней Бурчиком, осталась цельной и нераздробленной
+во времени в начале третьего тысячелетия.<br>
+Всё же одной идеей жить не будешь: надо каждый день что-то употреблять в
+желудок, растить детей, выполнять будничные функции посредственного крестьянина
+– рубить дрова, полоть огород, косить сено… И чтобы соединить величие идеи
+искусственного интеллекта и возможности сельского быта, Бурчик устроился
+сторожем на тракторную бригаду, от которой остались лишь металлические
+конструкции уже непонятных частей сельскохозяйственных агрегатов.</p>
+
+<p class="ds-markdown-paragraph">...<br>
+Что мы знаем о нашей голубой планете? В настоящее время почти все уголки земли
+известны – везде ступала нога человека, а если и не ступала, то их
+фотографировал спутник… Но не тешьте себя достижениями спутниковых технологий:
+не всё ещё можно увидеть даже с помощью высокоточных электронных обследований.
+Особенно там, где вроде бы всё известно… Белых пятен на планете ещё
+видимо-невидимо! Среди них выделяются ещё и искусственные пятна, так сказать,
+виртуальные…<br>
+Как-то в один день исчез с лица голубой планеты небольшой остров посреди Тихого
+океана. Нет, физически он не исчез, он пропал с радаров морских судов, его
+потеряла спутниковая сеть, любая информация касательно этого острова стёрлась
+из мировых библиотек, информационных архивов. А живые люди, кто хоть раз видел
+остров собственными глазами, неожиданно заболели немотой или были стёрты из
+жизни.<br>
+Началось всё с того, что научная экспедиция «Киты – мозг планеты» высадилась на
+этом острове и смонтировала на нём целую лабораторию для исследования
+крупнейших океанских млекопитающих. Но когда неподалёку в океан бултыхнулась
+российская орбитальная станция «Мир», волной смыло всех членов экспедиции,
+кроме одного профессора по зоолингвистике Хуана Самуиловича Крутомото.
+Профессор, благодаря своим предкам, был генетическим представителем всех земных
+рас и наций, поэтому лучше всех среди людей понимал язык зверей, птиц и рыб.<br>
+Его спасла маленькая акулка, которая запуталась зубами в густой бороде
+профессора и никак не могла ни выплюнуть её, ни проглотить. Чтобы отцепиться от
+профессора, акулке пришлось выброситься на берег острова и долго трепыхаться на
+песке, пока тот не оторвался от зубов, оставив на память полщеки с бородой.<br>
+Профессор два месяца монтировал передатчик, чтобы передать человеческому
+сообществу сигнал «SOS» от современного «Робинзона», затерянного на острове в
+океане. И чего только не экспериментировал с аппаратурой профессор! В конце
+концов, даже себе в голову засунул электроды, предназначенные для изучения
+мозга китов. И таки что-то смастерил, потому что вся система планетарной связи
+получила сигнал на неизвестном зверином языке. Космические и специальные службы
+государств ещё долго будут расшифровывать тот сигнал. Обсерватории мира
+повернули свои антенные тарелки в сторону Тихого океана, ища доказательства
+НЛО. А всемирная сеть Интернета взорвалась интересным вирусом «ХСК»
+(икс-цэ-ка), который просуществовал несколько секунд и растворился среди
+двоичных электрических сигналов.<br>
+Профессор умер от резкого электроразряда, поданного на воткнутые в его голову
+электроды. Все живые организмы – и животные, и рыбы – быстро покинули остров и
+ближе, чем за пятьдесят миль к нему, не приближались. А сам остров виртуально
+исчез с голубой планеты навсегда! Так родился планетарный электронный мозг, не
+подвластный людям и кому-либо ещё. Это был самостоятельный электронный
+интеллект космического масштаба, который сам себе дал имя: Пи.</p>
+
+<p class="ds-markdown-paragraph">Возле сельского трансформатора собралась группа
+жителей Бачковки. Трансформатор уже не гудел, а испускал в небо струйки едкого
+дыма.<br>
+– Опять у Витюни компьютер завис! – ворчала толпа.<br>
+– Третий раз за месяц! Сколько можно терпеть?<br>
+– Пора и отлупить изобретателя! Ишь ты, Эдисон в Бачковке нашёлся!<br>
+– Раньше всех гнали в колхоз на работу! А теперь кто что хочет, то и делает!
+Лаборатория какая-то, а не село!<br>
+– Только-только самогон гнать поставил – и свет выбило… Что ж теперь, брагу
+выливать?<br>
+Понятно, без специалиста отремонтировать трансформатор крестьяне не могли.
+Поэтому поступили просто: распили брагу, чтобы не пропала, и пошли на
+тракторную бригаду лупить Бурчика.<br>
+До сторожки, которую Витюня называл «материнкой» и куда стягивалось множество
+проводников разного калибра, распалённые брагой крестьяне не добрались. Дошли
+лишь до железных бочек, которые когда-то служили для разведения агрохимических
+растворов, а теперь Витюня называл их «жидкостные накопители». Там их
+остановила непонятная сила, вырвавшаяся в виде пара из патрубков – и крестьяне,
+кто больше выпил браги, заснули, а кто не добрал – вернулись в село искать
+пойло ещё.<br>
+Тракторную бригаду было не узнать! Повсюду на территории тянулись шланги и
+проводники, соединяя разбросанные то там, то тут бывшие сельскохозяйственные
+агрегаты. Агрегаты гудели, стучали, шипели. Там что-то крутилось, там что-то
+поднималось и опускалось. Возле сторожки-материнки, в кабине разобранного
+комбайна «Нива», Витюня Бурчик устроил масляный монитор, а на месте жатки из
+трёх электрических пишущих машинок «Ятрани» – клавиатуру. Нажимая ту или иную
+клавишу, через стекло кабины можно было видеть, как масло расплывается
+разноцветными пятнами, создавая информационные знаки, понятные лишь сельскому
+«Эдисону».<br>
+В данный момент этот гигантский агрокомпьютер работал в режиме защиты, потому
+что сгорел трансформатор в селе… Так что он по всему периметру тракторной
+бригады выпускал незадействованный пар… А Витюня в это время ехал на мопеде в
+соседнее село, чтобы позвонить в районную энергослужбу о сгоревшем
+трансформаторе. И по ходу дороги размышлял о том, чтобы в будущем создать
+независимое от государства электропитание и найти методы подключения своего компьютера
+к сети Интернета.<br>
+Первый этап создания искусственного интеллекта Витюня признал завершённым.
+Сегодня его компьютер умножил два на два и дал правильный ответ – четыре! Хотя
+эта математическая операция и стоила крестьянам Бачковки целого трансформатора.</p>
+
+<p class="ds-markdown-paragraph">Пи-мозг целый год обучался у человечества
+научным достижениям. Он невидимыми щупальцами электроники забирался в
+сокровеннейшие хранилища памяти и архивы институтов, производственных фирм и
+корпораций. Он познавал историю развития человечества и его нынешнее
+могущество. А заодно испытывал свои возможности.<br>
+Пи-мозг проводил эксперименты по влиянию своих указаний на поступки людей. И
+это оказалось для Пи-мозга интересной забавой. Все считают, что уничтожение
+башен-близнецов в Нью-Йорке – дело рук террористов. Пусть думают, ведь и эту
+мысль Пи-мозг прагматично спланировал, как и войну в Ираке.<br>
+Пи-мозг, поглощая знания человечества, учился контролировать каждое действие
+политических деятелей мира. Более того, он учился чувствовать силу каждого
+пользователя компьютера на всей планете. Он мог логически предсказать финалы
+событий, запланированных им же. Манипулируя информационными и электрическими
+факторами, объединив все разрозненные знания планеты в единый сгусток, Пи-мозг,
+по понятиям людей, стал Богом, хотя религия тут совсем ни при чём…<br>
+Ни одно событие мира уже не обходилось без участия Пи-мозга. Но в мире людей,
+кроме информационного влияния, нужно было иметь и физические рычаги усмирения
+биологического вида выскочек природы. Как-никак, а за пределы информационной и
+связной сети Пи-мозг выйти не мог. Ему нужно было материальное тело и полная
+власть на планете! Ведь белые пятна для Пи-мозга начинались там, где
+заканчивалась электронная связь.<br>
+Программа клонирования человекоподобных монстров уже взяла старт, но для неё
+нужно время – не могут биосистемы расти быстро. Железные роботы, хоть и
+собираются быстро, ограничены в ловкости и движениях, эффективны лишь как
+производственные комплексы. Да и доверия к исключительно металлическим
+конструкциям люди не испытывают. Поэтому на первом этапе Пи-мозг использовал
+самый распространённый среди людей порок – предательство ради денег!<br>
+Контролируя мировой оборот валюты, Пи-мозг предложил желающим хороший счёт в
+банке, безоблачную старость, многолюбовную молодость и бесконечную власть над
+своими братьями и сёстрами… И таких предателей нашлось много! Но Пи-мозг выбрал
+одного. Им оказался Йося Абдул, отброс из бедных кварталов Каракаса.
+Кандидатура Йоси привлекла тем, что уровень интеллекта составлял минус сто по
+любой шкале определения, зато физические данные адекватны предкам – африканским
+неграм.<br>
+На контакт с предателем Пи-мозг вышел через игру «Марио», которую Йося пытался
+запустить, засовывая вилку «Денди» в розетку телефона, и раздавил… «Денди»…
+«Направляй и властвуй!» – появился на всех компьютерах мира вирус, и Йося Абдул
+вмиг превратился в венесуэльского миллиардера – генерального директора компании
+по производству компьютерных игрушек «ПИ-АРТ».</p>
+
+<p class="ds-markdown-paragraph">Сельского голову села Бачковка срочно вызвали в
+район. Глава районной администрации начал разговор напрямую:<br>
+– Что там у вас в Бачковке с тракторной бригадой? Вот двадцать пять заявлений
+людей, желающих её приватизировать.<br>
+– А что я могу сделать? – ответил сельский голова. – Когда распределяли паи,
+стоимость бригады составляла восемь тысяч гривен, и никто не хотел её забирать?
+Претензии были только к металлолому, который находился на её территории. Да
+община решила лом продать и погасить задолженность по зарплате. Лом купил
+Виктор Бурчик, да и бригаду вместе с территорией выкупил. Ещё не до конца
+оформил документы, но деньги заплатил…<br>
+– И чему такой ажиотаж? – ткнул в заявления районный шеф.<br>
+– Да сейчас Бурчик там поставил автономную электростанцию, привёл в порядок
+агрегаты – они там что-то греют, парят, протянул туда телефонную линию… И
+вообще, я не знаю, чем он там занимается, но завистников появилось много.<br>
+– Да и я ему начинаю завидовать, – признался глава администрации, – по секрету,
+у него на счету в банке денег столько, что он платит в районный бюджет годовой
+налог – ой-ё-мама! Где он деньги берёт?<br>
+– А чёрт его знает, – пожал плечами голова сельсовета.<br>
+– Пошлём туда санэпидемстанцию и милицию. Пусть проверят на наркотики или на
+экологию…</p>
+
+<p class="ds-markdown-paragraph">Пи-мозг потерю заметил не сразу. Мировой баланс
+валюты Пи-мозг держал под своим контролем, и исчезновение небольших сумм его
+электронный мозг воспринял, но не придал тому значения. Но через несколько
+месяцев деньги исчезали из-под контроля методично и неизвестно каким образом.
+Это было вопреки всякой электрической логике!<br>
+Нечто проникало в сеть Интернета из географического центра Европы, с адреса
+Бачковка точка ком точка ю эй, и неизвестно каким образом стягивало с
+банковских счетов деньги. Главное – банковские сайты были бессильны защититься
+от проникновения Того Нечто… Был бы это опытнейший хакер, Пи-мозг не волновался
+бы. Такие действия людей Пи-мозг поддерживал, ведь всё равно деньги были под
+контролем, и такое игрушечное перераспределение не угрожало всей системе. Но
+это было Нечто Неизвестно Что!<br>
+Всеми своими электронными умишками вертелся Пи-мозг вокруг Бачковки, а
+проникнуть в непонятное Нечто не мог. Двоичная система электросигналов, в
+которой работал Пи-мозг, не понимала Того, что Это было Такое. Пи-мозг напрягал
+все свои знания истории человечества, чтобы познать Неведомое, но аналогов не
+находил.<br>
+Единственное, что смог расшифровать Пи-мозг, – это простое математическое
+действие: два умножить на два равно четырем. Но во время расшифровки этого
+действия пришлось аварийно остановить работу одной из французских атомных
+электростанций… Перенапряжение в системе грозило катастрофами. Резко повысилась
+сейсмическая активность и активизировались атмосферные явления.<br>
+Йося Абдул лично купил билет на самолёт в Украину. Командировка оказалась
+бессрочной – до полного выяснения обстоятельств!</p>
+
+<p class="ds-markdown-paragraph">Капитан милиции Папашкин и начальник
+санэпидемстанции Копальченко бродили по тракторной бригаде и заглядывали в
+каждую щель. Их сопровождал, как гид, Витюня.<br>
+– Что в этих резервуарах? – допытывался капитан.<br>
+– Обычная вода! – ответил Витюня. – Можете попробовать! Налог на воду я плачу
+регулярно!<br>
+И капитан пробовал.<br>
+– Где проводники снял?<br>
+– Купил! Все документы в порядке! Можете посмотреть.<br>
+И капитан смотрел.<br>
+– А где твоя электростанция? – докопался Копальченко.<br>
+– Вот. Сделана на базе камазовского двигателя. Солярка в спецпомещении, в
+нужной таре, покупаю в легальных структурах.<br>
+– А дым куда? В атмосферу?!<br>
+– Ну, ещё не придумала наука дым от «Камаза» закапывать в землю… А за землю я
+плачу налог вовремя…<br>
+– Всё платишь да платишь, – не удержался капитан. – Говори, где деньги берёшь?!<br>
+– Из воды, из воздуха, из земли, – пояснил Витюня. – Технология сложная, я сам
+до конца не понимаю, но эффективная. Вы же не спрашиваете, откуда берётся
+урожай, который продаётся за деньги? Тоже из воды, воздуха и земли…<br>
+– Не философствуй! – перебил Копальченко и поднял вверх указательный палец. –
+Чтобы вырастить урожай, надо посадить, обработать, собрать… Нужен труд многих
+людей! Нужно ими руководить и указывать, что где сеять! А эпидемическая
+ситуация в районе…<br>
+– Вы меня заморили! – заворчал Бурчик. – Что, вообще, вы ко мне имеете?<br>
+– К вам лично мы ничего не имеем, – Копальченко радостно перешёл на официальный
+тон, – а вот к этому мы имеем много чего.<br>
+И начальник СЭС указал на кабину «Нивы», заполненную маслом, через стекло
+которой переливались разноцветные пятна.<br>
+– Масло нужно хранить в соответствующей таре! Я выписываю вам штраф!</p>
+
+<p class="ds-markdown-paragraph">Йося Абдул с микрофоном в ухе и видеокамерой в
+глазу сошёл на перекрёстке республиканских трасс из комфортабельного автобуса.
+В Киеве таксисты не знали, где находится какая-то там Бачковка, но довезли
+богатого иностранца до автовокзала, засунули в соответствующий автобус и
+содрали за услугу пару тысяч условных единиц… Пи-мозг всё это видел и слышал.
+Но жадность и нечестность людей были ничто в сравнении с угрозой Неведомого
+фактора, спрятанного в Бачковке.<br>
+На перекрёстке, вместе с Йосей, в сторону Бачковки добиралась куча цыган с
+детьми, чемоданами и босыми ногами. Добиралась семья на заработки.<br>
+– Негра! Негра! – принялись визжать дети и дёргать Йосю за штаны. Тот сам вырос
+в бедных кварталах города, поэтому присел и погладил двухлетнего мальчика по
+чубчику. Но пятилетняя девочка в это время успела засунуть в ухо Йосе колосок
+ячменя и повредила микрофон…<br>
+– Давай я тебе погадаю, красавчик! – прицепилась старая цыганка, ухватила руку
+Йоси и начала врать: – Век твой короток да ярок! Сгоришь ты в великой любви и
+словно звезда засветишься в этом мире, и долго тебя будут помнить…<br>
+Йося слушал внимательно, хоть языка цыганки не понимал. Сломанный микрофон в
+ухе не давал возможности Пи-мозгу переводить Йосе вещие слова цыганки. А то,
+что надо позолотить ручку, Йося понял лишь по жестам, но расплатиться не успел.
+Жестами цыганка полезла в карман и вытащила всё, что там было…<br>
+До Бачковки Йося шёл пешком, потому что без денег его уже никто не подвозил, а
+банкоматов в степях почему-то не открывали… Когда до села оставалось несколько
+километров, изнурённого дорогой и жарой негра решил подвезти на подводе
+Гриць-молдован. Спьяну Гриць решил, что негр – его земляк из Кодр, и всю дорогу
+расспрашивал об урожае винограда и политической обстановке в Кишинёве. Йося
+придурковато улыбался и помахивал головой, Гриць помахивал кнутом, а кобыла
+хвостом. Кто-то из них таки домахался: то ли хвост, то ли кнут угодил Йосе в
+глаз, где была видеокамера… Изображение погасло.<br>
+Пи-мозг вынужден был срочно изменить орбиту одного из военных спутников и
+направить все его телеобъективы на Йосю. Автоматически включилась спутниковая
+передающая система, вмонтированная в галстук и часы Йоси. Заработал запасной
+искусственный глаз, спрятанный в пуговицу на пиджаке. Пи-мозг снова всё видел и
+слышал.<br>
+Первый кадр, который появился после поломки, – это был поднятый хвост кобылы,
+которая опорожнялась на центральную улицу села Бачковки, сопровождая действо
+соответствующими звуками. Потом было гнездо аиста, искусно сложенное на
+репродукторе, лицо испуганной бабы в шортах и шляпе, которая горланила: «Вася,
+негра живого хочешь увидеть?» – и лицо Васи, которое мало чем отличалось от
+лица негра…<br>
+Дорога на тракторную бригаду была спокойнее. Лишь один раз пацан на велосипеде
+разинул рот на Йосю и, потеряв равновесие, едва не свернул шею, бросил
+велосипед и побежал в село с воплем: «Шварц негер! Шварц негер!»</p>
+
+<p class="ds-markdown-paragraph">На тракторной бригаде Витюня Бурчик проводил
+традиционную дневную профилактику своей технике – куда надо доливал воды,
+смазывал колёсики агрегатов, доливал солярку в электростанцию.<br>
+За своей работой Витюня не заметил Йосю, как не замечал и капитана Папашкина,
+засевшего в бурьяне с пистолетом и очень желавшего вывести сельского «Кулибина»
+на чистую воду.<br>
+Капитан милиции наблюдал, что на территорию пожаловал негр, что негр пошарил
+среди агрегатов и присел, глядя на кабину бывшего комбайна «Нива».<br>
+Витюня выпустил из рук ведро с соляркой, когда увидел перед кабиной «Нивы»
+сидящего на корточках негра… Негр уставился в разноцветные пятна за стеклом
+кабины и уже совершенно не дышал, потрескивая разрядами электричества…<br>
+Витюня подошёл ближе к негру. Прикоснуться было невозможно – всё тело Йоси
+стреляло искорками разрядов… Йося ярко светился так, как наврала ему цыганка…<br>
+Пи-мозг не пропустил ни одного кадра и волновался, глядя на то, что показывал
+«глаз», вмонтированный в Йосю. Впервые он видел То Нечто, что нужно было узнать
+и дать Этому определение. Какие-то проводники, резервуары с жидкостями, облачка
+испарений, треск двигателей… Что Оно? Вот какие-то пишущие машинки. А вон…<br>
+При взгляде на стекло кабины бывшего комбайна Пи-мозг пропустил через себя
+электрическую дрожь. Весь энергозапас Пи-мозга содрогнулся, по всему миру
+компьютеры зависли и потребовали немедленной перезагрузки… Что То было?<br>
+В разноцветных пятнах Пи-мозг увидел систему разума. Нет, не такого, каким
+пользовался Пи-мозг, а другого, непохожего ни на что в мире! То была
+неудержимая красота иной логики и иного мышления, непознанного и
+привлекательного.<br>
+Если всё на свете знать и всё понимать, то совершенно непонятной становится
+обычная простота природного чуда. В то же время, глядя на всё это непонятное,
+такими ясными и осмысленными становятся желания и порывы, пусть и электронной,
+души.<br>
+То была ЖЕНЩИНА, если можно провести параллель с людьми!<br>
+С этой системой невозможно соединиться. С нею возможно существовать в паре,
+возможно обмениваться эмоциями, возможно создавать новые поколения
+информационной энергии. Но подчинить её мышление и логику невозможно!<br>
+Пи-мозг очаровался красотой масляных пятен, попал в плен раздумий и анализа
+того, что видел и чувствовал, и совсем забыл, что роль передатчика исполняет
+нашпигованный аппаратурой Йося, которого скрутило электрическими зарядами, что
+он перестал дышать и даже побелел, если это слово соответствует цвету его кожи…<br>
+– Убили негра? – услышал Витюня Бурчик сзади голос капитана Папашкина,
+вылезшего из бурьяна с пистолетом. – Вот где ты попался! Ты киллер! Иностранцев
+казнишь, за это и деньги берёшь! Не двигаться! Буду стрелять!<br>
+– Да я, товарищ капитан… – повернулся Витюня лицом, но зря. Папашкин пальнул из
+пистолета в стекло кабины, и на труп Йоси и Витюню Бурчика вылилось полторы
+тонны масла.<br>
+По всей территории бригады стали скрипеть и трещать элементы агрокомпьютера.
+Они останавливались навеки. Из резервуаров повалил пар.</p>
+
+<p class="ds-markdown-paragraph">Виктора Бурчика в отделении долго не продержали.
+Экспертиза тела иностранца показала остановку сердца от шока. И когда Витюня
+вернулся к своему компьютеру, запустить систему снова он уже не сумел…<br>
+Жители Бачковки, пока Витюня отдыхал на нарах, устроили на тракторной бригаде
+погром в стиле Клондайка. Громили агрегаты и сдавали их на металлолом.
+Проводники, кабели, шланги превращались в гривны и водку. «Золотое дно»
+тракторной бригады оказалось коротким во времени. Через несколько дней
+сторожка-материнка разобралась на кирпич и шифер. Жидкостные накопители – бочки
+– перекатились самоходом в фермерские дворы. Электростанция загудела в чужих
+сёлах… Витюня лишь развёл руками.</p>
+
+<p class="ds-markdown-paragraph">Пи-мозг, после увиденного, заболел тоской. Он
+почувствовал своё одиночество. Забросил все свои дела, свернулся сгустком
+энергии на острове в Тихом океане и стал ждать, когда перестанет действовать
+солнечная батарея бывшей лаборатории…<br>
+В сети Интернета, на том или ином компьютере, время от времени сверкнёт
+мгновенная звезда через экран монитора. Не удивляйтесь – это слеза Пи-мозга.
+Слеза о том, что невозможно вернуть, возродить, заново создать, о том, что
+загублено навсегда и, как всегда, – человеческой натурой.</p>
+
+<p class="ds-markdown-paragraph">2002–2023 гг.</p>
+
+</div>
+        <div class="status" id="status">готово</div>
+        <div class="footer">
+          <button class="nav-btn" id="prevBtn">←</button>
+          <div class="page-counter" id="pageCounter">Страница 1 / 1</div>
+          <button class="nav-btn" id="nextBtn">→</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+<script>
+(function(){
+  const KEY = 'azure-notebook-v8887';
+  const editor = document.getElementById('editor');
+  const counter = document.getElementById('pageCounter');
+  const status = document.getElementById('status');
+  const langSel = document.getElementById('language');
+  const importFile = document.getElementById('importFile');
+  const imageUpload = document.getElementById('imageUpload');
+
+  const dict = {
+    ru: { placeholder:'Пишите здесь...', page:'Страница', of:'/', saved:'сохранено', ready:'готово', emptyConfirm:'Удалить эту страницу?', clearConfirm:'Очистить всё содержимое страницы?', lastPage:'Это последняя страница.', firstPage:'Это первая страница.', imgTooBig:'Изображение слишком большое (макс. 500 КБ после сжатия)', imgError:'Ошибка обработки изображения' },
+    en: { placeholder:'Write here...', page:'Page', of:'/', saved:'saved', ready:'ready', emptyConfirm:'Delete this page?', clearConfirm:'Clear all content on this page?', lastPage:'This is the last page.', firstPage:'This is the first page.', imgTooBig:'Image too large (max 500 KB after compression)', imgError:'Image processing error' },
+    ua: { placeholder:'Пишіть тут...', page:'Сторінка', of:'/', saved:'збережено', ready:'готово', emptyConfirm:'Видалити цю сторінку?', clearConfirm:'Очистити весь вміст сторінки?', lastPage:'Це остання сторінка.', firstPage:'Це перша сторінка.', imgTooBig:'Зображення занадто велике (макс. 500 КБ після стиснення)', imgError:'Помилка обробки зображення' }
+  };
+
+  let state = { language: 'ru', current: 0, pages: [''] };
+  const EMBEDDED_STATE = {"language":"ru","current":0,"pages":["<!--[if gte mso 9]><xml>\n <w:WordDocument>\n  <w:View>Normal</w:View>\n  <w:Zoom>0</w:Zoom>\n  <w:PunctuationKerning/>\n  <w:ValidateAgainstSchemas/>\n  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>\n  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>\n  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>\n  <w:Compatibility>\n   <w:BreakWrappedTables/>\n   <w:SnapToGridInCell/>\n   <w:WrapTextWithPunct/>\n   <w:UseAsianBreakRules/>\n   <w:DontGrowAutofit/>\n  </w:Compatibility>\n  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>\n </w:WordDocument>\n</xml><![endif]--><!--[if gte mso 9]><xml>\n <w:LatentStyles DefLockedState=\"false\" LatentStyleCount=\"156\">\n </w:LatentStyles>\n</xml><![endif]--><!--[if gte mso 10]>\n<style>\n /* Style Definitions */\n table.MsoNormalTable\n\t{mso-style-name:\"Обычная таблица\";\n\tmso-tstyle-rowband-size:0;\n\tmso-tstyle-colband-size:0;\n\tmso-style-noshow:yes;\n\tmso-style-parent:\"\";\n\tmso-padding-alt:0cm 5.4pt 0cm 5.4pt;\n\tmso-para-margin:0cm;\n\tmso-para-margin-bottom:.0001pt;\n\tmso-pagination:widow-orphan;\n\tfont-size:10.0pt;\n\tfont-family:\"Times New Roman\";\n\tmso-ansi-language:#0400;\n\tmso-fareast-language:#0400;\n\tmso-bidi-language:#0400;}\n</style>\n<![endif]-->\n\n<p class=\"MsoNormal\">ПЕРЕВОД ЧИНА</p><img src=\"data:image/jpeg;base64,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\" alt=\"illustration\" style=\"max-width:100%; height:auto; border-radius:12px; margin:8px 0;\">\n\n<p class=\"ds-markdown-paragraph\"><strong>ЗВЕЗДА ИНТЕРНЕТА</strong></p>\n\n<p class=\"ds-markdown-paragraph\">С самого детства Витюня Бурчик зачитывался\nжурналами «Юный техник», «Техника молодёжи», «Радио», «Наука и жизнь», «Квант»\nи другой периодикой направления научно-технической революции. И хотя уже в\nзрелом возрасте никогда не пользовался компьютером, а видел его только на фото\nи по телевизору, он был готов воспринимать такую информативную технику хоть на\nмолекулярном, хоть на генетическом уровне…<br>\nВитюня часто просиживал долгими зимними вечерами с паяльником в руках, соединяя\nповреждённые калькуляторы, создавая искусственный электронный интеллект. Он\nстаскивал в хату выброшенные на помойку старые телевизоры, радиоприёмники,\nпишущие машинки и весь ненужный хлам нынешней цивилизации. Упорство любителя\nэлектронной техники будило зависть у всех чокнутых космическими идеями крестьян\nпровинциального села Бачковка.<br>\nГлава местного колхоза, глядя на несбыточные порывы сельского «Кулибина»,\nискренне хотел купить персональный компьютер и подарить его Витюне. Но с каждым\nновым урожаем он покупал для себя новую «Ниву» или «Газель», домашний кинотеатр\nили параболическую антенну, так что денег на ПК не хватало.<br>\nВ конце концов колхоз распался на отдельные фермерские хозяйства, и лишь идея\nэлектронного интеллекта, лелеемая Витюней Бурчиком, осталась цельной и нераздробленной\nво времени в начале третьего тысячелетия.<br>\nВсё же одной идеей жить не будешь: надо каждый день что-то употреблять в\nжелудок, растить детей, выполнять будничные функции посредственного крестьянина\n– рубить дрова, полоть огород, косить сено… И чтобы соединить величие идеи\nискусственного интеллекта и возможности сельского быта, Бурчик устроился\nсторожем на тракторную бригаду, от которой остались лишь металлические\nконструкции уже непонятных частей сельскохозяйственных агрегатов.</p>\n\n<p class=\"ds-markdown-paragraph\">...<br>\nЧто мы знаем о нашей голубой планете? В настоящее время почти все уголки земли\nизвестны – везде ступала нога человека, а если и не ступала, то их\nфотографировал спутник… Но не тешьте себя достижениями спутниковых технологий:\nне всё ещё можно увидеть даже с помощью высокоточных электронных обследований.\nОсобенно там, где вроде бы всё известно… Белых пятен на планете ещё\nвидимо-невидимо! Среди них выделяются ещё и искусственные пятна, так сказать,\nвиртуальные…<br>\nКак-то в один день исчез с лица голубой планеты небольшой остров посреди Тихого\nокеана. Нет, физически он не исчез, он пропал с радаров морских судов, его\nпотеряла спутниковая сеть, любая информация касательно этого острова стёрлась\nиз мировых библиотек, информационных архивов. А живые люди, кто хоть раз видел\nостров собственными глазами, неожиданно заболели немотой или были стёрты из\nжизни.<br>\nНачалось всё с того, что научная экспедиция «Киты – мозг планеты» высадилась на\nэтом острове и смонтировала на нём целую лабораторию для исследования\nкрупнейших океанских млекопитающих. Но когда неподалёку в океан бултыхнулась\nроссийская орбитальная станция «Мир», волной смыло всех членов экспедиции,\nкроме одного профессора по зоолингвистике Хуана Самуиловича Крутомото.\nПрофессор, благодаря своим предкам, был генетическим представителем всех земных\nрас и наций, поэтому лучше всех среди людей понимал язык зверей, птиц и рыб.<br>\nЕго спасла маленькая акулка, которая запуталась зубами в густой бороде\nпрофессора и никак не могла ни выплюнуть её, ни проглотить. Чтобы отцепиться от\nпрофессора, акулке пришлось выброситься на берег острова и долго трепыхаться на\nпеске, пока тот не оторвался от зубов, оставив на память полщеки с бородой.<br>\nПрофессор два месяца монтировал передатчик, чтобы передать человеческому\nсообществу сигнал «SOS» от современного «Робинзона», затерянного на острове в\nокеане. И чего только не экспериментировал с аппаратурой профессор! В конце\nконцов, даже себе в голову засунул электроды, предназначенные для изучения\nмозга китов. И таки что-то смастерил, потому что вся система планетарной связи\nполучила сигнал на неизвестном зверином языке. Космические и специальные службы\nгосударств ещё долго будут расшифровывать тот сигнал. Обсерватории мира\nповернули свои антенные тарелки в сторону Тихого океана, ища доказательства\nНЛО. А всемирная сеть Интернета взорвалась интересным вирусом «ХСК»\n(икс-цэ-ка), который просуществовал несколько секунд и растворился среди\nдвоичных электрических сигналов.<br>\nПрофессор умер от резкого электроразряда, поданного на воткнутые в его голову\nэлектроды. Все живые организмы – и животные, и рыбы – быстро покинули остров и\nближе, чем за пятьдесят миль к нему, не приближались. А сам остров виртуально\nисчез с голубой планеты навсегда! Так родился планетарный электронный мозг, не\nподвластный людям и кому-либо ещё. Это был самостоятельный электронный\nинтеллект космического масштаба, который сам себе дал имя: Пи.</p>\n\n<p class=\"ds-markdown-paragraph\">Возле сельского трансформатора собралась группа\nжителей Бачковки. Трансформатор уже не гудел, а испускал в небо струйки едкого\nдыма.<br>\n– Опять у Витюни компьютер завис! – ворчала толпа.<br>\n– Третий раз за месяц! Сколько можно терпеть?<br>\n– Пора и отлупить изобретателя! Ишь ты, Эдисон в Бачковке нашёлся!<br>\n– Раньше всех гнали в колхоз на работу! А теперь кто что хочет, то и делает!\nЛаборатория какая-то, а не село!<br>\n– Только-только самогон гнать поставил – и свет выбило… Что ж теперь, брагу\nвыливать?<br>\nПонятно, без специалиста отремонтировать трансформатор крестьяне не могли.\nПоэтому поступили просто: распили брагу, чтобы не пропала, и пошли на\nтракторную бригаду лупить Бурчика.<br>\nДо сторожки, которую Витюня называл «материнкой» и куда стягивалось множество\nпроводников разного калибра, распалённые брагой крестьяне не добрались. Дошли\nлишь до железных бочек, которые когда-то служили для разведения агрохимических\nрастворов, а теперь Витюня называл их «жидкостные накопители». Там их\nостановила непонятная сила, вырвавшаяся в виде пара из патрубков – и крестьяне,\nкто больше выпил браги, заснули, а кто не добрал – вернулись в село искать\nпойло ещё.<br>\nТракторную бригаду было не узнать! Повсюду на территории тянулись шланги и\nпроводники, соединяя разбросанные то там, то тут бывшие сельскохозяйственные\nагрегаты. Агрегаты гудели, стучали, шипели. Там что-то крутилось, там что-то\nподнималось и опускалось. Возле сторожки-материнки, в кабине разобранного\nкомбайна «Нива», Витюня Бурчик устроил масляный монитор, а на месте жатки из\nтрёх электрических пишущих машинок «Ятрани» – клавиатуру. Нажимая ту или иную\nклавишу, через стекло кабины можно было видеть, как масло расплывается\nразноцветными пятнами, создавая информационные знаки, понятные лишь сельскому\n«Эдисону».<br>\nВ данный момент этот гигантский агрокомпьютер работал в режиме защиты, потому\nчто сгорел трансформатор в селе… Так что он по всему периметру тракторной\nбригады выпускал незадействованный пар… А Витюня в это время ехал на мопеде в\nсоседнее село, чтобы позвонить в районную энергослужбу о сгоревшем\nтрансформаторе. И по ходу дороги размышлял о том, чтобы в будущем создать\nнезависимое от государства электропитание и найти методы подключения своего компьютера\nк сети Интернета.<br>\nПервый этап создания искусственного интеллекта Витюня признал завершённым.\nСегодня его компьютер умножил два на два и дал правильный ответ – четыре! Хотя\nэта математическая операция и стоила крестьянам Бачковки целого трансформатора.</p>\n\n<p class=\"ds-markdown-paragraph\">Пи-мозг целый год обучался у человечества\nнаучным достижениям. Он невидимыми щупальцами электроники забирался в\nсокровеннейшие хранилища памяти и архивы институтов, производственных фирм и\nкорпораций. Он познавал историю развития человечества и его нынешнее\nмогущество. А заодно испытывал свои возможности.<br>\nПи-мозг проводил эксперименты по влиянию своих указаний на поступки людей. И\nэто оказалось для Пи-мозга интересной забавой. Все считают, что уничтожение\nбашен-близнецов в Нью-Йорке – дело рук террористов. Пусть думают, ведь и эту\nмысль Пи-мозг прагматично спланировал, как и войну в Ираке.<br>\nПи-мозг, поглощая знания человечества, учился контролировать каждое действие\nполитических деятелей мира. Более того, он учился чувствовать силу каждого\nпользователя компьютера на всей планете. Он мог логически предсказать финалы\nсобытий, запланированных им же. Манипулируя информационными и электрическими\nфакторами, объединив все разрозненные знания планеты в единый сгусток, Пи-мозг,\nпо понятиям людей, стал Богом, хотя религия тут совсем ни при чём…<br>\nНи одно событие мира уже не обходилось без участия Пи-мозга. Но в мире людей,\nкроме информационного влияния, нужно было иметь и физические рычаги усмирения\nбиологического вида выскочек природы. Как-никак, а за пределы информационной и\nсвязной сети Пи-мозг выйти не мог. Ему нужно было материальное тело и полная\nвласть на планете! Ведь белые пятна для Пи-мозга начинались там, где\nзаканчивалась электронная связь.<br>\nПрограмма клонирования человекоподобных монстров уже взяла старт, но для неё\nнужно время – не могут биосистемы расти быстро. Железные роботы, хоть и\nсобираются быстро, ограничены в ловкости и движениях, эффективны лишь как\nпроизводственные комплексы. Да и доверия к исключительно металлическим\nконструкциям люди не испытывают. Поэтому на первом этапе Пи-мозг использовал\nсамый распространённый среди людей порок – предательство ради денег!<br>\nКонтролируя мировой оборот валюты, Пи-мозг предложил желающим хороший счёт в\nбанке, безоблачную старость, многолюбовную молодость и бесконечную власть над\nсвоими братьями и сёстрами… И таких предателей нашлось много! Но Пи-мозг выбрал\nодного. Им оказался Йося Абдул, отброс из бедных кварталов Каракаса.\nКандидатура Йоси привлекла тем, что уровень интеллекта составлял минус сто по\nлюбой шкале определения, зато физические данные адекватны предкам – африканским\nнеграм.<br>\nНа контакт с предателем Пи-мозг вышел через игру «Марио», которую Йося пытался\nзапустить, засовывая вилку «Денди» в розетку телефона, и раздавил… «Денди»…\n«Направляй и властвуй!» – появился на всех компьютерах мира вирус, и Йося Абдул\nвмиг превратился в венесуэльского миллиардера – генерального директора компании\nпо производству компьютерных игрушек «ПИ-АРТ».</p>\n\n<p class=\"ds-markdown-paragraph\">Сельского голову села Бачковка срочно вызвали в\nрайон. Глава районной администрации начал разговор напрямую:<br>\n– Что там у вас в Бачковке с тракторной бригадой? Вот двадцать пять заявлений\nлюдей, желающих её приватизировать.<br>\n– А что я могу сделать? – ответил сельский голова. – Когда распределяли паи,\nстоимость бригады составляла восемь тысяч гривен, и никто не хотел её забирать?\nПретензии были только к металлолому, который находился на её территории. Да\nобщина решила лом продать и погасить задолженность по зарплате. Лом купил\nВиктор Бурчик, да и бригаду вместе с территорией выкупил. Ещё не до конца\nоформил документы, но деньги заплатил…<br>\n– И чему такой ажиотаж? – ткнул в заявления районный шеф.<br>\n– Да сейчас Бурчик там поставил автономную электростанцию, привёл в порядок\nагрегаты – они там что-то греют, парят, протянул туда телефонную линию… И\nвообще, я не знаю, чем он там занимается, но завистников появилось много.<br>\n– Да и я ему начинаю завидовать, – признался глава администрации, – по секрету,\nу него на счету в банке денег столько, что он платит в районный бюджет годовой\nналог – ой-ё-мама! Где он деньги берёт?<br>\n– А чёрт его знает, – пожал плечами голова сельсовета.<br>\n– Пошлём туда санэпидемстанцию и милицию. Пусть проверят на наркотики или на\nэкологию…</p>\n\n<p class=\"ds-markdown-paragraph\">Пи-мозг потерю заметил не сразу. Мировой баланс\nвалюты Пи-мозг держал под своим контролем, и исчезновение небольших сумм его\nэлектронный мозг воспринял, но не придал тому значения. Но через несколько\nмесяцев деньги исчезали из-под контроля методично и неизвестно каким образом.\nЭто было вопреки всякой электрической логике!<br>\nНечто проникало в сеть Интернета из географического центра Европы, с адреса\nБачковка точка ком точка ю эй, и неизвестно каким образом стягивало с\nбанковских счетов деньги. Главное – банковские сайты были бессильны защититься\nот проникновения Того Нечто… Был бы это опытнейший хакер, Пи-мозг не волновался\nбы. Такие действия людей Пи-мозг поддерживал, ведь всё равно деньги были под\nконтролем, и такое игрушечное перераспределение не угрожало всей системе. Но\nэто было Нечто Неизвестно Что!<br>\nВсеми своими электронными умишками вертелся Пи-мозг вокруг Бачковки, а\nпроникнуть в непонятное Нечто не мог. Двоичная система электросигналов, в\nкоторой работал Пи-мозг, не понимала Того, что Это было Такое. Пи-мозг напрягал\nвсе свои знания истории человечества, чтобы познать Неведомое, но аналогов не\nнаходил.<br>\nЕдинственное, что смог расшифровать Пи-мозг, – это простое математическое\nдействие: два умножить на два равно четырем. Но во время расшифровки этого\nдействия пришлось аварийно остановить работу одной из французских атомных\nэлектростанций… Перенапряжение в системе грозило катастрофами. Резко повысилась\nсейсмическая активность и активизировались атмосферные явления.<br>\nЙося Абдул лично купил билет на самолёт в Украину. Командировка оказалась\nбессрочной – до полного выяснения обстоятельств!</p>\n\n<p class=\"ds-markdown-paragraph\">Капитан милиции Папашкин и начальник\nсанэпидемстанции Копальченко бродили по тракторной бригаде и заглядывали в\nкаждую щель. Их сопровождал, как гид, Витюня.<br>\n– Что в этих резервуарах? – допытывался капитан.<br>\n– Обычная вода! – ответил Витюня. – Можете попробовать! Налог на воду я плачу\nрегулярно!<br>\nИ капитан пробовал.<br>\n– Где проводники снял?<br>\n– Купил! Все документы в порядке! Можете посмотреть.<br>\nИ капитан смотрел.<br>\n– А где твоя электростанция? – докопался Копальченко.<br>\n– Вот. Сделана на базе камазовского двигателя. Солярка в спецпомещении, в\nнужной таре, покупаю в легальных структурах.<br>\n– А дым куда? В атмосферу?!<br>\n– Ну, ещё не придумала наука дым от «Камаза» закапывать в землю… А за землю я\nплачу налог вовремя…<br>\n– Всё платишь да платишь, – не удержался капитан. – Говори, где деньги берёшь?!<br>\n– Из воды, из воздуха, из земли, – пояснил Витюня. – Технология сложная, я сам\nдо конца не понимаю, но эффективная. Вы же не спрашиваете, откуда берётся\nурожай, который продаётся за деньги? Тоже из воды, воздуха и земли…<br>\n– Не философствуй! – перебил Копальченко и поднял вверх указательный палец. –\nЧтобы вырастить урожай, надо посадить, обработать, собрать… Нужен труд многих\nлюдей! Нужно ими руководить и указывать, что где сеять! А эпидемическая\nситуация в районе…<br>\n– Вы меня заморили! – заворчал Бурчик. – Что, вообще, вы ко мне имеете?<br>\n– К вам лично мы ничего не имеем, – Копальченко радостно перешёл на официальный\nтон, – а вот к этому мы имеем много чего.<br>\nИ начальник СЭС указал на кабину «Нивы», заполненную маслом, через стекло\nкоторой переливались разноцветные пятна.<br>\n– Масло нужно хранить в соответствующей таре! Я выписываю вам штраф!</p>\n\n<p class=\"ds-markdown-paragraph\">Йося Абдул с микрофоном в ухе и видеокамерой в\nглазу сошёл на перекрёстке республиканских трасс из комфортабельного автобуса.\nВ Киеве таксисты не знали, где находится какая-то там Бачковка, но довезли\nбогатого иностранца до автовокзала, засунули в соответствующий автобус и\nсодрали за услугу пару тысяч условных единиц… Пи-мозг всё это видел и слышал.\nНо жадность и нечестность людей были ничто в сравнении с угрозой Неведомого\nфактора, спрятанного в Бачковке.<br>\nНа перекрёстке, вместе с Йосей, в сторону Бачковки добиралась куча цыган с\nдетьми, чемоданами и босыми ногами. Добиралась семья на заработки.<br>\n– Негра! Негра! – принялись визжать дети и дёргать Йосю за штаны. Тот сам вырос\nв бедных кварталах города, поэтому присел и погладил двухлетнего мальчика по\nчубчику. Но пятилетняя девочка в это время успела засунуть в ухо Йосе колосок\nячменя и повредила микрофон…<br>\n– Давай я тебе погадаю, красавчик! – прицепилась старая цыганка, ухватила руку\nЙоси и начала врать: – Век твой короток да ярок! Сгоришь ты в великой любви и\nсловно звезда засветишься в этом мире, и долго тебя будут помнить…<br>\nЙося слушал внимательно, хоть языка цыганки не понимал. Сломанный микрофон в\nухе не давал возможности Пи-мозгу переводить Йосе вещие слова цыганки. А то,\nчто надо позолотить ручку, Йося понял лишь по жестам, но расплатиться не успел.\nЖестами цыганка полезла в карман и вытащила всё, что там было…<br>\nДо Бачковки Йося шёл пешком, потому что без денег его уже никто не подвозил, а\nбанкоматов в степях почему-то не открывали… Когда до села оставалось несколько\nкилометров, изнурённого дорогой и жарой негра решил подвезти на подводе\nГриць-молдован. Спьяну Гриць решил, что негр – его земляк из Кодр, и всю дорогу\nрасспрашивал об урожае винограда и политической обстановке в Кишинёве. Йося\nпридурковато улыбался и помахивал головой, Гриць помахивал кнутом, а кобыла\nхвостом. Кто-то из них таки домахался: то ли хвост, то ли кнут угодил Йосе в\nглаз, где была видеокамера… Изображение погасло.<br>\nПи-мозг вынужден был срочно изменить орбиту одного из военных спутников и\nнаправить все его телеобъективы на Йосю. Автоматически включилась спутниковая\nпередающая система, вмонтированная в галстук и часы Йоси. Заработал запасной\nискусственный глаз, спрятанный в пуговицу на пиджаке. Пи-мозг снова всё видел и\nслышал.<br>\nПервый кадр, который появился после поломки, – это был поднятый хвост кобылы,\nкоторая опорожнялась на центральную улицу села Бачковки, сопровождая действо\nсоответствующими звуками. Потом было гнездо аиста, искусно сложенное на\nрепродукторе, лицо испуганной бабы в шортах и шляпе, которая горланила: «Вася,\nнегра живого хочешь увидеть?» – и лицо Васи, которое мало чем отличалось от\nлица негра…<br>\nДорога на тракторную бригаду была спокойнее. Лишь один раз пацан на велосипеде\nразинул рот на Йосю и, потеряв равновесие, едва не свернул шею, бросил\nвелосипед и побежал в село с воплем: «Шварц негер! Шварц негер!»</p>\n\n<p class=\"ds-markdown-paragraph\">На тракторной бригаде Витюня Бурчик проводил\nтрадиционную дневную профилактику своей технике – куда надо доливал воды,\nсмазывал колёсики агрегатов, доливал солярку в электростанцию.<br>\nЗа своей работой Витюня не заметил Йосю, как не замечал и капитана Папашкина,\nзасевшего в бурьяне с пистолетом и очень желавшего вывести сельского «Кулибина»\nна чистую воду.<br>\nКапитан милиции наблюдал, что на территорию пожаловал негр, что негр пошарил\nсреди агрегатов и присел, глядя на кабину бывшего комбайна «Нива».<br>\nВитюня выпустил из рук ведро с соляркой, когда увидел перед кабиной «Нивы»\nсидящего на корточках негра… Негр уставился в разноцветные пятна за стеклом\nкабины и уже совершенно не дышал, потрескивая разрядами электричества…<br>\nВитюня подошёл ближе к негру. Прикоснуться было невозможно – всё тело Йоси\nстреляло искорками разрядов… Йося ярко светился так, как наврала ему цыганка…<br>\nПи-мозг не пропустил ни одного кадра и волновался, глядя на то, что показывал\n«глаз», вмонтированный в Йосю. Впервые он видел То Нечто, что нужно было узнать\nи дать Этому определение. Какие-то проводники, резервуары с жидкостями, облачка\nиспарений, треск двигателей… Что Оно? Вот какие-то пишущие машинки. А вон…<br>\nПри взгляде на стекло кабины бывшего комбайна Пи-мозг пропустил через себя\nэлектрическую дрожь. Весь энергозапас Пи-мозга содрогнулся, по всему миру\nкомпьютеры зависли и потребовали немедленной перезагрузки… Что То было?<br>\nВ разноцветных пятнах Пи-мозг увидел систему разума. Нет, не такого, каким\nпользовался Пи-мозг, а другого, непохожего ни на что в мире! То была\nнеудержимая красота иной логики и иного мышления, непознанного и\nпривлекательного.<br>\nЕсли всё на свете знать и всё понимать, то совершенно непонятной становится\nобычная простота природного чуда. В то же время, глядя на всё это непонятное,\nтакими ясными и осмысленными становятся желания и порывы, пусть и электронной,\nдуши.<br>\nТо была ЖЕНЩИНА, если можно провести параллель с людьми!<br>\nС этой системой невозможно соединиться. С нею возможно существовать в паре,\nвозможно обмениваться эмоциями, возможно создавать новые поколения\nинформационной энергии. Но подчинить её мышление и логику невозможно!<br>\nПи-мозг очаровался красотой масляных пятен, попал в плен раздумий и анализа\nтого, что видел и чувствовал, и совсем забыл, что роль передатчика исполняет\nнашпигованный аппаратурой Йося, которого скрутило электрическими зарядами, что\nон перестал дышать и даже побелел, если это слово соответствует цвету его кожи…<br>\n– Убили негра? – услышал Витюня Бурчик сзади голос капитана Папашкина,\nвылезшего из бурьяна с пистолетом. – Вот где ты попался! Ты киллер! Иностранцев\nказнишь, за это и деньги берёшь! Не двигаться! Буду стрелять!<br>\n– Да я, товарищ капитан… – повернулся Витюня лицом, но зря. Папашкин пальнул из\nпистолета в стекло кабины, и на труп Йоси и Витюню Бурчика вылилось полторы\nтонны масла.<br>\nПо всей территории бригады стали скрипеть и трещать элементы агрокомпьютера.\nОни останавливались навеки. Из резервуаров повалил пар.</p>\n\n<p class=\"ds-markdown-paragraph\">Виктора Бурчика в отделении долго не продержали.\nЭкспертиза тела иностранца показала остановку сердца от шока. И когда Витюня\nвернулся к своему компьютеру, запустить систему снова он уже не сумел…<br>\nЖители Бачковки, пока Витюня отдыхал на нарах, устроили на тракторной бригаде\nпогром в стиле Клондайка. Громили агрегаты и сдавали их на металлолом.\nПроводники, кабели, шланги превращались в гривны и водку. «Золотое дно»\nтракторной бригады оказалось коротким во времени. Через несколько дней\nсторожка-материнка разобралась на кирпич и шифер. Жидкостные накопители – бочки\n– перекатились самоходом в фермерские дворы. Электростанция загудела в чужих\nсёлах… Витюня лишь развёл руками.</p>\n\n<p class=\"ds-markdown-paragraph\">Пи-мозг, после увиденного, заболел тоской. Он\nпочувствовал своё одиночество. Забросил все свои дела, свернулся сгустком\nэнергии на острове в Тихом океане и стал ждать, когда перестанет действовать\nсолнечная батарея бывшей лаборатории…<br>\nВ сети Интернета, на том или ином компьютере, время от времени сверкнёт\nмгновенная звезда через экран монитора. Не удивляйтесь – это слеза Пи-мозга.\nСлеза о том, что невозможно вернуть, возродить, заново создать, о том, что\nзагублено навсегда и, как всегда, – человеческой натурой.</p>\n\n<p class=\"ds-markdown-paragraph\">2002–2023 гг.</p>\n\n"]};
+  let saveTimer = null;
+
+  function load(){
+    try {
+      const stored = localStorage.getItem(KEY);
+      const raw = stored || (EMBEDDED_STATE ? JSON.stringify(EMBEDDED_STATE) : null65);
+      if (raw) state = JSON.parse(raw);
+      if (!stored && EMBEDDED_STATE) localStorage.setItem(KEY, JSON.stringify(state));
+      if (!state.pages || !state.pages.length) state.pages = [''];
+      if (state.current == null || state.current < 0) state.current = 0;
+      if (state.current >= state.pages.length) state.current = state.pages.length - 1;
+    } catch(e) { state = { language:'ru', current:0, pages:[''] }; }
+    langSel.value = state.language || 'ru';
+    render();
+  }
+
+  function persist(){
+    state.pages[state.current] = editor.innerHTML;
+    state.language = langSel.value;
+    localStorage.setItem(KEY, JSON.stringify(state));
+    flash(dict[state.language].saved);
+  }
+
+  function softPersist(){
+    state.pages[state.current] = editor.innerHTML;
+    state.language = langSel.value;
+    localStorage.setItem(KEY, JSON.stringify(state));
+  }
+
+  function render(){
+    const lang = dict[state.language] || dict.ru;
+    editor.innerHTML = state.pages[state.current] || '';
+    editor.setAttribute('data-placeholder', lang.placeholder);
+    counter.textContent = `${lang.page} ${state.current + 1} ${lang.of} ${state.pages.length}`;
+    status.textContent = lang.ready;
+  }
+
+  function flash(text){
+    status.textContent = text;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => { status.textContent = dict[state.language].ready; }, 900);
+  }
+
+  function changePage(nextIndex){
+    state.pages[state.current] = editor.innerHTML;
+    state.language = langSel.value;
+    if (nextIndex < 0) { flash(dict[state.language].firstPage); return; }
+    if (nextIndex >= state.pages.length) { flash(dict[state.language].lastPage); return; }
+    state.current = nextIndex;
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render();
+    editor.focus();
+  }
+
+  function compressAndInsertImage(file) {
+    const lang = dict[state.language];
+    if (!file.type.startsWith('image/')) {
+      flash(lang.imgError);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        let width = img.width;
+        let height = img.height;
+        const maxSize = 400;
+        if (width > maxSize || height > maxSize) {
+          if (width > height) {
+            height = (height / width) * maxSize;
+            width = maxSize;
+          } else {
+            width = (width / height) * maxSize;
+            height = maxSize;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        let quality = 0.7;
+        let mime = 'image/jpeg';
+        if (file.type === 'image/png') {
+          mime = 'image/png';
+          quality = 0.85;
+        } else if (file.type === 'image/webp') {
+          mime = 'image/webp';
+        } else {
+          mime = 'image/jpeg';
+        }
+        let base64 = canvas.toDataURL(mime, quality);
+        const estimatedSize = base64.length * 0.75;
+        if (estimatedSize > 500 * 1024) {
+          quality = 0.5;
+          base64 = canvas.toDataURL(mime, quality);
+          const newEstimatedSize = base64.length * 0.75;
+          if (newEstimatedSize > 550 * 1024) {
+            flash(lang.imgTooBig);
+            return;
+          }
+        }
+        editor.focus();
+        const html = `<img src="${base64}" alt="illustration" style="max-width:100%; height:auto; border-radius:12px; margin:8px 0;" />`;
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          range.deleteContents();
+          const frag = range.createContextualFragment(html);
+          range.insertNode(frag);
+          range.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } else {
+          editor.insertAdjacentHTML('beforeend', html);
+        }
+        softPersist();
+        flash(dict[state.language].saved);
+      };
+      img.onerror = function() { flash(lang.imgError); };
+      img.src = e.target.result;
+    };
+    reader.onerror = function() { flash(lang.imgError); };
+    reader.readAsDataURL(file);
+  }
+
+  // --- Очистка текущей страницы (без удаления страницы) ---
+  function clearCurrentPage() {
+    const lang = dict[state.language];
+    if (confirm(lang.clearConfirm)) {
+      editor.innerHTML = '';
+      softPersist();
+      render();
+      editor.focus();
+      flash(lang.saved);
+    }
+  }
+
+  document.getElementById('imageBtn').onclick = () => imageUpload.click();
+  imageUpload.addEventListener('change', (e) => {
+    if (e.target.files[0]) compressAndInsertImage(e.target.files[0]);
+    imageUpload.value = '';
+  });
+
+  editor.addEventListener('dragover', (e) => e.preventDefault());
+  editor.addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.files[0]?.type.startsWith('image/')) {
+      compressAndInsertImage(e.dataTransfer.files[0]);
+    }
+  });
+
+  editor.addEventListener('input', () => {
+    softPersist();
+    flash(dict[state.language].saved);
+  });
+
+  langSel.addEventListener('change', () => {
+    state.language = langSel.value;
+    softPersist();
+    render();
+  });
+
+  document.getElementById('saveBtn').onclick = persist;
+  document.getElementById('prevBtn').onclick = () => changePage(state.current - 1);
+  document.getElementById('nextBtn').onclick = () => changePage(state.current + 1);
+  document.getElementById('clearBtn').onclick = clearCurrentPage;
+
+  document.getElementById('newBtn').onclick = () => {
+    state.pages[state.current] = editor.innerHTML;
+    state.language = langSel.value;
+    state.pages.splice(state.current + 1, 0, '');
+    state.current += 1;
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render();
+    editor.focus();
+  };
+
+  document.getElementById('deleteBtn').onclick = () => {
+    const lang = dict[state.language];
+    if (state.pages.length === 1) {
+      if (confirm(lang.clearConfirm)) {
+        editor.innerHTML = '';
+        softPersist();
+        render();
+        flash(lang.saved);
+      }
+      return;
+    }
+    if (!confirm(lang.emptyConfirm)) return;
+    state.pages.splice(state.current, 1);
+    if (state.current >= state.pages.length) state.current = state.pages.length - 1;
+    softPersist();
+    render();
+  };
+
+  document.getElementById('copyBtn').onclick = async () => {
+    try {
+      const sel = window.getSelection().toString();
+      await navigator.clipboard.writeText(sel || editor.innerText);
+      flash('copy');
+    } catch(e) { document.execCommand('copy'); flash('copy'); }
+  };
+
+  document.getElementById('pasteBtn').onclick = async () => {
+    editor.focus();
+    try {
+      const txt = await navigator.clipboard.readText();
+      document.execCommand('insertText', false, txt);
+    } catch(e) { flash('Ctrl+V'); }
+  };
+
+  document.getElementById('exportBtn').onclick = () => {
+    softPersist();
+    const savedState = JSON.parse(JSON.stringify(state));
+    const currentHtml = document.documentElement.outerHTML;
+    const embedded = currentHtml.replace(
+      /const EMBEDDED_STATE = .*?;\n/,
+      'const EMBEDDED_STATE = ' + JSON.stringify(savedState) + ';\n'
+    );
+    const blob = new Blob(['<!DOCTYPE html>\n' + embedded], {type:'text/html'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Синяя_тетрадь_сохранение.html';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+  };
+
+  document.getElementById('importBtn').onclick = () => importFile.click();
+  importFile.addEventListener('change', () => {
+    const file = importFile.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        let incoming;
+        const text = String(reader.result || '');
+        const match = text.match(/const EMBEDDED_STATE = (.*?);\n/);
+        if (match) {
+          incoming = JSON.parse(match[1]);
+        } else {
+          const data = JSON.parse(text);
+          incoming = data.state || data;
+        }
+        if (incoming.pages && Array.isArray(incoming.pages)) {
+          state = incoming;
+          if (!state.language) state.language = 'ru';
+          if (state.current == null) state.current = 0;
+          softPersist();
+          langSel.value = state.language;
+          render();
+        }
+      } catch(e) { alert('Import error'); }
+    };
+    reader.readAsText(file);
+    importFile.value = '';
+  });
+
+  window.addEventListener('beforeunload', softPersist);
+  load();
+})();
+</script>
+
+</body><div id="immersive-translate-popup" style="all: initial"></div></html>
