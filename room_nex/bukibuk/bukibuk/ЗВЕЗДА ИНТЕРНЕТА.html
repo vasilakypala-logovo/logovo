@@ -679,7 +679,7 @@
   function load(){
     try {
       const stored = localStorage.getItem(KEY1);
-      const raw = stored || (EMBEDDED_STATE ? JSON.stringify(EMBEDDED_STATE) : null65);
+      const raw = stored || (EMBEDDED_STATE ? JSON.stringify(EMBEDDED_STATE) : null);
       if (raw) state = JSON.parse(raw);
       if (!stored && EMBEDDED_STATE) localStorage.setItem(KEY, JSON.stringify(state));
       if (!state.pages || !state.pages.length) state.pages = [''];
