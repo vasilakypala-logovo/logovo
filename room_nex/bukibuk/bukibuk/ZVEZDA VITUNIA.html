@@ -411,7 +411,7 @@
 
 <script>
 (function(){
-  const KEY = 'azure-notebook-v88543';
+  const KEY = 'azure-notebook-v33543';
   const editor = document.getElementById('editor');
   const counter = document.getElementById('pageCounter');
   const status = document.getElementById('status');
@@ -432,7 +432,7 @@
   function load(){
     try {
       const stored = localStorage.getItem(KEY);
-      const raw = stored || (EMBEDDED_STATE ? JSON.stringify(EMBEDDED_STATE) : null6643);
+      const raw = stored || (EMBEDDED_STATE ? JSON.stringify(EMBEDDED_STATE) : null950);
       if (raw) state = JSON.parse(raw);
       if (!stored && EMBEDDED_STATE) localStorage.setItem(KEY, JSON.stringify(state));
       if (!state.pages || !state.pages.length) state.pages = [''];
