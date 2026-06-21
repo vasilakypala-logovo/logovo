@@ -32,7 +32,7 @@ body{
 }
 
 .folderBtn{
-    padding:12px 30px; /* увеличил длину */
+    padding:12px 30px;
     background:#222831;
     border:1px solid #333;
     color:#ddd;
@@ -114,8 +114,6 @@ body{
     cursor:pointer;
     z-index:20;
 }
-
-/* заголовок - убрал, т.к. теперь папки сверху */
 </style>
 </head>
 
@@ -128,8 +126,8 @@ body{
 <button id="closeReader" onclick="closeReader()">Закрыть</button>
 
 <script>
-// ИЗМЕНЕНО: теперь 7 папок
-const FOLDERS = Array.from({length:7}, (_,i)=>String(i+1).padStart(3,'0'));
+// ИЗМЕНЕНО: имена папок stih1...stih7
+const FOLDERS = ['stih1', 'stih2', 'stih3', 'stih4', 'stih5', 'stih6', 'stih7'];
 const FILES = Array.from({length:99}, (_,i)=>String(i+1).padStart(2,'0'));
 
 const foldersDiv = document.getElementById('folders');
@@ -147,18 +145,19 @@ function saveFolderNames(){
     localStorage.setItem('tucha_folder_names', JSON.stringify(folderNames));
 }
 
-/* ====== FOLDERS - ГОРИЗОНТАЛЬНО ====== */
+/* ====== FOLDERS ====== */
 FOLDERS.forEach(f=>{
     const b = document.createElement('div');
     b.className='folderBtn';
-    b.textContent = folderNames[f] || ("папка " + f);
+    // Показываем имя папки (stih1...stih7)
+    b.textContent = folderNames[f] || f;
     b.onclick=()=>openFolder(f);
     b.ondblclick = () => {
-        const t = prompt("Название папки:", folderNames[f] || "");
+        const t = prompt("Название папки:", folderNames[f] || f);
         if (t === null) return;
         folderNames[f] = t;
         saveFolderNames();
-        b.textContent = t || ("папка " + f);
+        b.textContent = t || f;
     };
     foldersDiv.appendChild(b);
 });
@@ -182,7 +181,9 @@ function renderFiles(folder){
 
         const name = document.createElement('div');
         name.className='name';
-        name.textContent = titles[folder+num] || '';
+        // ИСПРАВЛЕНО: показываем имя файла из localStorage
+        const fileName = titles[folder+num];
+        name.textContent = fileName || '';
 
         row.appendChild(n);
         row.appendChild(name);
