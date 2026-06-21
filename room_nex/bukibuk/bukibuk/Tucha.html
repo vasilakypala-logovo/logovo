@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Tucha Archive</title>
+<title>Tucha ПЕРВАЯ</title>
 
 <style>
 body{
@@ -26,18 +26,121 @@ body{
     border-right:1px solid #222;
 }
 
+/* ===== ДОБАВЛЯЕМ ОТСТУП СВЕРХУ ДЛЯ ПЕРВОЙ ПАПКИ ===== */
+#folders {
+    padding-top: 30px; /* Добавляем воздух сверху */
+}
+
 .folderBtn{
     width:100%;
-    padding:10px;
-    margin-bottom:6px;
+    padding:12px 10px; /* Увеличил вертикальный паддинг */
+    margin-bottom:10px; /* Увеличил отступ между папками */
     background:#222831;
     border:1px solid #333;
     color:#ddd;
     cursor:pointer;
     text-align:center;
+    position:relative; /* Для позиционирования индикатора */
+    transition: all 0.3s ease;
+    border-radius:4px; /* Добавил скругление */
 }
 .folderBtn:hover{
     background:#2f3a46;
+}
+
+/* ===== ИНДИКАТОР ОТКРЫТОЙ ПАПКИ (ЛАМПОЧКА) ===== */
+.folderBtn.active {
+    border-color: #4ade80;
+    box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+}
+
+.folderBtn .indicator {
+    display: none;
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 16px;
+    height: 16px;
+    background: #4ade80;
+    border-radius: 50%;
+    border: 2px solid #15181d;
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
+    animation: pulse-green 1.5s ease-in-out infinite;
+}
+
+.folderBtn.active .indicator {
+    display: block;
+}
+
+@keyframes pulse-green {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(74, 222, 128, 0.9);
+        transform: scale(1.2);
+    }
+}
+
+/* ===== НАЗВАНИЕ ПАПКИ В ПРАВОМ НИЖНЕМ УГЛУ С ЛАМПОЧКОЙ ===== */
+#folderLabel{
+    position:fixed;
+    bottom:30px;
+    right:30px;
+    font-size:48px;
+    font-weight:900;
+    color:rgba(0,0,0,0.35);
+    text-transform:uppercase;
+    letter-spacing:3px;
+    pointer-events:none;
+    user-select:none;
+    z-index:1000;
+    font-family:'Arial Black',sans-serif;
+    white-space:nowrap;
+    display:none;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+    align-items:center;
+    gap:20px;
+}
+
+#folderLabel .label-text {
+    display:inline-block;
+}
+
+/* Лампочка рядом с названием в читалке */
+#folderLabel .label-indicator {
+    display:inline-block;
+    width:20px;
+    height:20px;
+    background:#4ade80;
+    border-radius:50%;
+    box-shadow: 0 0 25px rgba(74, 222, 128, 0.7);
+    animation: pulse-green 1.5s ease-in-out infinite;
+    flex-shrink:0;
+    margin-right:10px;
+}
+
+/* Для мобильных устройств */
+@media (max-width:768px){
+    #folderLabel{
+        font-size:24px;
+        bottom:15px;
+        right:15px;
+        opacity:0.7;
+        gap:10px;
+    }
+    #folderLabel .label-indicator {
+        width:14px;
+        height:14px;
+        margin-right:5px;
+    }
+    .folderBtn .indicator {
+        width:12px;
+        height:12px;
+        top:-4px;
+        right:-4px;
+    }
 }
 
 /* список файлов */
@@ -108,35 +211,6 @@ body{
     z-index:1001;
 }
 
-/* ===== НАЗВАНИЕ ПАПКИ В ПРАВОМ НИЖНЕМ УГЛУ ===== */
-#folderLabel{
-    position:fixed;
-    bottom:30px;
-    right:30px;
-    font-size:48px;
-    font-weight:900;
-    color:rgba(0,0,0,0.35); /* ТЕМНЕЕ: было 0.10, стало 0.35 */
-    text-transform:uppercase;
-    letter-spacing:3px;
-    pointer-events:none;
-    user-select:none;
-    z-index:1000;
-    font-family:'Arial Black',sans-serif;
-    white-space:nowrap;
-    display:none;
-    text-shadow: 0 1px 2px rgba(255,255,255,0.3); /* легкая подсветка для читаемости */
-}
-
-/* Для мобильных устройств */
-@media (max-width:768px){
-    #folderLabel{
-        font-size:24px;
-        bottom:15px;
-        right:15px;
-        opacity:0.7; /* чуть ярче на мобилках */
-    }
-}
-
 /* заголовок */
 #title{
     position:absolute;
@@ -158,8 +232,11 @@ body{
 <div id="reader"></div>
 <button id="closeReader" onclick="closeReader()">Закрыть</button>
 
-<!-- НАЗВАНИЕ ПАПКИ -->
-<div id="folderLabel"></div>
+<!-- НАЗВАНИЕ ПАПКИ С ЛАМПОЧКОЙ -->
+<div id="folderLabel">
+    <span class="label-indicator"></span>
+    <span class="label-text"></span>
+</div>
 
 <script>
 const FOLDERS = Array.from({length:14}, (_,i)=>String(i+1).padStart(3,'0'));
@@ -169,10 +246,14 @@ const foldersDiv = document.getElementById('folders');
 const filesDiv = document.getElementById('files');
 const reader = document.getElementById('reader');
 const folderLabel = document.getElementById('folderLabel');
+const labelText = document.querySelector('#folderLabel .label-text');
 
 let currentFolder = null;
 let titles = JSON.parse(localStorage.getItem('tucha_titles') || '{}');
 let folderNames = JSON.parse(localStorage.getItem('tucha_folder_names') || '{}');
+
+// Храним все кнопки папок для обновления индикаторов
+let folderButtons = {};
 
 function saveTitles(){
     localStorage.setItem('tucha_titles', JSON.stringify(titles));
@@ -186,6 +267,15 @@ FOLDERS.forEach(f=>{
     const b = document.createElement('div');
     b.className='folderBtn';
     b.textContent = folderNames[f] || ("папка " + f);
+    
+    // Добавляем индикатор (лампочку)
+    const indicator = document.createElement('span');
+    indicator.className = 'indicator';
+    b.appendChild(indicator);
+    
+    // Сохраняем кнопку
+    folderButtons[f] = b;
+    
     b.onclick=()=>openFolder(f);
     b.ondblclick = () => {
         const t = prompt("Название папки:", folderNames[f] || "");
@@ -193,16 +283,36 @@ FOLDERS.forEach(f=>{
         folderNames[f] = t;
         saveFolderNames();
         b.textContent = t || ("папка " + f);
+        // Возвращаем индикатор обратно (он был удален при замене текста)
+        const newIndicator = document.createElement('span');
+        newIndicator.className = 'indicator';
+        b.appendChild(newIndicator);
+        // Обновляем состояние
         if (currentFolder === f) {
             updateFolderLabel(f);
+            updateActiveFolder(f);
         }
     };
     
     foldersDiv.appendChild(b);
 });
 
+/* ====== ФУНКЦИЯ ОБНОВЛЕНИЯ АКТИВНОЙ ПАПКИ ====== */
+function updateActiveFolder(folder) {
+    // Убираем класс active у всех папок
+    Object.keys(folderButtons).forEach(key => {
+        folderButtons[key].classList.remove('active');
+    });
+    
+    // Добавляем класс active текущей папке
+    if (folder && folderButtons[folder]) {
+        folderButtons[folder].classList.add('active');
+    }
+}
+
 function openFolder(folder){
     currentFolder = folder;
+    updateActiveFolder(folder);
     renderFiles(folder);
 }
 
@@ -262,11 +372,11 @@ async function openFile(folder,num){
     }
 }
 
-/* ====== ОБНОВЛЕНИЕ НАЗВАНИЯ ПАПКИ ====== */
+/* ====== ОБНОВЛЕНИЕ НАЗВАНИЯ ПАПКИ С ЛАМПОЧКОЙ ====== */
 function updateFolderLabel(folder){
     const displayName = folderNames[folder] || ("папка " + folder);
-    folderLabel.textContent = '📁 ' + displayName;
-    folderLabel.style.display = 'block';
+    labelText.textContent = '📁 ' + displayName;
+    folderLabel.style.display = 'flex';
 }
 
 /* ====== ENCODING DETECTOR ====== */
