@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Tucha perva</title>
+<title>Tucha Archive</title>
 
 <style>
 body{
@@ -29,7 +29,7 @@ body{
 
 .folderBtn{
     width:100%;
-    padding:12px 5px; /* Уменьшил боковые отступы с 10px до 5px */
+    padding:12px 5px;
     margin-bottom:10px;
     background:#222831;
     border:1px solid #333;
@@ -39,11 +39,11 @@ body{
     position:relative;
     transition: all 0.3s ease;
     border-radius:4px;
-    font-size:12px; /* Уменьшил шрифт с 13px до 12px */
-    white-space: nowrap; /* Запрещаем перенос */
-    overflow: hidden; /* Обрезаем лишнее */
-    text-overflow: ellipsis; /* Добавляем многоточие для длинных названий */
-    box-sizing: border-box; /* Чтобы padding не увеличивал ширину */
+    font-size:12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
 }
 .folderBtn:hover{
     background:#2f3a46;
@@ -144,10 +144,10 @@ body{
     }
 }
 
-/* список файлов */
+/* список файлов - СДВИНУТ ВПРАВО НА 5 ММ */
 #files{
     position:absolute;
-    left:140px;
+    left:159px; /* Было 140px, стало 159px (+19px ≈ 5 мм) */
     top:0;
     bottom:0;
     width:280px;
@@ -183,10 +183,10 @@ body{
     color:#aaa;
 }
 
-/* окно текста */
+/* окно текста - СДВИНУТО ВПРАВО */
 #reader{
     position:absolute;
-    left:420px;
+    left:439px; /* Было 420px, стало 439px (159+280) */
     right:0;
     top:0;
     bottom:0;
@@ -212,10 +212,10 @@ body{
     z-index:1001;
 }
 
-/* заголовок */
+/* заголовок - СДВИНУТ ВПРАВО */
 #title{
     position:absolute;
-    left:140px;
+    left:159px; /* Было 140px, стало 159px */
     top:0;
     padding:10px;
     font-size:14px;
