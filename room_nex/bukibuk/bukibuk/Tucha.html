@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Tucha ПЕРВАЯ</title>
+<title>Tucha Archive</title>
 
 <style>
 body{
@@ -19,30 +19,26 @@ body{
     left:0;
     top:0;
     bottom:0;
-    width:120px;
+    width:140px; /* Увеличил ширину с 120px до 140px */
     background:#15181d;
     padding:10px;
     overflow-y:auto;
     border-right:1px solid #222;
-}
-
-/* ===== ДОБАВЛЯЕМ ОТСТУП СВЕРХУ ДЛЯ ПЕРВОЙ ПАПКИ ===== */
-#folders {
     padding-top: 30px; /* Добавляем воздух сверху */
 }
 
 .folderBtn{
     width:100%;
-    padding:12px 10px; /* Увеличил вертикальный паддинг */
-    margin-bottom:10px; /* Увеличил отступ между папками */
+    padding:12px 10px;
+    margin-bottom:10px;
     background:#222831;
     border:1px solid #333;
     color:#ddd;
     cursor:pointer;
     text-align:center;
-    position:relative; /* Для позиционирования индикатора */
+    position:relative;
     transition: all 0.3s ease;
-    border-radius:4px; /* Добавил скругление */
+    border-radius:4px;
 }
 .folderBtn:hover{
     background:#2f3a46;
@@ -143,10 +139,10 @@ body{
     }
 }
 
-/* список файлов */
+/* список файлов - СДВИНУТ ПРАВЕЕ */
 #files{
     position:absolute;
-    left:120px;
+    left:140px; /* Было 120px, стало 140px */
     top:0;
     bottom:0;
     width:280px;
@@ -182,15 +178,15 @@ body{
     color:#aaa;
 }
 
-/* окно текста */
+/* окно текста - СДВИНУТО ПРАВЕЕ */
 #reader{
     position:absolute;
-    left:400px;
+    left:420px; /* Было 400px, стало 420px (140+280) */
     right:0;
     top:0;
     bottom:0;
     display:none;
-    background:#aeb5bb; /* сталь */
+    background:#aeb5bb;
     color:#000;
     padding:25px;
     overflow:auto;
@@ -211,10 +207,10 @@ body{
     z-index:1001;
 }
 
-/* заголовок */
+/* заголовок - СДВИНУТ ПРАВЕЕ */
 #title{
     position:absolute;
-    left:120px;
+    left:140px; /* Было 120px, стало 140px */
     top:0;
     padding:10px;
     font-size:14px;
