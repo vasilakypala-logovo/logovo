@@ -111,6 +111,35 @@ body{
     cursor:pointer;
     z-index:20;
 }
+
+/* ===== НАЗВАНИЕ ПАПКИ В ПРАВОМ НИЖНЕМ УГЛУ ===== */
+#folderLabel{
+    position:fixed;
+    bottom:30px;
+    right:30px;
+    font-size:48px;
+    font-weight:900;
+    color:rgba(0,0,0,0.35);
+    text-transform:uppercase;
+    letter-spacing:3px;
+    pointer-events:none;
+    user-select:none;
+    z-index:1000;
+    font-family:'Arial Black',sans-serif;
+    white-space:nowrap;
+    display:none;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+}
+
+/* Для мобильных устройств */
+@media (max-width:768px){
+    #folderLabel{
+        font-size:24px;
+        bottom:15px;
+        right:15px;
+        opacity:0.7;
+    }
+}
 </style>
 </head>
 
@@ -121,6 +150,9 @@ body{
 
 <div id="reader"></div>
 <button id="closeReader" onclick="closeReader()">Закрыть</button>
+
+<!-- НАЗВАНИЕ ПАПКИ -->
+<div id="folderLabel"></div>
 
 <script>
 console.log('=== СКРИПТ ЗАПУЩЕН ===');
@@ -135,11 +167,13 @@ console.log('Файлов:', FILES.length);
 const foldersDiv = document.getElementById('folders');
 const filesDiv = document.getElementById('files');
 const reader = document.getElementById('reader');
+const folderLabel = document.getElementById('folderLabel');
 
 console.log('Элементы найдены:', {
     foldersDiv: !!foldersDiv,
     filesDiv: !!filesDiv,
-    reader: !!reader
+    reader: !!reader,
+    folderLabel: !!folderLabel
 });
 
 let currentFolder = null;
@@ -170,6 +204,10 @@ PHYSICAL_FOLDERS.forEach((physical, index)=>{
         folderNames[physical] = t;
         saveFolderNames();
         b.textContent = t || physical;
+        // Обновляем название в читалке, если эта папка открыта
+        if (currentFolder === physical) {
+            updateFolderLabel(physical);
+        }
     };
     foldersDiv.appendChild(b);
     console.log('Кнопка добавлена');
@@ -261,6 +299,9 @@ async function openFile(folder,num){
         reader.style.display='block';
         reader.textContent = text;
         console.log('Текст отображён');
+        
+        // ===== ПОКАЗЫВАЕМ НАЗВАНИЕ ПАПКИ =====
+        updateFolderLabel(folder);
 
     }catch(e){
         console.error('=== ОШИБКА ===');
@@ -270,7 +311,17 @@ async function openFile(folder,num){
         
         reader.style.display='block';
         reader.textContent = `ОШИБКА: ${e.message}\n\nПуть: ${path}\n\nПроверьте:\n1. Существует ли папка "${folder}"\n2. Существует ли файл "${num}.txt"\n3. Правильно ли написаны имена (регистр важен!)\n4. Открываете ли вы через сервер (не file://)`;
+        
+        // ===== ПОКАЗЫВАЕМ НАЗВАНИЕ ПАПКИ даже при ошибке =====
+        updateFolderLabel(folder);
     }
+}
+
+/* ====== НОВАЯ ФУНКЦИЯ: Обновление названия папки ====== */
+function updateFolderLabel(folder){
+    const displayName = folderNames[folder] || folder;
+    folderLabel.textContent = '📁 ' + displayName;
+    folderLabel.style.display = 'block';
 }
 
 /* ====== ENCODING DETECTOR ====== */
@@ -314,6 +365,8 @@ function closeReader(){
     console.log('Закрываю читалку');
     reader.style.display='none';
     reader.textContent='';
+    // ===== СКРЫВАЕМ НАЗВАНИЕ ПАПКИ =====
+    folderLabel.style.display = 'none';
 }
 
 /* init */
