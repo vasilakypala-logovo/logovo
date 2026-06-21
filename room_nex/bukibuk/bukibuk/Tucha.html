@@ -105,6 +105,44 @@ body{
     color:#fff;
     border:none;
     cursor:pointer;
+    z-index:1001;
+}
+
+/* ===== НОВЫЙ БЛОК: Название папки в правом нижнем углу ===== */
+#folderLabel{
+    position:fixed;
+    bottom:30px;
+    right:30px;
+    font-size:48px;
+    font-weight:900;
+    color:rgba(0,0,0,0.10);
+    text-transform:uppercase;
+    letter-spacing:3px;
+    pointer-events:none;
+    user-select:none;
+    z-index:1000;
+    font-family:'Arial Black',sans-serif;
+    white-space:nowrap;
+    display:none; /* скрыто по умолчанию */
+}
+
+/* Адаптация для темной темы (если читалка темная) - не нужно, т.к. у вас светлая */
+/* Но если захотите темную тему, раскомментируйте:
+@media (prefers-color-scheme: dark) {
+  #folderLabel {
+    color: rgba(255,255,255,0.08);
+  }
+}
+*/
+
+/* Для мобильных устройств */
+@media (max-width:768px){
+    #folderLabel{
+        font-size:24px;
+        bottom:15px;
+        right:15px;
+        opacity:0.5;
+    }
 }
 
 /* заголовок */
@@ -128,6 +166,9 @@ body{
 <div id="reader"></div>
 <button id="closeReader" onclick="closeReader()">Закрыть</button>
 
+<!-- ===== НОВЫЙ ЭЛЕМЕНТ: Название папки ===== -->
+<div id="folderLabel"></div>
+
 <script>
 const FOLDERS = Array.from({length:14}, (_,i)=>String(i+1).padStart(3,'0'));
 const FILES = Array.from({length:99}, (_,i)=>String(i+1).padStart(2,'0'));
@@ -135,10 +176,11 @@ const FILES = Array.from({length:99}, (_,i)=>String(i+1).padStart(2,'0'));
 const foldersDiv = document.getElementById('folders');
 const filesDiv = document.getElementById('files');
 const reader = document.getElementById('reader');
+const folderLabel = document.getElementById('folderLabel');
 
 let currentFolder = null;
 let titles = JSON.parse(localStorage.getItem('tucha_titles') || '{}');
-    let folderNames = JSON.parse(localStorage.getItem('tucha_folder_names') || '{}');
+let folderNames = JSON.parse(localStorage.getItem('tucha_folder_names') || '{}');
 
 function saveTitles(){
     localStorage.setItem('tucha_titles', JSON.stringify(titles));
@@ -146,19 +188,24 @@ function saveTitles(){
 function saveFolderNames(){
     localStorage.setItem('tucha_folder_names', JSON.stringify(folderNames));
 }
+
 /* ====== FOLDERS ====== */
 FOLDERS.forEach(f=>{
     const b = document.createElement('div');
     b.className='folderBtn';
     b.textContent = folderNames[f] || ("папка " + f);
     b.onclick=()=>openFolder(f);
-b.ondblclick = () => {
-    const t = prompt("Название папки:", folderNames[f] || "");
-    if (t === null) return;
-    folderNames[f] = t;
-    saveFolderNames();
-    b.textContent = t || ("папка " + f);
-};
+    b.ondblclick = () => {
+        const t = prompt("Название папки:", folderNames[f] || "");
+        if (t === null) return;
+        folderNames[f] = t;
+        saveFolderNames();
+        b.textContent = t || ("папка " + f);
+        // Обновляем название в читалке, если эта папка открыта
+        if (currentFolder === f) {
+            updateFolderLabel(f);
+        }
+    };
     
     foldersDiv.appendChild(b);
 });
@@ -213,11 +260,24 @@ async function openFile(folder,num){
 
         reader.style.display='block';
         reader.textContent = text;
+        
+        // ===== ПОКАЗЫВАЕМ НАЗВАНИЕ ПАПКИ =====
+        updateFolderLabel(folder);
 
     }catch(e){
         reader.style.display='block';
         reader.textContent = "Файл не найден: " + path;
+        
+        // ===== ПОКАЗЫВАЕМ НАЗВАНИЕ ПАПКИ даже если файл не найден =====
+        updateFolderLabel(folder);
     }
+}
+
+/* ====== НОВАЯ ФУНКЦИЯ: Обновление названия папки ====== */
+function updateFolderLabel(folder){
+    const displayName = folderNames[folder] || ("папка " + folder);
+    folderLabel.textContent = '📁 ' + displayName;
+    folderLabel.style.display = 'block';
 }
 
 /* ====== ENCODING DETECTOR ====== */
@@ -260,6 +320,8 @@ function qualityScore(txt){
 function closeReader(){
     reader.style.display='none';
     reader.textContent='';
+    // ===== СКРЫВАЕМ НАЗВАНИЕ ПАПКИ =====
+    folderLabel.style.display = 'none';
 }
 
 /* init */
