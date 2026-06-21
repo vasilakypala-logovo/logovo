@@ -13,18 +13,18 @@ body{
     overflow:hidden;
 }
 
-/* верхняя панель папок */
+/* верхняя панель папок - УВЕЛИЧИВАЕМ ШИРИНУ */
 #folders{
     position:absolute;
     left:0;
     top:0;
     bottom:0;
-    width:140px; /* Увеличил ширину с 120px до 140px */
+    width:180px; /* Было 140px, стало 180px */
     background:#15181d;
     padding:10px;
     overflow-y:auto;
     border-right:1px solid #222;
-    padding-top: 30px; /* Добавляем воздух сверху */
+    padding-top: 30px;
 }
 
 .folderBtn{
@@ -39,6 +39,7 @@ body{
     position:relative;
     transition: all 0.3s ease;
     border-radius:4px;
+    font-size:13px; /* Чуть меньше шрифт, чтобы влезало */
 }
 .folderBtn:hover{
     background:#2f3a46;
@@ -142,7 +143,7 @@ body{
 /* список файлов - СДВИНУТ ПРАВЕЕ */
 #files{
     position:absolute;
-    left:140px; /* Было 120px, стало 140px */
+    left:180px; /* Было 140px, стало 180px */
     top:0;
     bottom:0;
     width:280px;
@@ -181,7 +182,7 @@ body{
 /* окно текста - СДВИНУТО ПРАВЕЕ */
 #reader{
     position:absolute;
-    left:420px; /* Было 400px, стало 420px (140+280) */
+    left:460px; /* Было 420px, стало 460px (180+280) */
     right:0;
     top:0;
     bottom:0;
@@ -210,7 +211,7 @@ body{
 /* заголовок - СДВИНУТ ПРАВЕЕ */
 #title{
     position:absolute;
-    left:140px; /* Было 120px, стало 140px */
+    left:180px; /* Было 140px, стало 180px */
     top:0;
     padding:10px;
     font-size:14px;
