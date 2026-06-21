@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html data-immersive-translate-page-theme="light" lang="ru"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure Notebook РЕДАКТОР + Иллюстрации</title>
+<style>
+  @font-face {
+    font-family: 'AzureCustomFont';
+    src: url('Comic Sans MS.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  :root {
+    --azure-dark: #184f8f;
+    --azure: #2d7fd3;
+    --azure-soft: #82b8ee;
+    --paper: #efe0bd;
+    --paper-light: #f7ebc9;
+    --ink: #111;
+    --panel: rgba(10, 48, 92, 0.88);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 20% 15%, rgba(113,169,227,.22), transparent 28%),
+      radial-gradient(circle at 80% 70%, rgba(25,74,140,.28), transparent 35%),
+      linear-gradient(135deg, #06182e, #0d3058 50%, #06182e);
+    color: var(--ink);
+    font-family: Arial, sans-serif;
+  }
+
+  .app {
+    width: 100vw;
+    height: 100vh;
+    padding: 18px;
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 14px;
+  }
+
+  .side-panel {
+    height: calc(100vh - 36px);
+    border: 2px solid rgba(130,184,238,.75);
+    border-radius: 18px;
+    background: var(--panel);
+    box-shadow: 0 10px 35px rgba(0,0,0,.35), inset 0 0 22px rgba(130,184,238,.16);
+    padding: 10px 7px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tool, .lang-select {
+    width: 46px;
+    min-height: 38px;
+    border: 1px solid rgba(255,255,255,.35);
+    border-radius: 12px;
+    background: rgba(255,255,255,.12);
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    transition: .15s ease;
+  }
+
+  .tool:hover, .lang-select:hover {
+    background: rgba(255,255,255,.23);
+    transform: translateY(-1px);
+  }
+
+  .lang-select {
+    appearance: none;
+    text-align: center;
+    padding-left: 5px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .spacer { flex: 1; }
+
+  .book-wrap {
+    position: relative;
+    height: calc(100vh - 36px);
+    min-width: 0;
+  }
+
+  .page {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border: 7px solid var(--azure-dark);
+    border-radius: 26px;
+    background:
+      linear-gradient(90deg, rgba(92,55,20,.06) 0, transparent 10%, transparent 90%, rgba(92,55,20,.06) 100%),
+      linear-gradient(180deg, var(--paper-light), var(--paper));
+    box-shadow:
+      0 16px 45px rgba(0,0,0,.42),
+      inset 0 0 0 4px var(--azure-soft),
+      inset 0 0 55px rgba(73,37,6,.14);
+    overflow: hidden;
+  }
+
+
+  .watermark {
+    position: absolute;
+    top: 22px;
+    right: 34px;
+    width: 118px;
+    height: 118px;
+    border-radius: 50%;
+    background-image: url('watermark.png');
+    background-size: cover;
+    background-position: center;
+    opacity: .16;
+    filter: sepia(1) saturate(.85) hue-rotate(165deg) contrast(.95);
+    box-shadow: 0 0 0 1px rgba(24,79,143,.18);
+    transform: rotate(-10deg);
+    user-select: none;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+
+  .title-line {
+    position: absolute;
+    left: 70px;
+    right: 190px;
+    top: 34px;
+    height: 36px;
+    border-bottom: 1px solid rgba(24,79,143,.24);
+    color: rgba(24,79,143,.74);
+    font-family: Georgia, serif;
+    font-size: 22px;
+    letter-spacing: .06em;
+    display: flex;
+    align-items: center;
+  }
+
+  #editor {
+    position: absolute;
+    left: 68px;
+    right: 68px;
+    top: 92px;
+    bottom: 62px;
+    padding: 10px 4px;
+    outline: none;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: 'AzureCustomFont', 'Comic Sans MS', Arial, sans-serif;
+    font-size: clamp(18px, 2.05vw, 30px);
+    line-height: 1.56;
+    color: var(--ink);
+    caret-color: var(--azure-dark);
+  }
+
+  #editor img {
+    max-width: min(100%, 400px);
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    margin: 8px 0;
+    display: block;
+    cursor: pointer;
+    transition: 0.1s ease;
+  }
+  #editor img:hover {
+    transform: scale(1.01);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  }
+
+  #editor:empty:before {
+    content: attr(data-placeholder);
+    color: rgba(0,0,0,.32);
+  }
+
+  .footer {
+    position: absolute;
+    left: 70px;
+    right: 70px;
+    bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    color: rgba(24,79,143,.82);
+    font-family: Georgia, serif;
+    user-select: none;
+  }
+
+  .nav-btn {
+    border: 1px solid rgba(24,79,143,.38);
+    background: rgba(255,255,255,.26);
+    color: var(--azure-dark);
+    min-width: 48px;
+    height: 32px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .page-counter { min-width: 128px; text-align: center; font-size: 16px; }
+
+  .status {
+    position: absolute;
+    left: 80px;
+    bottom: 24px;
+    color: rgba(24,79,143,.62);
+    font-size: 12px;
+    font-family: Arial, sans-serif;
+    user-select: none;
+  }
+
+  input[type="file"] { display: none; }
+
+  @media (max-width: 720px) {
+    .app { padding: 8px; grid-template-columns: 48px 1fr; gap: 8px; }
+    .side-panel, .book-wrap { height: calc(100vh - 16px); }
+    .side-panel { border-radius: 14px; padding: 7px 4px; }
+    .tool, .lang-select { width: 36px; min-height: 34px; font-size: 13px; border-radius: 10px; }
+    .page { border-width: 5px; border-radius: 18px; }
+    .title-line { left: 30px; right: 110px; top: 20px; font-size: 15px; }
+    #editor { left: 28px; right: 28px; top: 70px; bottom: 58px; font-size: 18px; }
+    #editor img { max-width: 100%; }
+    .watermark { width: 78px; height: 78px; top: 18px; right: 24px; }
+    .footer { left: 30px; right: 30px; gap: 10px; bottom: 18px; }
+    .status { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <aside class="side-panel" aria-label="Command strip">
+      <select id="language" class="lang-select" title="Language">
+        <option value="ru">RU</option>
+        <option value="en">EN</option>
+        <option value="ua">UA</option>
+      </select>
+      <button class="tool" id="saveBtn" title="Сохранить">💾</button>
+      <button class="tool" id="newBtn" title="Новая страница">＋</button>
+      <button class="tool" id="deleteBtn" title="Удалить страницу">✕</button>
+      <button class="tool" id="clearBtn" title="Очистить страницу">🧹</button>
+      <button class="tool" id="copyBtn" title="Копировать">⧉</button>
+      <button class="tool" id="pasteBtn" title="Вставить">⇩</button>
+      <button class="tool" id="imageBtn" title="Вставить иллюстрацию">🖼️</button>
+      <div class="spacer"></div>
+      <button class="tool" id="exportBtn" title="Экспорт">⇧</button>
+      <button class="tool" id="importBtn" title="Импорт">⇩</button>
+      <input type="file" id="importFile" accept="text/html,application/json,.html,.json">
+      <input type="file" id="imageUpload" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none">
+    </aside>
+
+    <main class="book-wrap">
+      <section class="page">
+        <div class="watermark" aria-hidden="true"></div>
+        <div class="title-line" id="titleLine">AZURE NOTEBOOK</div>
+        <div id="editor" spellcheck="true" data-placeholder="Пишите здесь..." contenteditable="true"><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:View>Normal</w:View>
+  <w:Zoom>0</w:Zoom>
+  <w:PunctuationKerning/>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SnapToGridInCell/>
+   <w:WrapTextWithPunct/>
+   <w:UseAsianBreakRules/>
+   <w:DontGrowAutofit/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" LatentStyleCount="156">
+ </w:LatentStyles>
+</xml><![endif]--><!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Обычная таблица";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-para-margin:0cm;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]-->
+
+<p class="ds-markdown-paragraph"><strong>ПОРТСИГАР ОТ КОПЕРФИЛЬДА</strong><br>
+радиопьеса</p><p class="ds-markdown-paragraph"><strong>Действующие лица:</strong></p><p class="ds-markdown-paragraph" style="margin-left:36.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo1;tab-stops:list 36.0pt"><span style="mso-list:Ignore">1.<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Кирилл Кириллович Поплавский, заведующий районным
+отделом культуры. (голос творческий, тонкий, утомленный песнями)</p><p class="ds-markdown-paragraph" style="margin-left:36.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo1;tab-stops:list 36.0pt"><span style="mso-list:Ignore">2.<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Коперфильд Володя, цирковой аферист. (голос молодой,
+активный, веселый)</p><p class="ds-markdown-paragraph" style="margin-left:36.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo1;tab-stops:list 36.0pt"><span style="mso-list:Ignore">3.<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Евгеньевна, заведующая районной библиотекой. (голос
+романтичной женщины в годах)</p><p class="ds-markdown-paragraph" style="margin-left:36.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo1;tab-stops:list 36.0pt"><span style="mso-list:Ignore">4.<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Районный пожарник, Василий Андреевич, представитель
+местного МЧС. (голос любой сонный)</p><p class="ds-markdown-paragraph" style="margin-left:36.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo1;tab-stops:list 36.0pt"><span style="mso-list:Ignore">5.<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Глава районной администрации, Семен Иванович. (голос
+басистый, с хрипотцой)</p>
+<p class="ds-markdown-paragraph"><strong>                           Актовый зал администрации</strong></p><p class="ds-markdown-paragraph">Гомонит народ в актовом зале. Визжат мобильники
+разными мелодиями. Двигаются стулья, хлопают двери. Где-то вдалеке хохочет женщина, пищит микрофон...<br>
+Звучит властный мужской голос главы районной администрации.</p><p class="ds-markdown-paragraph">ГЛАВА АДМИНИСТРАЦИИ: - Все! Кончайте анекдоты! Начинаем
+работу! Евгеньевна, вы меня слышите? (Стучит карандашом по столу) Я понимаю, настроение праздничное, я тоже знаю анекдот про апельсинчики, но не так же открыто...</p><p class="ds-markdown-paragraph">ЕВГЕНЬЕВНА (оправдывается веселый женский голос): – А что я, что я? Это все Поплавок. Ой, простите, Кирилл Кириллович (женщина несдерживаемо смеется) нас развлекает... истории... говорит...</p><p class="ds-markdown-paragraph">ГЛАВА АДМИНИСТРАЦИИ (серьезно прекращает гомон)
+– Довольно! И выключите, пожалуйста, мобильники! Это же заседание комиссии, а не свинарник,...</p><p class="ds-markdown-paragraph">Стихают звуки, поодиночке покашливают
+курильщики.</p><p class="ds-markdown-paragraph">ГЛАВА АДМИНИСТРАЦИИ (размеренно деловым тоном):
+- Начинаем работу комиссии. Председательствую я. Меня вы знаете, знакомиться не нужно. Повестка дня уже записана. Вопрос один: подготовка к празднованию Нового года. (пауза) Год, как всегда, оказался тяжелый, но развлекаться, как говорилфилософ, нам не запретишь...</p><p class="ds-markdown-paragraph">ЕВГЕНЬЕВНА (осторожно): - Семен Иванович, прошу
+прощения, еще раз про философа, какой философ?</p><p class="ds-markdown-paragraph">ГЛАВА АДМИНИСТРАЦИИ (раздраженно): - Так, Евгеньевна, не докучайте своими библиотекарскими замашками! Сейчас у меня вы философом станете! Почему, я вас спрашиваю, у вас не горят гирлянды на здании?
+Здание в центре района, библиотека! Храм, можно сказать, культуры... Должно
+мигать на весь, можно сказать, район...</p><p class="ds-markdown-paragraph">ЕВГЕНЬЕВНА (обиженно): - Это не я. Это все Кирилл Кириллович. Одолжил гирлянду на праздник Николая и до сих пор не возвращает...</p><p class="ds-markdown-paragraph">ГЛАВА АДМИНИСТРАЦИИ (с иронией): - Опять анекдоты от Поплавского? Так, Кирилл Кириллович? Вы, наш культурный «белый попугай», про гирляндочку, а не про апельсинчики рассказали бы. Где гирлянда?!</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (печально и серьезно): -
+Нет... Семен Иванович, поверьте, уже нет... Балбесы эти, молодые – рок-группа наша из дома культуры... Николая водили... Ну, в общем, ни гирлянды, ни аппаратуры... Ремонтировать надо...</p><p class="ds-markdown-paragraph">ГЛАВА АДМИНИСТРАЦИИ (сердито): - Так ремонтируйте! Или мне лампочки припаять? Что с елкой?</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (уверенно): - Ну, елку, мы, разумеется, зажжем!</p><p class="ds-markdown-paragraph">РАЙОННЫЙ ПОЖАРНИК (сонно поправляет): – Не зажжем, а засветим!</p>
+<p class="ds-markdown-paragraph">ГЛАВА АДМИНИСТРАЦИИ (с усмешкой): - Так, Василий Андреевич, вы, как пожарник, вовремя проснулись. Кириллу Кирилловичу все бы только жечь: библиотечную гирлянду сжег... теперь на елку замахивается...</p><p class="ds-markdown-paragraph">Оживление голосов, слышны смешки, шепот. Пищит
+мобильник с мелодией «Золотые купола»...</p><p class="ds-markdown-paragraph">ГЛАВА АДМИНИСТРАЦИИ (громко и раздраженно): - Я же сказал выключить мобильники! Вам «Золотые купола» спеть хочется? А думать о празднике, кто будет, Пушкин?...</p><p class="ds-markdown-paragraph">ЕВГЕНЬЕВНА (замечает): - Пушкина перестали читать. Франко никто и не читал. Я думаю, у нас постоянный праздник...</p><p class="ds-markdown-paragraph">ГЛАВА АДМИНИСТРАЦИИ (грубо): - А Вам, Евгеньевна, я думать запрещаю! Вы в своей библиотеке только тем и занимаетесь, только думаете! А надо работать, ясно?</p><p class="ds-markdown-paragraph">ЕВГЕНЬЕВНА: - Ясно.</p><p class="ds-markdown-paragraph">ГЛАВА АДМИНИСТРАЦИИ: - Как Божий день ясно, или как в Новогоднюю ночь? А дальше что, культурная программа есть? А, Кирилл Кириллович?</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (смущенно): Что дальше? Что дальше... Как всегда. Своими силами гулять будем! Самодеятельность такая: клоун и еще один арлекин чудачат, народный ансамбль «Вечерняя зоренька» поют. Потом
+два поэта-пенсионера денег не берут...</p><p class="ds-markdown-paragraph">Пауза. Стучит карандаш по столу «тук», «тук», «тук».</p><p class="ds-markdown-paragraph">ГЛАВА АДМИНИСТРАЦИИ (размышляя): -Ну, если своими силами и без денег... (пауза) Елку точно сожжем! Может есть предложения?
+(пауза) Народ требует шоу! Год тяжелый. Одна радость – праздники
+Рождественские! Как вы думаете, я прав? (пауза) А давайте пригласим на
+праздники профессионалов? Район на тысячу гривен один раз в год не обеднеет, а праздник закроем на высоком уровне...</p><p class="ds-markdown-paragraph">ЕВГЕНЬЕВНА (взволнованно): - Да где ж их взять, профессионалов? Мы же аграрный район! Сюда никто ехать не хочет! У нас, в библиотеке компьютер уже есть, а работать некому...</p><p class="ds-markdown-paragraph">ГЛАВА АДМИНИСТРАЦИИ (решительно): - Здрасьте, Евгеньевна! Я вам про здравие, а вы мне про упокой! При чем тут ваш компьютер к елке? (иронично) Отдайте компьютер Кириллу Кирилловичу, он знает что с ним
+сделать!...</p><p class="ds-markdown-paragraph">РАЙОННЫЙ ПОЖАРНИК (весело спросонья): - Хе! То что с гирляндой! Отдайте лучше в МЧС, по крайней мере не сгорит...</p><p class="ds-markdown-paragraph">ГЛАВА АДМИНИСТРАЦИИ (строго): - Хватит уже болтать! С вами, Василий Андреевич, мы продолжим разговор о праздничных огнях и салютах, о газе, в конце концов, и о вкладе МЧС в общерайонный праздник! А библиотека и культура до свидания!</p>
+<p class="ds-markdown-paragraph">Скрипят стулья, шаркают шаги.</p><p class="ds-markdown-paragraph">ГЛАВА АДМИНИСТРАЦИИ (перекрикивая шум): - Значит так, Кирилл Кириллович, вы завтра едете в область, в филармонию, в цирк, куда угодно, и приглашаете на праздники профессиональных артистов! Ясно?</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (фатально): - Да ясно... Не ясно где деньги... взять. Эти же профессионалы, дорого стоят... До свидания!</p><p class="ds-markdown-paragraph"><br></p><p class="ds-markdown-paragraph">Грохот дверей. Слышны шаги по коридору.</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (шепотом, так чтобы никто его
+не услышал): - Скорее бы эти праздники состоялись, Господи! Нормальные люди в праздники отдыхают, а тут как не гирлянда горит, так филармонию надо привезти... (пауза) Доберусь до кабинета, включу музыку. Что-нибудь веселенькое послушаю. Устрою расслабуху...</p>
+<p class="ds-markdown-paragraph"><strong>В кабинете Кирилла Кирилловича фоном
+звучит песня «Костер» в исполнении «Машины времени».</strong></p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (без мелодии напевает
+речитативом): - Раз ночь темна, жгут едва-едва, и берегут, силы и дрова... Еще
+не все погасли краски дня, еще не жаль огня... И Бог хранит меня...</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (сам с собой вслух): - Вот песни раньше делали! Что то ретро! (декламирует) «Силы и дрова берегут и Бог хранит меня!» (пауза) Макаревичу, за эту песню, памятник надо поставить. А тут ищешь что-то родное, национальное, а имеем колядки и щедривки, щедривки и колядки. Разве что «Галю» спеть? (пауза) (неуверенно напевает) «Привязали Галю
+к сосне косами, подожгли сосну от верха до низа»... «Горит сосна горит, горит да полыхает»... А там и елка загорится... Лесной пожар какой-то. В нашей стране одним пожарникам весело...</p><p class="ds-markdown-paragraph">Слышен неудержимый стук в дверь. Дверь открывается.</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД (обращается): - Можно войти? Кирилл Кириллович?</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ: (властно и в хорошемнастроении): - Да заходите уже... Заходите, как чудо, как песня... Вы, часом, не Новогоднее чудо? Потому что я в чудеса не верю.</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД (иронично): - Нет, я не чудо, но к чудесам имею непосредственное участие.</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ: - Так кто же вы?</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД: - Я Володя Коперфильд.</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (удивленно): Коперфильд? Тот самый? Тот что летает?</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД (весело): - Ну, не совсем тот. Вы вот, Поплавский. На двери написано. Это ж не значит, что вы тот Поплавский, что ого! А вы Поплавский поменьше, но тоже культурный и творческий... А я тоже Коперфильд, но Володя. Тоже, можно сказать, летаю...</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (смущенно): - Ага. Летаете? Крылья есть?</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД (объясняет): - Я профессиональный циркач. Артист легкого жанра...</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (радостно): - Так вы артист! Вы из филармонии?</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД (гордо) : - Можно сказать и так.  Филармонию, можно сказать, я отгудел. Вот, времена были! Теперь своим талантом помогаю создавать важным людям зрелища.</p>
+<p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (активно): - Это очень хорошо,
+что вы из филармонии! Очень хорошо! У нас тут как раз проблемка с артистами. С профессиональными артистами! У нас елка горит...</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД (по-деловому): - Ну, еще не горит. Не спешите в событиях. Всему свое время! Время собирать и время поджигать! (пауза)
+Но если про елку, то я могу ее оригинально зажечь. Зрелище понравится и
+малышам, и взрослым.</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (заверяя): - О, елку поджечь
+мы можем и своими яркими талантами! Только пожарник не разрешает. Нам бы организовать какую-нибудь развлекательную программу возле елки...</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД (решительно): - Запросто! Как говорит мой тезка Коперфильд: "ноу проблем"! Вот... Дайте мне две гривны.</p><p class="ds-markdown-paragraph">Небольшая пауза.</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (сам себе): - Опять речь о деньгах... Эти профессионалы без денег жить не могут. Мир перевернулся с этими
+деньгами! Но ведь две гривны - не двести...</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (вслух): - Две так две! Вот вам две гривны.</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД (объясняя): - Это очень просто. Берем
+ваши деньги и поджигаем их спичками. (Слышны звуки зажигания спички) Смотрите, вот так сжигаем жестокий капитал жизни. Вон как горит денежная проблема! Вон как горит фундамент буржуазной культуры! Вот так он превращается в духовный пепел! Последний вздох капитализма – погасшая искра, и все...</p><p class="ds-markdown-paragraph">Пауза.</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (с интересом): И это все?</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД: - Все.</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (разочарованно): Это не интересно. Так и я умею. Верните две гривны!</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД (интригуя): - А что у вас в потайничке?! Что там у вас в потайничке? Позвольте мне просунуть руку. Вот так. Еще вот так! Ну, так просто: получите ваши две гривны! (пауза) Надо было бы, чтобы вы запомнили номер купюры, тогда сомнений не осталось бы никаких. Может
+повторим?</p>
+<p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (восхищенно): - Гениально! Это что-то подобное из моего детства, когда я был в цирке... Такого в нашем районе давненько не бывало! (переходит в веселое настроение и сарказм) А вот в потайник к главе нашей администрации, Семену Ивановичу, сможете залезть? Он в этом году продал трубу водопровода за миллион, а на культуру ни копейки...
+Ха...</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД (уверенно): - Я к кому хотите в потайник залезу! Были бы деньги...</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (допытливо иронично): - А вы только деньги жжете? Может газеткой обойдемся?</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД (убедительно): - Какая газетка?! В моем репертуаре много оригинальных зрелищных трюков: «Прыжок в ничто», «Алло, телефоны не работают», «Золотой портсигар» и многие другие...</p><p class="ds-markdown-paragraph">Небольшая пауза. Шуршат бумаги.</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (деловым тоном): - Ладно. Это интересно. Главное, что вы из филармонии! Семен Иванович будет доволен. Думаю, построим Новогодний праздник на ваших, так сказать, фокусах под елкой. Оденем
+вас Снегурочкой. Только в потайник к главе администрации залезать не надо! Это я пошутил. Надо сделать просто приятное, развлекательное, яркое шоу... А этот ваш «Золотой портсигар», что, действительно золотой?</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД (решительно): - Да я вам сейчас продемонстрирую. Только для этого две гривны мало. Надо две тысячи...</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (шепотом себе): - Опять
+деньги. Что то профессионалы, никогда о них не забывают! Да и мы не простачки. Сейчас я его обую.</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (вслух, предлагая): - Хо-ро-шо! Две тысячи у меня нет. А вот тысяча гривен выделена нам на проведение праздника есть! Только запомните – это ваш заработок, гонорар, так сказать! Если сожжете деньги, извиняйте, останетесь без зарплаты... (иронично улыбаясь) Да я думаю свои деньги вы жечь не будете, правда ведь?</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД (осторожно): - Конечно! Свои деньги
+требуют пристального внимания. Что ж, давайте тысячу. (пауза) Понятно, это не та сумма, которая нужна для эффекта, но мы артисты, народ не амбициозный. Что перепадет с праздничного стола, тому и радуемся. Время такое. У людей денег на цирк нет, филармонии не ремонтируются... Вот, приходится, летать по районам и брать, что Бог пошлет.</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (считает): - Вот, восемьсот, девятьсот, девятьсот пятьдесят, дальше мельче: пять, десять, двадцать, девятьсот девяносто девять, тысяча! (пауза) Слушайте, Володя, выделите мне десятку на открытки? Вам эта десятка ни туда, ни сюда, а нам в культуре...</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД (серьезно): - Вот это уже нет, Кирилл Кириллович! Только не сейчас. Покажу номер, тогда и выделю, хоть пятьдесят! Давайте сюда деньги. Кладите в этот портсигар.</p><p class="ds-markdown-paragraph">Слышно шуршание, металлический щелчок.</p><p class="ds-markdown-paragraph">КОПЕРФИЛЬД (приказывая): - Включите, пожалуйста, музыку, какую-нибудь для озвучки, чтобы не сухо... Портсигар я кладу на край стола...</p>
+<p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (соглашаясь): - Это, сейчас, включу! Сухо не будет! (возится) У меня тут как раз песня Макаревича про дрова и там, ретро, что все отболит и мудрый ветер золу развеет без следа...</p><p class="ds-markdown-paragraph">Звучит песня «Костер» «Машины времени». На фоне
+музыки взрываются петарды. Стук падающих предметов, звон стекла. Опять
+взрываются петарды, словно фильм о войне.</p>
+<p class="ds-markdown-paragraph"><strong>В кабинете Кирилла Кирилловича стук в
+дверь. Шаги. Скрип дверей.</strong></p><p class="ds-markdown-paragraph">ЕВГЕНЬЕВНА (тихо интересуется): – Кирилл Кириллович, вы живы? Что здесь было?</p><p class="ds-markdown-paragraph">РАЙОННЫЙ ПОЖАРНИК (пробужденно и громко оценивая): - Да тут словно фейерверк кто-то устроил! Конфетти рассыпано! Петарды стреляли! А воняет как... Хоть топор вешай! Кирилл Кириллович, вы что гирлянду ремонтировали?</p><p class="ds-markdown-paragraph">ЕВГЕНЬЕВНА (удивляется): - Такое впечатление, что наступило первое января после Новогодней ночи... Снежинок не хватает...</p><p class="ds-markdown-paragraph">РАЙОННЫЙ ПОЖАРНИК: - Портрет главы Верховного совета разбился...</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (печально): - Этот портрет просто упал. Сам по себе упал. Я тут сам чуть не упал...</p>
+<p class="ds-markdown-paragraph">РАЙОННЫЙ ПОЖАРНИК (спрашивает): - А что случилось? У вас кто-то стрелял?</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (раздраженно): - Да никто у меня не стрелял! Видите, это обыкновеннейшие петарды и хлопушки. Вы, Василий Андреевич, позвоните немедленно в милицию. Надо задержать одного артиста, пока
+далеко не улетел... Профессионал говорит!</p><p class="ds-markdown-paragraph">РАЙОННЫЙ ПОЖАРНИК (удивленно): - А разве вы не знаете? Уже с полчаса, как все телефоны не работают! Ремонтников уже вызвали...</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (гневно): - Вот, Коперфильд! И говорил же, что летун, и профессионал, и «Алло, телефоны не работают»...</p><p class="ds-markdown-paragraph">ЕВГЕНЬЕВНА (интересуясь): - О чем вы, Кирилл Кириллович? И что это вы в руке мнете?</p>
+<p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (громко, в истерике): - Что, что! Портсигар! Пустой портсигар. Зо-ло-той! Я его только что купил за тысячу гривен. (пауза) Артист! Циркач легкого жанра - национальная зараза!</p><p class="ds-markdown-paragraph">РАЙОННЫЙ ПОЖАРНИК (спокойно, погружаясь в
+сонливость): - Кирилл Кириллович, я дверь открою, пусть комната проветрится. У вас все в порядке с сигнализацией?... Но ведь и сигнализация не работает!</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (безнадежно): - Что ж тут поделаешь. Так, откройте, пожалуйста, дверь. Да идите себе... Дайте покой. (тихо вслух) И там, Василий Андреевич, не говорите никому, особенно главе...
+Глава еще от гирлянды не отошел...</p><p class="ds-markdown-paragraph">Скрипят двери.</p>
+<p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (печально размышляя): - Вот так, Евгеньевна, никогда нам тут, в районе, не достичь профессионализма! Тянемся за городом, за большой культурой, хотим развлекаться на «высоком уровне», а за это платить надо!</p><p class="ds-markdown-paragraph">ЕВГЕНЬЕВНА (сочувствуя): - Вас что, обманули? Кто-то обманул?</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ: - Не просто обманул, а в душу плюнул! Из филармонии он. Цаца большая! Две тысячи ему подавай! Я ж говорил,
+что у нас всего тысяча и на нашем уровне клоуны бесплатно работают! А мне он... На высоком уровне, на высоком уровне...</p><p class="ds-markdown-paragraph">ЕВГЕНЬЕВНА (ласково успокаивая): - Не переживайте так, Кирилл Кириллович. Я с нашим ансамблем «Вечерняя зоренька» переговорю. Что-нибудь придумаем к Новому году... (смущенно) Что с вами? Кирилл
+Кириллович, что с вами?</p><p class="ds-markdown-paragraph">Кирилл Кириллович начинает заливаться смехом.</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (сквозь смех): - Евгеньевна, не поверите! Этот «коперфильд» у меня из потайника депутатское удостоверение
+украл... Представляете? Удостоверение депутата районного совета! Это ж только можно представить себе как, в каком-нибудь районе, Коперфильд будет представляться депутатом Поплавским... А то и министром культуры... (спокойнее) Это вам не анекдот про апельсинчики!</p><p class="ds-markdown-paragraph">ЕВГЕНЬЕВНА (мудро): - Лишь бы мы были живы и
+здоровы, да дети наши... А на такого профессионала всегда найдется другой
+аферист. Вот я лампочку принесла к гирлянде. Может отремонтируете?</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ (спокойно): - Ах, Евгеньевна, если бы в гирлянде только одна лампочка перегорела... Давайте так: вы что-нибудь придумаете с программой для праздника. Там, «Вечернюю зореньку» уговорите петь, арлекин пусть почудит возле елки. Наденьте на него костюм Снегурочки. И поэтов, поэтов не забудьте!... А с гирляндой я уже что-нибудь придумаю. Будем мигать. На весь район вместе замигаем... Согласны?</p><p class="ds-markdown-paragraph">ЕВГЕНЬЕВНА: - Согласна, согласна! Если уже мигать, то вместе со всем районом. Да и со всей Украиной вместе...</p><p class="ds-markdown-paragraph">КИРИЛЛ КИРИЛЛОВИЧ: - Вот именно! Спасибо. С
+праздником вас, Новогодним!</p><p class="ds-markdown-paragraph">Звучит песня «Костер» в исполнении «Машины времени».</p><p class="ds-markdown-paragraph"><strong>2008г.</strong></p>
+
+<p class="MsoNormal">&nbsp;</p>
+
+</div>
+        <div class="status" id="status">готово</div>
+        <div class="footer">
+          <button class="nav-btn" id="prevBtn">←</button>
+          <div class="page-counter" id="pageCounter">Страница 1 / 1</div>
+          <button class="nav-btn" id="nextBtn">→</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+<script>
+// ----- УНИКАЛЬНЫЙ КЛЮЧ ДЛЯ ЭТОГО ЭКЗЕМПЛЯРА (может быть переопределён при экспорте) -----
+let STORAGE_KEY = 'azure-notebook-export-1782030941272-u7ie0hsm';
+
+// ----- ВСТРОЕННОЕ СОСТОЯНИЕ (заполняется при экспорте) -----
+const EMBEDDED_STATE = {"language":"ru","current":0,"pages":["<!--[if gte mso 9]><xml>\n <w:WordDocument>\n  <w:View>Normal</w:View>\n  <w:Zoom>0</w:Zoom>\n  <w:PunctuationKerning/>\n  <w:ValidateAgainstSchemas/>\n  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>\n  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>\n  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>\n  <w:Compatibility>\n   <w:BreakWrappedTables/>\n   <w:SnapToGridInCell/>\n   <w:WrapTextWithPunct/>\n   <w:UseAsianBreakRules/>\n   <w:DontGrowAutofit/>\n  </w:Compatibility>\n  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>\n </w:WordDocument>\n</xml><![endif]--><!--[if gte mso 9]><xml>\n <w:LatentStyles DefLockedState=\"false\" LatentStyleCount=\"156\">\n </w:LatentStyles>\n</xml><![endif]--><!--[if gte mso 10]>\n<style>\n /* Style Definitions */\n table.MsoNormalTable\n\t{mso-style-name:\"Обычная таблица\";\n\tmso-tstyle-rowband-size:0;\n\tmso-tstyle-colband-size:0;\n\tmso-style-noshow:yes;\n\tmso-style-parent:\"\";\n\tmso-padding-alt:0cm 5.4pt 0cm 5.4pt;\n\tmso-para-margin:0cm;\n\tmso-para-margin-bottom:.0001pt;\n\tmso-pagination:widow-orphan;\n\tfont-size:10.0pt;\n\tfont-family:\"Times New Roman\";\n\tmso-ansi-language:#0400;\n\tmso-fareast-language:#0400;\n\tmso-bidi-language:#0400;}\n</style>\n<![endif]-->\n\n<p class=\"ds-markdown-paragraph\"><strong>ПОРТСИГАР ОТ КОПЕРФИЛЬДА</strong><br>\nрадиопьеса</p><p class=\"ds-markdown-paragraph\"><strong>Действующие лица:</strong></p><p class=\"ds-markdown-paragraph\" style=\"margin-left:36.0pt;text-indent:-18.0pt;\nmso-list:l0 level1 lfo1;tab-stops:list 36.0pt\"><span style=\"mso-list:Ignore\">1.<span style=\"font:7.0pt &quot;Times New Roman&quot;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n</span></span>Кирилл Кириллович Поплавский, заведующий районным\nотделом культуры. (голос творческий, тонкий, утомленный песнями)</p><p class=\"ds-markdown-paragraph\" style=\"margin-left:36.0pt;text-indent:-18.0pt;\nmso-list:l0 level1 lfo1;tab-stops:list 36.0pt\"><span style=\"mso-list:Ignore\">2.<span style=\"font:7.0pt &quot;Times New Roman&quot;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n</span></span>Коперфильд Володя, цирковой аферист. (голос молодой,\nактивный, веселый)</p><p class=\"ds-markdown-paragraph\" style=\"margin-left:36.0pt;text-indent:-18.0pt;\nmso-list:l0 level1 lfo1;tab-stops:list 36.0pt\"><span style=\"mso-list:Ignore\">3.<span style=\"font:7.0pt &quot;Times New Roman&quot;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n</span></span>Евгеньевна, заведующая районной библиотекой. (голос\nромантичной женщины в годах)</p><p class=\"ds-markdown-paragraph\" style=\"margin-left:36.0pt;text-indent:-18.0pt;\nmso-list:l0 level1 lfo1;tab-stops:list 36.0pt\"><span style=\"mso-list:Ignore\">4.<span style=\"font:7.0pt &quot;Times New Roman&quot;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n</span></span>Районный пожарник, Василий Андреевич, представитель\nместного МЧС. (голос любой сонный)</p><p class=\"ds-markdown-paragraph\" style=\"margin-left:36.0pt;text-indent:-18.0pt;\nmso-list:l0 level1 lfo1;tab-stops:list 36.0pt\"><span style=\"mso-list:Ignore\">5.<span style=\"font:7.0pt &quot;Times New Roman&quot;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n</span></span>Глава районной администрации, Семен Иванович. (голос\nбасистый, с хрипотцой)</p>\n<p class=\"ds-markdown-paragraph\"><strong>                           Актовый зал администрации</strong></p><p class=\"ds-markdown-paragraph\">Гомонит народ в актовом зале. Визжат мобильники\nразными мелодиями. Двигаются стулья, хлопают двери. Где-то вдалеке хохочет женщина, пищит микрофон...<br>\nЗвучит властный мужской голос главы районной администрации.</p><p class=\"ds-markdown-paragraph\">ГЛАВА АДМИНИСТРАЦИИ: - Все! Кончайте анекдоты! Начинаем\nработу! Евгеньевна, вы меня слышите? (Стучит карандашом по столу) Я понимаю, настроение праздничное, я тоже знаю анекдот про апельсинчики, но не так же открыто...</p><p class=\"ds-markdown-paragraph\">ЕВГЕНЬЕВНА (оправдывается веселый женский голос): – А что я, что я? Это все Поплавок. Ой, простите, Кирилл Кириллович (женщина несдерживаемо смеется) нас развлекает... истории... говорит...</p><p class=\"ds-markdown-paragraph\">ГЛАВА АДМИНИСТРАЦИИ (серьезно прекращает гомон)\n– Довольно! И выключите, пожалуйста, мобильники! Это же заседание комиссии, а не свинарник,...</p><p class=\"ds-markdown-paragraph\">Стихают звуки, поодиночке покашливают\nкурильщики.</p><p class=\"ds-markdown-paragraph\">ГЛАВА АДМИНИСТРАЦИИ (размеренно деловым тоном):\n- Начинаем работу комиссии. Председательствую я. Меня вы знаете, знакомиться не нужно. Повестка дня уже записана. Вопрос один: подготовка к празднованию Нового года. (пауза) Год, как всегда, оказался тяжелый, но развлекаться, как говорилфилософ, нам не запретишь...</p><p class=\"ds-markdown-paragraph\">ЕВГЕНЬЕВНА (осторожно): - Семен Иванович, прошу\nпрощения, еще раз про философа, какой философ?</p><p class=\"ds-markdown-paragraph\">ГЛАВА АДМИНИСТРАЦИИ (раздраженно): - Так, Евгеньевна, не докучайте своими библиотекарскими замашками! Сейчас у меня вы философом станете! Почему, я вас спрашиваю, у вас не горят гирлянды на здании?\nЗдание в центре района, библиотека! Храм, можно сказать, культуры... Должно\nмигать на весь, можно сказать, район...</p><p class=\"ds-markdown-paragraph\">ЕВГЕНЬЕВНА (обиженно): - Это не я. Это все Кирилл Кириллович. Одолжил гирлянду на праздник Николая и до сих пор не возвращает...</p><p class=\"ds-markdown-paragraph\">ГЛАВА АДМИНИСТРАЦИИ (с иронией): - Опять анекдоты от Поплавского? Так, Кирилл Кириллович? Вы, наш культурный «белый попугай», про гирляндочку, а не про апельсинчики рассказали бы. Где гирлянда?!</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (печально и серьезно): -\nНет... Семен Иванович, поверьте, уже нет... Балбесы эти, молодые – рок-группа наша из дома культуры... Николая водили... Ну, в общем, ни гирлянды, ни аппаратуры... Ремонтировать надо...</p><p class=\"ds-markdown-paragraph\">ГЛАВА АДМИНИСТРАЦИИ (сердито): - Так ремонтируйте! Или мне лампочки припаять? Что с елкой?</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (уверенно): - Ну, елку, мы, разумеется, зажжем!</p><p class=\"ds-markdown-paragraph\">РАЙОННЫЙ ПОЖАРНИК (сонно поправляет): – Не зажжем, а засветим!</p>\n<p class=\"ds-markdown-paragraph\">ГЛАВА АДМИНИСТРАЦИИ (с усмешкой): - Так, Василий Андреевич, вы, как пожарник, вовремя проснулись. Кириллу Кирилловичу все бы только жечь: библиотечную гирлянду сжег... теперь на елку замахивается...</p><p class=\"ds-markdown-paragraph\">Оживление голосов, слышны смешки, шепот. Пищит\nмобильник с мелодией «Золотые купола»...</p><p class=\"ds-markdown-paragraph\">ГЛАВА АДМИНИСТРАЦИИ (громко и раздраженно): - Я же сказал выключить мобильники! Вам «Золотые купола» спеть хочется? А думать о празднике, кто будет, Пушкин?...</p><p class=\"ds-markdown-paragraph\">ЕВГЕНЬЕВНА (замечает): - Пушкина перестали читать. Франко никто и не читал. Я думаю, у нас постоянный праздник...</p><p class=\"ds-markdown-paragraph\">ГЛАВА АДМИНИСТРАЦИИ (грубо): - А Вам, Евгеньевна, я думать запрещаю! Вы в своей библиотеке только тем и занимаетесь, только думаете! А надо работать, ясно?</p><p class=\"ds-markdown-paragraph\">ЕВГЕНЬЕВНА: - Ясно.</p><p class=\"ds-markdown-paragraph\">ГЛАВА АДМИНИСТРАЦИИ: - Как Божий день ясно, или как в Новогоднюю ночь? А дальше что, культурная программа есть? А, Кирилл Кириллович?</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (смущенно): Что дальше? Что дальше... Как всегда. Своими силами гулять будем! Самодеятельность такая: клоун и еще один арлекин чудачат, народный ансамбль «Вечерняя зоренька» поют. Потом\nдва поэта-пенсионера денег не берут...</p><p class=\"ds-markdown-paragraph\">Пауза. Стучит карандаш по столу «тук», «тук», «тук».</p><p class=\"ds-markdown-paragraph\">ГЛАВА АДМИНИСТРАЦИИ (размышляя): -Ну, если своими силами и без денег... (пауза) Елку точно сожжем! Может есть предложения?\n(пауза) Народ требует шоу! Год тяжелый. Одна радость – праздники\nРождественские! Как вы думаете, я прав? (пауза) А давайте пригласим на\nпраздники профессионалов? Район на тысячу гривен один раз в год не обеднеет, а праздник закроем на высоком уровне...</p><p class=\"ds-markdown-paragraph\">ЕВГЕНЬЕВНА (взволнованно): - Да где ж их взять, профессионалов? Мы же аграрный район! Сюда никто ехать не хочет! У нас, в библиотеке компьютер уже есть, а работать некому...</p><p class=\"ds-markdown-paragraph\">ГЛАВА АДМИНИСТРАЦИИ (решительно): - Здрасьте, Евгеньевна! Я вам про здравие, а вы мне про упокой! При чем тут ваш компьютер к елке? (иронично) Отдайте компьютер Кириллу Кирилловичу, он знает что с ним\nсделать!...</p><p class=\"ds-markdown-paragraph\">РАЙОННЫЙ ПОЖАРНИК (весело спросонья): - Хе! То что с гирляндой! Отдайте лучше в МЧС, по крайней мере не сгорит...</p><p class=\"ds-markdown-paragraph\">ГЛАВА АДМИНИСТРАЦИИ (строго): - Хватит уже болтать! С вами, Василий Андреевич, мы продолжим разговор о праздничных огнях и салютах, о газе, в конце концов, и о вкладе МЧС в общерайонный праздник! А библиотека и культура до свидания!</p>\n<p class=\"ds-markdown-paragraph\">Скрипят стулья, шаркают шаги.</p><p class=\"ds-markdown-paragraph\">ГЛАВА АДМИНИСТРАЦИИ (перекрикивая шум): - Значит так, Кирилл Кириллович, вы завтра едете в область, в филармонию, в цирк, куда угодно, и приглашаете на праздники профессиональных артистов! Ясно?</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (фатально): - Да ясно... Не ясно где деньги... взять. Эти же профессионалы, дорого стоят... До свидания!</p><p class=\"ds-markdown-paragraph\"><br></p><p class=\"ds-markdown-paragraph\">Грохот дверей. Слышны шаги по коридору.</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (шепотом, так чтобы никто его\nне услышал): - Скорее бы эти праздники состоялись, Господи! Нормальные люди в праздники отдыхают, а тут как не гирлянда горит, так филармонию надо привезти... (пауза) Доберусь до кабинета, включу музыку. Что-нибудь веселенькое послушаю. Устрою расслабуху...</p>\n<p class=\"ds-markdown-paragraph\"><strong>В кабинете Кирилла Кирилловича фоном\nзвучит песня «Костер» в исполнении «Машины времени».</strong></p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (без мелодии напевает\nречитативом): - Раз ночь темна, жгут едва-едва, и берегут, силы и дрова... Еще\nне все погасли краски дня, еще не жаль огня... И Бог хранит меня...</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (сам с собой вслух): - Вот песни раньше делали! Что то ретро! (декламирует) «Силы и дрова берегут и Бог хранит меня!» (пауза) Макаревичу, за эту песню, памятник надо поставить. А тут ищешь что-то родное, национальное, а имеем колядки и щедривки, щедривки и колядки. Разве что «Галю» спеть? (пауза) (неуверенно напевает) «Привязали Галю\nк сосне косами, подожгли сосну от верха до низа»... «Горит сосна горит, горит да полыхает»... А там и елка загорится... Лесной пожар какой-то. В нашей стране одним пожарникам весело...</p><p class=\"ds-markdown-paragraph\">Слышен неудержимый стук в дверь. Дверь открывается.</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД (обращается): - Можно войти? Кирилл Кириллович?</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ: (властно и в хорошемнастроении): - Да заходите уже... Заходите, как чудо, как песня... Вы, часом, не Новогоднее чудо? Потому что я в чудеса не верю.</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД (иронично): - Нет, я не чудо, но к чудесам имею непосредственное участие.</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ: - Так кто же вы?</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД: - Я Володя Коперфильд.</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (удивленно): Коперфильд? Тот самый? Тот что летает?</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД (весело): - Ну, не совсем тот. Вы вот, Поплавский. На двери написано. Это ж не значит, что вы тот Поплавский, что ого! А вы Поплавский поменьше, но тоже культурный и творческий... А я тоже Коперфильд, но Володя. Тоже, можно сказать, летаю...</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (смущенно): - Ага. Летаете? Крылья есть?</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД (объясняет): - Я профессиональный циркач. Артист легкого жанра...</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (радостно): - Так вы артист! Вы из филармонии?</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД (гордо) : - Можно сказать и так.  Филармонию, можно сказать, я отгудел. Вот, времена были! Теперь своим талантом помогаю создавать важным людям зрелища.</p>\n<p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (активно): - Это очень хорошо,\nчто вы из филармонии! Очень хорошо! У нас тут как раз проблемка с артистами. С профессиональными артистами! У нас елка горит...</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД (по-деловому): - Ну, еще не горит. Не спешите в событиях. Всему свое время! Время собирать и время поджигать! (пауза)\nНо если про елку, то я могу ее оригинально зажечь. Зрелище понравится и\nмалышам, и взрослым.</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (заверяя): - О, елку поджечь\nмы можем и своими яркими талантами! Только пожарник не разрешает. Нам бы организовать какую-нибудь развлекательную программу возле елки...</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД (решительно): - Запросто! Как говорит мой тезка Коперфильд: \"ноу проблем\"! Вот... Дайте мне две гривны.</p><p class=\"ds-markdown-paragraph\">Небольшая пауза.</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (сам себе): - Опять речь о деньгах... Эти профессионалы без денег жить не могут. Мир перевернулся с этими\nденьгами! Но ведь две гривны - не двести...</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (вслух): - Две так две! Вот вам две гривны.</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД (объясняя): - Это очень просто. Берем\nваши деньги и поджигаем их спичками. (Слышны звуки зажигания спички) Смотрите, вот так сжигаем жестокий капитал жизни. Вон как горит денежная проблема! Вон как горит фундамент буржуазной культуры! Вот так он превращается в духовный пепел! Последний вздох капитализма – погасшая искра, и все...</p><p class=\"ds-markdown-paragraph\">Пауза.</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (с интересом): И это все?</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД: - Все.</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (разочарованно): Это не интересно. Так и я умею. Верните две гривны!</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД (интригуя): - А что у вас в потайничке?! Что там у вас в потайничке? Позвольте мне просунуть руку. Вот так. Еще вот так! Ну, так просто: получите ваши две гривны! (пауза) Надо было бы, чтобы вы запомнили номер купюры, тогда сомнений не осталось бы никаких. Может\nповторим?</p>\n<p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (восхищенно): - Гениально! Это что-то подобное из моего детства, когда я был в цирке... Такого в нашем районе давненько не бывало! (переходит в веселое настроение и сарказм) А вот в потайник к главе нашей администрации, Семену Ивановичу, сможете залезть? Он в этом году продал трубу водопровода за миллион, а на культуру ни копейки...\nХа...</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД (уверенно): - Я к кому хотите в потайник залезу! Были бы деньги...</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (допытливо иронично): - А вы только деньги жжете? Может газеткой обойдемся?</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД (убедительно): - Какая газетка?! В моем репертуаре много оригинальных зрелищных трюков: «Прыжок в ничто», «Алло, телефоны не работают», «Золотой портсигар» и многие другие...</p><p class=\"ds-markdown-paragraph\">Небольшая пауза. Шуршат бумаги.</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (деловым тоном): - Ладно. Это интересно. Главное, что вы из филармонии! Семен Иванович будет доволен. Думаю, построим Новогодний праздник на ваших, так сказать, фокусах под елкой. Оденем\nвас Снегурочкой. Только в потайник к главе администрации залезать не надо! Это я пошутил. Надо сделать просто приятное, развлекательное, яркое шоу... А этот ваш «Золотой портсигар», что, действительно золотой?</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД (решительно): - Да я вам сейчас продемонстрирую. Только для этого две гривны мало. Надо две тысячи...</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (шепотом себе): - Опять\nденьги. Что то профессионалы, никогда о них не забывают! Да и мы не простачки. Сейчас я его обую.</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (вслух, предлагая): - Хо-ро-шо! Две тысячи у меня нет. А вот тысяча гривен выделена нам на проведение праздника есть! Только запомните – это ваш заработок, гонорар, так сказать! Если сожжете деньги, извиняйте, останетесь без зарплаты... (иронично улыбаясь) Да я думаю свои деньги вы жечь не будете, правда ведь?</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД (осторожно): - Конечно! Свои деньги\nтребуют пристального внимания. Что ж, давайте тысячу. (пауза) Понятно, это не та сумма, которая нужна для эффекта, но мы артисты, народ не амбициозный. Что перепадет с праздничного стола, тому и радуемся. Время такое. У людей денег на цирк нет, филармонии не ремонтируются... Вот, приходится, летать по районам и брать, что Бог пошлет.</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (считает): - Вот, восемьсот, девятьсот, девятьсот пятьдесят, дальше мельче: пять, десять, двадцать, девятьсот девяносто девять, тысяча! (пауза) Слушайте, Володя, выделите мне десятку на открытки? Вам эта десятка ни туда, ни сюда, а нам в культуре...</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД (серьезно): - Вот это уже нет, Кирилл Кириллович! Только не сейчас. Покажу номер, тогда и выделю, хоть пятьдесят! Давайте сюда деньги. Кладите в этот портсигар.</p><p class=\"ds-markdown-paragraph\">Слышно шуршание, металлический щелчок.</p><p class=\"ds-markdown-paragraph\">КОПЕРФИЛЬД (приказывая): - Включите, пожалуйста, музыку, какую-нибудь для озвучки, чтобы не сухо... Портсигар я кладу на край стола...</p>\n<p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (соглашаясь): - Это, сейчас, включу! Сухо не будет! (возится) У меня тут как раз песня Макаревича про дрова и там, ретро, что все отболит и мудрый ветер золу развеет без следа...</p><p class=\"ds-markdown-paragraph\">Звучит песня «Костер» «Машины времени». На фоне\nмузыки взрываются петарды. Стук падающих предметов, звон стекла. Опять\nвзрываются петарды, словно фильм о войне.</p>\n<p class=\"ds-markdown-paragraph\"><strong>В кабинете Кирилла Кирилловича стук в\nдверь. Шаги. Скрип дверей.</strong></p><p class=\"ds-markdown-paragraph\">ЕВГЕНЬЕВНА (тихо интересуется): – Кирилл Кириллович, вы живы? Что здесь было?</p><p class=\"ds-markdown-paragraph\">РАЙОННЫЙ ПОЖАРНИК (пробужденно и громко оценивая): - Да тут словно фейерверк кто-то устроил! Конфетти рассыпано! Петарды стреляли! А воняет как... Хоть топор вешай! Кирилл Кириллович, вы что гирлянду ремонтировали?</p><p class=\"ds-markdown-paragraph\">ЕВГЕНЬЕВНА (удивляется): - Такое впечатление, что наступило первое января после Новогодней ночи... Снежинок не хватает...</p><p class=\"ds-markdown-paragraph\">РАЙОННЫЙ ПОЖАРНИК: - Портрет главы Верховного совета разбился...</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (печально): - Этот портрет просто упал. Сам по себе упал. Я тут сам чуть не упал...</p>\n<p class=\"ds-markdown-paragraph\">РАЙОННЫЙ ПОЖАРНИК (спрашивает): - А что случилось? У вас кто-то стрелял?</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (раздраженно): - Да никто у меня не стрелял! Видите, это обыкновеннейшие петарды и хлопушки. Вы, Василий Андреевич, позвоните немедленно в милицию. Надо задержать одного артиста, пока\nдалеко не улетел... Профессионал говорит!</p><p class=\"ds-markdown-paragraph\">РАЙОННЫЙ ПОЖАРНИК (удивленно): - А разве вы не знаете? Уже с полчаса, как все телефоны не работают! Ремонтников уже вызвали...</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (гневно): - Вот, Коперфильд! И говорил же, что летун, и профессионал, и «Алло, телефоны не работают»...</p><p class=\"ds-markdown-paragraph\">ЕВГЕНЬЕВНА (интересуясь): - О чем вы, Кирилл Кириллович? И что это вы в руке мнете?</p>\n<p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (громко, в истерике): - Что, что! Портсигар! Пустой портсигар. Зо-ло-той! Я его только что купил за тысячу гривен. (пауза) Артист! Циркач легкого жанра - национальная зараза!</p><p class=\"ds-markdown-paragraph\">РАЙОННЫЙ ПОЖАРНИК (спокойно, погружаясь в\nсонливость): - Кирилл Кириллович, я дверь открою, пусть комната проветрится. У вас все в порядке с сигнализацией?... Но ведь и сигнализация не работает!</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (безнадежно): - Что ж тут поделаешь. Так, откройте, пожалуйста, дверь. Да идите себе... Дайте покой. (тихо вслух) И там, Василий Андреевич, не говорите никому, особенно главе...\nГлава еще от гирлянды не отошел...</p><p class=\"ds-markdown-paragraph\">Скрипят двери.</p>\n<p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (печально размышляя): - Вот так, Евгеньевна, никогда нам тут, в районе, не достичь профессионализма! Тянемся за городом, за большой культурой, хотим развлекаться на «высоком уровне», а за это платить надо!</p><p class=\"ds-markdown-paragraph\">ЕВГЕНЬЕВНА (сочувствуя): - Вас что, обманули? Кто-то обманул?</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ: - Не просто обманул, а в душу плюнул! Из филармонии он. Цаца большая! Две тысячи ему подавай! Я ж говорил,\nчто у нас всего тысяча и на нашем уровне клоуны бесплатно работают! А мне он... На высоком уровне, на высоком уровне...</p><p class=\"ds-markdown-paragraph\">ЕВГЕНЬЕВНА (ласково успокаивая): - Не переживайте так, Кирилл Кириллович. Я с нашим ансамблем «Вечерняя зоренька» переговорю. Что-нибудь придумаем к Новому году... (смущенно) Что с вами? Кирилл\nКириллович, что с вами?</p><p class=\"ds-markdown-paragraph\">Кирилл Кириллович начинает заливаться смехом.</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (сквозь смех): - Евгеньевна, не поверите! Этот «коперфильд» у меня из потайника депутатское удостоверение\nукрал... Представляете? Удостоверение депутата районного совета! Это ж только можно представить себе как, в каком-нибудь районе, Коперфильд будет представляться депутатом Поплавским... А то и министром культуры... (спокойнее) Это вам не анекдот про апельсинчики!</p><p class=\"ds-markdown-paragraph\">ЕВГЕНЬЕВНА (мудро): - Лишь бы мы были живы и\nздоровы, да дети наши... А на такого профессионала всегда найдется другой\nаферист. Вот я лампочку принесла к гирлянде. Может отремонтируете?</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ (спокойно): - Ах, Евгеньевна, если бы в гирлянде только одна лампочка перегорела... Давайте так: вы что-нибудь придумаете с программой для праздника. Там, «Вечернюю зореньку» уговорите петь, арлекин пусть почудит возле елки. Наденьте на него костюм Снегурочки. И поэтов, поэтов не забудьте!... А с гирляндой я уже что-нибудь придумаю. Будем мигать. На весь район вместе замигаем... Согласны?</p><p class=\"ds-markdown-paragraph\">ЕВГЕНЬЕВНА: - Согласна, согласна! Если уже мигать, то вместе со всем районом. Да и со всей Украиной вместе...</p><p class=\"ds-markdown-paragraph\">КИРИЛЛ КИРИЛЛОВИЧ: - Вот именно! Спасибо. С\nпраздником вас, Новогодним!</p><p class=\"ds-markdown-paragraph\">Звучит песня «Костер» в исполнении «Машины времени».</p><p class=\"ds-markdown-paragraph\"><strong>2008г.</strong></p>\n\n<p class=\"MsoNormal\">&nbsp;</p>\n\n"]};
+
+(function(){
+  const editor = document.getElementById('editor');
+  const counter = document.getElementById('pageCounter');
+  const status = document.getElementById('status');
+  const langSel = document.getElementById('language');
+  const importFile = document.getElementById('importFile');
+  const imageUpload = document.getElementById('imageUpload');
+
+  const dict = {
+    ru: { placeholder:'Пишите здесь...', page:'Страница', of:'/', saved:'сохранено', ready:'готово', emptyConfirm:'Удалить эту страницу?', clearConfirm:'Очистить всё содержимое страницы?', lastPage:'Это последняя страница.', firstPage:'Это первая страница.', imgTooBig:'Изображение слишком большое (макс. 500 КБ после сжатия)', imgError:'Ошибка обработки изображения' },
+    en: { placeholder:'Write here...', page:'Page', of:'/', saved:'saved', ready:'ready', emptyConfirm:'Delete this page?', clearConfirm:'Clear all content on this page?', lastPage:'This is the last page.', firstPage:'This is the first page.', imgTooBig:'Image too large (max 500 KB after compression)', imgError:'Image processing error' },
+    ua: { placeholder:'Пишіть тут...', page:'Сторінка', of:'/', saved:'збережено', ready:'готово', emptyConfirm:'Видалити цю сторінку?', clearConfirm:'Очистити весь вміст сторінки?', lastPage:'Це остання сторінка.', firstPage:'Це перша сторінка.', imgTooBig:'Зображення занадто велике (макс. 500 КБ після стиснення)', imgError:'Помилка обробки зображення' }
+  };
+
+  let state = { language: 'ru', current: 0, pages: [''] };
+  let saveTimer = null;
+
+  function load(){
+    // 1. Пытаемся загрузить из localStorage по текущему STORAGE_KEY
+    let stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        state = JSON.parse(stored);
+      } catch(e) { /* ignore */ }
+    } 
+    // 2. Если нет сохранения, но есть встроенное состояние (экспортированный файл) – используем его
+    else if (EMBEDDED_STATE && typeof EMBEDDED_STATE === 'object') {
+      state = EMBEDDED_STATE;
+      // Сохраняем в localStorage для будущих сессий этого же файла
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } 
+    // 3. Иначе создаём пустое состояние по умолчанию
+    else {
+      state = { language: 'ru', current: 0, pages: [''] };
+    }
+
+    // Гарантируем валидность
+    if (!state.pages || !state.pages.length) state.pages = [''];
+    if (state.current == null || state.current < 0) state.current = 0;
+    if (state.current >= state.pages.length) state.current = state.pages.length - 1;
+    if (!state.language) state.language = 'ru';
+
+    langSel.value = state.language;
+    render();
+  }
+
+  function persist(){
+    state.pages[state.current] = editor.innerHTML;
+    state.language = langSel.value;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    flash(dict[state.language].saved);
+  }
+
+  function softPersist(){
+    state.pages[state.current] = editor.innerHTML;
+    state.language = langSel.value;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function render(){
+    const lang = dict[state.language] || dict.ru;
+    editor.innerHTML = state.pages[state.current] || '';
+    editor.setAttribute('data-placeholder', lang.placeholder);
+    counter.textContent = `${lang.page} ${state.current + 1} ${lang.of} ${state.pages.length}`;
+    status.textContent = lang.ready;
+  }
+
+  function flash(text){
+    status.textContent = text;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => { status.textContent = dict[state.language].ready; }, 900);
+  }
+
+  function changePage(nextIndex){
+    state.pages[state.current] = editor.innerHTML;
+    state.language = langSel.value;
+    if (nextIndex < 0) { flash(dict[state.language].firstPage); return; }
+    if (nextIndex >= state.pages.length) { flash(dict[state.language].lastPage); return; }
+    state.current = nextIndex;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    render();
+    editor.focus();
+  }
+
+  function compressAndInsertImage(file) {
+    const lang = dict[state.language];
+    if (!file.type.startsWith('image/')) {
+      flash(lang.imgError);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        let width = img.width;
+        let height = img.height;
+        const maxSize = 400;
+        if (width > maxSize || height > maxSize) {
+          if (width > height) {
+            height = (height / width) * maxSize;
+            width = maxSize;
+          } else {
+            width = (width / height) * maxSize;
+            height = maxSize;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        let quality = 0.7;
+        let mime = 'image/jpeg';
+        if (file.type === 'image/png') {
+          mime = 'image/png';
+          quality = 0.85;
+        } else if (file.type === 'image/webp') {
+          mime = 'image/webp';
+        } else {
+          mime = 'image/jpeg';
+        }
+        let base64 = canvas.toDataURL(mime, quality);
+        const estimatedSize = base64.length * 0.75;
+        if (estimatedSize > 500 * 1024) {
+          quality = 0.5;
+          base64 = canvas.toDataURL(mime, quality);
+          const newEstimatedSize = base64.length * 0.75;
+          if (newEstimatedSize > 550 * 1024) {
+            flash(lang.imgTooBig);
+            return;
+          }
+        }
+        editor.focus();
+        const html = `<img src="${base64}" alt="illustration" style="max-width:100%; height:auto; border-radius:12px; margin:8px 0;" />`;
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          range.deleteContents();
+          const frag = range.createContextualFragment(html);
+          range.insertNode(frag);
+          range.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } else {
+          editor.insertAdjacentHTML('beforeend', html);
+        }
+        softPersist();
+        flash(dict[state.language].saved);
+      };
+      img.onerror = function() { flash(lang.imgError); };
+      img.src = e.target.result;
+    };
+    reader.onerror = function() { flash(lang.imgError); };
+    reader.readAsDataURL(file);
+  }
+
+  function clearCurrentPage() {
+    const lang = dict[state.language];
+    if (confirm(lang.clearConfirm)) {
+      editor.innerHTML = '';
+      softPersist();
+      render();
+      editor.focus();
+      flash(lang.saved);
+    }
+  }
+
+  // --- КНОПКИ ---
+  document.getElementById('imageBtn').onclick = () => imageUpload.click();
+  imageUpload.addEventListener('change', (e) => {
+    if (e.target.files[0]) compressAndInsertImage(e.target.files[0]);
+    imageUpload.value = '';
+  });
+
+  editor.addEventListener('dragover', (e) => e.preventDefault());
+  editor.addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.files[0]?.type.startsWith('image/')) {
+      compressAndInsertImage(e.dataTransfer.files[0]);
+    }
+  });
+
+  editor.addEventListener('input', () => {
+    softPersist();
+    flash(dict[state.language].saved);
+  });
+
+  langSel.addEventListener('change', () => {
+    state.language = langSel.value;
+    softPersist();
+    render();
+  });
+
+  document.getElementById('saveBtn').onclick = persist;
+  document.getElementById('prevBtn').onclick = () => changePage(state.current - 1);
+  document.getElementById('nextBtn').onclick = () => changePage(state.current + 1);
+  document.getElementById('clearBtn').onclick = clearCurrentPage;
+
+  document.getElementById('newBtn').onclick = () => {
+    state.pages[state.current] = editor.innerHTML;
+    state.language = langSel.value;
+    state.pages.splice(state.current + 1, 0, '');
+    state.current += 1;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    render();
+    editor.focus();
+  };
+
+  document.getElementById('deleteBtn').onclick = () => {
+    const lang = dict[state.language];
+    if (state.pages.length === 1) {
+      if (confirm(lang.clearConfirm)) {
+        editor.innerHTML = '';
+        softPersist();
+        render();
+        flash(lang.saved);
+      }
+      return;
+    }
+    if (!confirm(lang.emptyConfirm)) return;
+    state.pages.splice(state.current, 1);
+    if (state.current >= state.pages.length) state.current = state.pages.length - 1;
+    softPersist();
+    render();
+  };
+
+  document.getElementById('copyBtn').onclick = async () => {
+    try {
+      const sel = window.getSelection().toString();
+      await navigator.clipboard.writeText(sel || editor.innerText);
+      flash('copy');
+    } catch(e) { document.execCommand('copy'); flash('copy'); }
+  };
+
+  document.getElementById('pasteBtn').onclick = async () => {
+    editor.focus();
+    try {
+      const txt = await navigator.clipboard.readText();
+      document.execCommand('insertText', false, txt);
+    } catch(e) { flash('Ctrl+V'); }
+  };
+
+  // ----- ЭКСПОРТ (с уникальным ключом) -----
+  document.getElementById('exportBtn').onclick = () => {
+    softPersist(); // сохраняем текущее состояние в localStorage
+    const savedState = JSON.parse(JSON.stringify(state));
+    // Генерируем новый уникальный ключ для экспортируемого файла
+    const newKey = 'azure-notebook-export-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8);
+    // Получаем текущий HTML
+    let htmlContent = document.documentElement.outerHTML;
+    // Заменяем строку с объявлением STORAGE_KEY на новую (с уникальным ключом)
+    htmlContent = htmlContent.replace(
+      /let STORAGE_KEY = 'azure-notebook-v889397';/,
+      `let STORAGE_KEY = '${newKey}';`
+    );
+    // Заменяем встроенное состояние на текущее
+    htmlContent = htmlContent.replace(
+      /const EMBEDDED_STATE = .*?;\n/,
+      `const EMBEDDED_STATE = ${JSON.stringify(savedState)};\n`
+    );
+    // Создаём файл и скачиваем
+    const blob = new Blob(['<!DOCTYPE html>\n' + htmlContent], {type:'text/html'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Синяя_тетрадь_сохранение.html';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+  };
+
+  // ----- ИМПОРТ -----
+  document.getElementById('importBtn').onclick = () => importFile.click();
+  importFile.addEventListener('change', () => {
+    const file = importFile.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        let incoming;
+        const text = String(reader.result || '');
+        // Пытаемся извлечь EMBEDDED_STATE из HTML
+        const match = text.match(/const EMBEDDED_STATE = (.*?);\n/);
+        if (match) {
+          incoming = JSON.parse(match[1]);
+        } else {
+          // Или читаем как JSON
+          const data = JSON.parse(text);
+          incoming = data.state || data;
+        }
+        if (incoming.pages && Array.isArray(incoming.pages)) {
+          state = incoming;
+          if (!state.language) state.language = 'ru';
+          if (state.current == null) state.current = 0;
+          softPersist(); // сохраняем под текущим STORAGE_KEY
+          langSel.value = state.language;
+          render();
+        }
+      } catch(e) { alert('Import error'); }
+    };
+    reader.readAsText(file);
+    importFile.value = '';
+  });
+
+  window.addEventListener('beforeunload', softPersist);
+  load();
+})();
+</script>
+
+</body><div id="immersive-translate-popup" style="all: initial"></div></html>
