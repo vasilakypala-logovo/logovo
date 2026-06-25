@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>БУКИНИСТ НЕКСА</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050403;font-family:Georgia,'Times New Roman',serif;color:#f0d28a}body{user-select:none}.scene{position:relative;width:100vw;height:100vh;background:url('fonpolka.png') center center/cover no-repeat}.velvet-field{position:absolute;left:12.5%;top:11.8%;width:73.8%;height:69.4%;}.book-grid{position:absolute;inset:0;padding:2.1vw 2.5vw;display:grid;grid-template-columns:repeat(8, minmax(72px, 1fr));grid-auto-rows:minmax(178px, 20vh);gap:1.25vw 1.15vw;align-content:start}.book-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;animation:appear .36s ease-out both;cursor:pointer;filter:drop-shadow(0 12px 15px rgba(0,0,0,.72))}.book-card:hover .cover{transform:translateY(-4px) scale(1.035);filter:brightness(1.13) drop-shadow(0 0 12px rgba(218,174,84,.35))}.cover{width:min(7.4vw,98px);max-height:13.2vh;object-fit:contain;transition:.22s}.plaque{margin-top:.65vh;min-width:min(8.7vw,125px);height:2.65vh;min-height:22px;padding:.18vh .6vw;border-radius:6px;background:linear-gradient(180deg,#b8843e 0%,#6c3d18 48%,#c0924e 100%);border:1px solid rgba(255,214,139,.55);box-shadow:inset 0 1px 3px rgba(255,230,160,.35),inset 0 -2px 5px rgba(0,0,0,.55),0 4px 7px rgba(0,0,0,.5);color:#241103;text-align:center;font-size:clamp(10px,.82vw,14px);line-height:2.1vh;letter-spacing:.04em;text-transform:uppercase;text-shadow:0 1px 0 rgba(255,234,168,.24);outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.plaque:empty:after{content:''}.balls{position:absolute;left:25.6%;bottom:4.8%;display:flex;gap:2.75vw;align-items:center}.ball{width:clamp(30px,3.1vw,52px);height:clamp(30px,3.1vw,52px);border-radius:50%;border:1px solid rgba(250,222,154,.55);cursor:pointer;box-shadow:inset -10px -12px 18px rgba(0,0,0,.72),inset 7px 6px 12px rgba(255,255,255,.28),0 8px 12px rgba(0,0,0,.7),0 0 9px rgba(224,177,88,.18);position:relative;transition:.18s}.ball:before{content:'';position:absolute;left:22%;top:16%;width:28%;height:22%;border-radius:50%;background:rgba(255,255,255,.72);filter:blur(1px)}.ball:hover{transform:translateY(-4px) scale(1.06);box-shadow:inset -10px -12px 18px rgba(0,0,0,.72),inset 7px 6px 12px rgba(255,255,255,.31),0 11px 16px rgba(0,0,0,.78),0 0 18px rgba(244,203,111,.35)}.b1{background:radial-gradient(circle at 33% 26%,#f9f3db 0 10%,#d9b769 19%,#5f3414 61%,#170a05 100%)}.b2{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#a74328 20%,#3b0d0d 66%,#120404 100%)}.b3{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#294f84 21%,#09182b 68%,#04070d 100%)}.b4{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#315b36 21%,#0b2011 68%,#030804 100%)}.b5{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#8a7224 21%,#302305 68%,#090601 100%)}.hint{position:absolute;right:3.5%;bottom:2.5%;font-size:11px;color:rgba(218,190,130,.55);letter-spacing:.05em}.flash{position:absolute;left:50%;top:9%;transform:translateX(-50%);padding:9px 18px;border-radius:999px;background:rgba(8,6,4,.72);border:1px solid rgba(205,159,72,.35);color:#e6c477;font-size:14px;opacity:0;pointer-events:none;transition:.35s}.flash.show{opacity:1}@keyframes appear{from{opacity:0;transform:translateY(18px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:900px){.book-grid{grid-template-columns:repeat(6,1fr);grid-auto-rows:minmax(150px,19vh)}.cover{width:11vw}.balls{left:18%;gap:3.4vw}.plaque{min-width:12vw}.hint{display:none}}
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="velvet-field"><div id="bookGrid" class="book-grid"></div></div>
+  <div class="balls" aria-label="выбор иконок">
+    <button class="ball b1" data-icon="001.png" title="Поставить иконку 001"></button>
+    <button class="ball b2" data-icon="002.png" title="Поставить иконку 002"></button>
+    <button class="ball b3" data-icon="003.png" title="Поставить иконку 003"></button>
+    <button class="ball b4" data-icon="004.png" title="Поставить иконку 004"></button>
+    <button class="ball b5" data-icon="005.png" title="Поставить иконку 005"></button>
+  </div>
+  <div id="flash" class="flash"></div>
+  <div class="hint">двойной клик по табличке — вписать книгу</div>
+</div>
+<script>
+const BOOK_FOLDER = 'bookinist/';
+const STORAGE_KEY = 'nex_bookinist_shelf_v2';
+const MAX_BOOKS = 40;
+const grid = document.getElementById('bookGrid');
+const flash = document.getElementById('flash');
+let shelf = loadShelf();
+
+function loadShelf(){
+  try{return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];}catch(e){return []}
+}
+function saveShelf(){localStorage.setItem(STORAGE_KEY, JSON.stringify(shelf));}
+function message(t){flash.textContent=t;flash.classList.add('show');setTimeout(()=>flash.classList.remove('show'),1500)}
+
+function addBook(icon){
+  if(shelf.length >= MAX_BOOKS){ message('Витрина заполнена'); return; }
+  shelf.push({icon, title:'', file:''});
+  saveShelf();
+  render();
+}
+
+function render(){
+  grid.innerHTML='';
+  shelf.forEach((item, index)=>{
+    const card=document.createElement('div');
+    card.className='book-card';
+    card.title='Клик — открыть книгу. Двойной клик по табличке — вписать название и файл.';
+
+    const img=document.createElement('img');
+    img.className='cover';
+    img.src=BOOK_FOLDER + item.icon;
+    img.alt='book icon';
+
+    const plaque=document.createElement('div');
+    plaque.className='plaque';
+    plaque.textContent=item.title || '';
+
+    card.addEventListener('click',()=>{
+      if(!item.file){
+        message('Файл книги не указан');
+        return;
+      }
+      window.open(BOOK_FOLDER + item.file, '_blank');
+    });
+
+    plaque.addEventListener('dblclick',(ev)=>{
+      ev.stopPropagation();
+      const title = prompt('Текст медной таблички:', item.title || '');
+      if(title === null) return;
+      const file = prompt('Имя файла книги в папке bookinist, например GALALAY_EN.exe:', item.file || '');
+      if(file === null) return;
+      shelf[index].title = title.trim();
+      shelf[index].file = file.trim();
+      saveShelf();
+      render();
+    });
+
+    card.addEventListener('contextmenu',(ev)=>{
+      ev.preventDefault();
+      if(confirm('Убрать эту книгу с витрины?')){
+        shelf.splice(index,1); saveShelf(); render();
+      }
+    });
+
+    card.appendChild(img);
+    card.appendChild(plaque);
+    grid.appendChild(card);
+  });
+}
+
+document.querySelectorAll('.ball').forEach(btn=>{
+  btn.addEventListener('click',()=>addBook(btn.dataset.icon));
+});
+
+render();
+</script>
+</body>
+</html>
