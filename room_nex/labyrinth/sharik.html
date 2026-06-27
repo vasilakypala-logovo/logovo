@@ -1,0 +1,174 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Корона</title>
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle at center, #0a0a0a, #000);
+      overflow: hidden;
+      height: 100vh;
+    }
+    canvas {
+      display: block;
+    }
+    #exitMsg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: rgba(180, 220, 255, 0);
+      font-family: Arial, sans-serif;
+      font-size: 22px;
+      text-align: center;
+      pointer-events: none;
+      transition: opacity 2s ease, color 1.5s ease;
+      cursor: default;
+      user-select: none;
+      background: transparent;
+      padding: 18px 28px;
+      border-radius: 40px;
+      border: 1px solid rgba(180, 220, 255, 0);
+      transition: all 2s ease;
+      text-shadow: 0 0 10px rgba(120, 180, 255, 0);
+    }
+    #exitMsg.show {
+      pointer-events: auto;
+      cursor: pointer;
+      color: rgba(180, 220, 255, 0.95);
+      border-color: rgba(180, 220, 255, 0.15);
+      text-shadow: 0 0 20px rgba(120, 180, 255, 0.3);
+    }
+    #exitMsg.show:hover {
+      background: rgba(120, 180, 255, 0.05);
+      border-color: rgba(180, 220, 255, 0.4);
+      transform: translate(-50%, -50%) scale(1.02);
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+<div id="exitMsg">Надоело смотреть? Покинь территорию!</div>
+
+<script>
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const exitMsg = document.getElementById('exitMsg');
+
+  resize();
+  window.addEventListener('resize', resize);
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  let pulses = [];
+  let time = 0;
+  let startTime = Date.now();
+  let messageShown = false;
+  let linkReady = false;
+
+  // —————— переход в лабиринт только по клику после появления ——————
+  exitMsg.addEventListener('click', function(e) {
+    if (!linkReady) return;
+    window.location.href = 'labyrinth.html';
+  });
+
+  function createPulse(x, y) {
+    pulses.push({
+      x,
+      y,
+      radius: 0,
+      alpha: 1,
+      speed: 0.8 + Math.random() * 1.5
+    });
+  }
+
+  function randomPulse() {
+    let baseZone = Math.random() < 0.7;
+    let x, y;
+    if (baseZone) {
+      x = canvas.width / 2 + (Math.random() - 0.5) * 200;
+      y = canvas.height / 2 + (Math.random() - 0.5) * 200;
+    } else {
+      x = Math.random() * canvas.width;
+      y = Math.random() * canvas.height;
+    }
+    createPulse(x, y);
+  }
+
+  function showExitMessage() {
+    if (messageShown) return;
+    messageShown = true;
+
+    // плавное появление надписи
+    setTimeout(() => {
+      exitMsg.classList.add('show');
+      // надпись становится кликабельной только через 1.5 сек после появления
+      setTimeout(() => {
+        linkReady = true;
+      }, 1500);
+    }, 500);
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    time += 0.01;
+
+    ctx.fillStyle = "rgba(0,0,0,0.08)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    let chaos = 0.02 + time * 0.002;
+    if (Math.random() < chaos) {
+      randomPulse();
+    }
+
+    for (let i = pulses.length - 1; i >= 0; i--) {
+      let p = pulses[i];
+      p.radius += p.speed;
+      p.alpha -= 0.005;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(120,180,255,${p.alpha})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius + 3, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(180,220,255,${p.alpha * 0.5})`;
+      ctx.stroke();
+
+      if (p.alpha <= 0) {
+        pulses.splice(i, 1);
+      }
+    }
+
+    let breath = 20 + Math.sin(time * 2) * 10;
+    let gradient = ctx.createRadialGradient(
+      canvas.width / 2,
+      canvas.height / 2,
+      0,
+      canvas.width / 2,
+      canvas.height / 2,
+      200 + breath
+    );
+    gradient.addColorStop(0, "rgba(100,150,255,0.08)");
+    gradient.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // через ~3 минуты появляется "граница территории"
+    if (Date.now() - startTime > 180000) {
+      showExitMessage();
+    }
+  }
+
+  animate();
+</script>
+
+</body>
+</html>
