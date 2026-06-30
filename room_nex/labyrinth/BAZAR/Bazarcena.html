@@ -477,12 +477,22 @@
 
 <script>
 // ============================================
-//  НАСТРОЙКИ РЕПОЗИТОРИЯ — ЗАМЕНИ НА СВОИ!
+//  НАСТРОЙКИ (ТВОИ ДАННЫЕ)
 // ============================================
-const REPO_OWNER = "ТВОЙ_НИК";          // например "nexus"
-const REPO_NAME = "ТВОЙ_РЕПОЗИТОРИЙ";   // например "bazar"
-const FILE_PATH = "prices.json";         // файл для хранения данных
-const GITHUB_TOKEN = "ТВОЙ_ТОКЕН";       // личный токен доступа
+const REPO_OWNER = "vasilakypala-logovo";
+const REPO_NAME = "logovo";
+const FILE_PATH = "prices.json";
+
+// Токен берем из localStorage (сохраняется в телефоне)
+let GITHUB_TOKEN = localStorage.getItem('github_token');
+
+// Если токена нет — просим ввести
+if (!GITHUB_TOKEN) {
+    GITHUB_TOKEN = prompt('🔑 Введите токен GitHub:');
+    if (GITHUB_TOKEN) {
+        localStorage.setItem('github_token', GITHUB_TOKEN);
+    }
+}
 
 // ============================================
 
@@ -509,7 +519,7 @@ let allProducts = ["МЕД", "КАРТОШКА", "САЛО", "МЯКИШ", "КА
 let pricesData = {};
 let currentProduct = null;
 let editingCity = null;
-let fileSha = null; // для обновления файла
+let fileSha = null;
 
 // ==================== РАБОТА С GITHUB ====================
 
@@ -535,10 +545,8 @@ async function loadFromGitHub() {
             if (parsed.products) allProducts = parsed.products;
             if (parsed.prices) pricesData = parsed.prices;
             
-            // Кешируем
             localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
         } else if (resp.status === 404) {
-            // Файла нет — создадим
             await saveToGitHub(true);
         } else {
             throw new Error('Ошибка загрузки');
@@ -546,7 +554,6 @@ async function loadFromGitHub() {
         return true;
     } catch (e) {
         console.error('Ошибка загрузки:', e);
-        // Пробуем кеш
         try {
             const cache = JSON.parse(localStorage.getItem('priceCache'));
             if (cache) {
@@ -578,11 +585,10 @@ async function saveToGitHub(create = false) {
             payload.sha = fileSha;
         }
         
-        const method = create ? 'PUT' : 'PUT';
         const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
         
         const resp = await fetch(url, {
-            method: method,
+            method: 'PUT',
             headers: {
                 'Authorization': `token ${GITHUB_TOKEN}`,
                 'Content-Type': 'application/json',
@@ -596,7 +602,6 @@ async function saveToGitHub(create = false) {
         const result = await resp.json();
         fileSha = result.content.sha;
         
-        // Обновляем кеш
         localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
         return true;
     } catch (e) {
@@ -615,15 +620,11 @@ function hasAnyPrices(city) {
     return pricesData[city] && Object.keys(pricesData[city]).length > 0;
 }
 
-// ==================== ДАТА ====================
-
 function updateDateDisplay() {
     const now = new Date();
     document.getElementById('dayNumber').textContent = now.getDate();
     document.getElementById('monthName').textContent = MONTHS_UA[now.getMonth()];
 }
-
-// ==================== ОТРИСОВКА ====================
 
 function renderPrices() {
     document.querySelectorAll('.price').forEach(el => el.remove());
@@ -693,8 +694,6 @@ function buildCityList() {
     });
 }
 
-// ==================== МОДАЛЬНЫЕ ОКНА ====================
-
 function openModal(id) {
     document.getElementById(id).classList.add('active');
 }
@@ -711,8 +710,6 @@ function openCitySelector() {
     buildCityList();
     openModal('modalCity');
 }
-
-// ==================== РЕДАКТОР ====================
 
 function openPriceEditor(city) {
     editingCity = city;
@@ -815,10 +812,9 @@ async function savePrices() {
         }
     });
     
-    // Сохраняем в GitHub
     const ok = await saveToGitHub();
     if (!ok) {
-        alert('❌ Не удалось сохранить. Проверь настройки репозитория и токен.');
+        alert('❌ Не удалось сохранить. Проверь настройки.');
         return;
     }
     
@@ -828,8 +824,6 @@ async function savePrices() {
     buildCityList();
     alert('✅ Цены сохранены в репозитории!');
 }
-
-// ==================== ПРОВЕРКА КОДА ====================
 
 function checkCode() {
     const input = document.getElementById('codeInput');
@@ -847,9 +841,13 @@ function checkCode() {
     }
 }
 
-// ==================== ИНИЦИАЛИЗАЦИЯ ====================
-
 async function init() {
+    // Проверяем, есть ли токен
+    if (!GITHUB_TOKEN) {
+        alert('❌ Нет токена! Перезагрузи страницу и введи токен.');
+        return;
+    }
+    
     await loadFromGitHub();
     
     updateDateDisplay();
@@ -885,4 +883,4 @@ async function init() {
 init();
 </script>
 </body>
-</html>﻿
+</html>
