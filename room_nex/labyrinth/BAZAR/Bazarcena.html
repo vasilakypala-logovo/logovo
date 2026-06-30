@@ -486,12 +486,9 @@ const FILE_PATH = "prices.json";
 // Токен берем из localStorage (сохраняется в телефоне)
 let GITHUB_TOKEN = localStorage.getItem('github_token');
 
-// Если токена нет — просим ввести
+// Если токена нет — НЕ просим, просто работаем в режиме "только чтение"
 if (!GITHUB_TOKEN) {
-    GITHUB_TOKEN = prompt('🔑 Введите токен GitHub:');
-    if (GITHUB_TOKEN) {
-        localStorage.setItem('github_token', GITHUB_TOKEN);
-    }
+    console.log('🔑 Токен не найден. Работаем в режиме "только чтение".');
 }
 
 // ============================================
@@ -547,7 +544,12 @@ async function loadFromGitHub() {
             
             localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
         } else if (resp.status === 404) {
-            await saveToGitHub(true);
+            // Если файла нет — создаем (только если есть токен)
+            if (GITHUB_TOKEN) {
+                await saveToGitHub(true);
+            } else {
+                alert('❌ Нет токена! Цены не загружены.');
+            }
         } else {
             throw new Error('Ошибка загрузки');
         }
@@ -794,6 +796,12 @@ function deleteProduct(product) {
 }
 
 async function savePrices() {
+    // Проверяем, есть ли токен
+    if (!GITHUB_TOKEN) {
+        alert('❌ Для редактирования цен нужен токен! Обратись к администратору.');
+        return;
+    }
+    
     if (!editingCity) return;
     
     const inputs = document.querySelectorAll('#productList .product-row input[type="number"]');
@@ -814,7 +822,7 @@ async function savePrices() {
     
     const ok = await saveToGitHub();
     if (!ok) {
-        alert('❌ Не удалось сохранить. Проверь настройки.');
+        alert('❌ Не удалось сохранить. Проверь токен.');
         return;
     }
     
@@ -842,12 +850,6 @@ function checkCode() {
 }
 
 async function init() {
-    // Проверяем, есть ли токен
-    if (!GITHUB_TOKEN) {
-        alert('❌ Нет токена! Перезагрузи страницу и введи токен.');
-        return;
-    }
-    
     await loadFromGitHub();
     
     updateDateDisplay();
