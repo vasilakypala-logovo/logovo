@@ -1,142 +1,41 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Плеер Некса</title>
-<style>
-body{
-    margin:0;
-    background:#111;
-    color:#e8e8e8;
-    font-family:Segoe UI,Arial,sans-serif;
-}
-.wrap{
-    max-width:900px;
-    margin:20px auto;
-    padding:20px;
-}
-h1{
-    text-align:center;
-}
-.panel{
-    border:1px solid #444;
-    border-radius:12px;
-    padding:15px;
-}
-button{
-    padding:8px 14px;
-    margin:4px;
-    cursor:pointer;
-}
-#playlist{
-    margin-top:15px;
-    max-height:450px;
-    overflow:auto;
-    border:1px solid #333;
-    border-radius:8px;
-}
-.track{
-    padding:8px 12px;
-    border-bottom:1px solid #222;
-    cursor:pointer;
-}
-.track:hover{
-    background:#222;
-}
-.active{
-    background:#2d4d2d;
-}
-.now{
-    margin:10px 0;
-    font-weight:bold;
-}
-audio{
-    width:100%;
-    margin-top:10px;
-}
-</style>
-</head>
-<body>
-<div class="wrap">
-<h1>Плеер Некса</h1>
+  <meta charset="UTF-8">
+  <title>Лабиринт Некса</title>
 
-<div class="panel">
-<input type="file" id="files" accept=".mp3,audio/*" multiple>
-<div class="now">Ничего не выбрано</div>
-<audio id="player" controls></audio>
-<div id="playlist"></div>
-</div>
-
-<p>
-Как пользоваться:<br>
-1. Положите HTML рядом где угодно.<br>
-2. Нажмите «Выбрать файлы».<br>
-3. Выделите все MP3 из нужной папки.<br>
-4. Плеер будет играть их по очереди автоматически.
-</p>
-
-</div>
-
-<script>
-const filesInput=document.getElementById('files');
-const playlist=document.getElementById('playlist');
-const player=document.getElementById('player');
-const now=document.querySelector('.now');
-
-let tracks=[];
-let current=0;
-
-function playTrack(index){
-    if(!tracks.length) return;
-
-    current=index;
-    player.src=tracks[index].url;
-    player.play();
-
-    now.textContent='Сейчас играет: '+tracks[index].name;
-
-    document.querySelectorAll('.track').forEach((el,i)=>{
-        el.classList.toggle('active',i===index);
-    });
-}
-
-filesInput.addEventListener('change',()=>{
-    playlist.innerHTML='';
-    tracks=[];
-
-    [...filesInput.files]
-        .sort((a,b)=>a.name.localeCompare(b.name,'ru'))
-        .forEach((file,i)=>{
-            const url=URL.createObjectURL(file);
-
-            tracks.push({
-                name:file.name,
-                url:url
-            });
-
-            const div=document.createElement('div');
-            div.className='track';
-            div.textContent=file.name;
-
-            div.onclick=()=>playTrack(i);
-
-            playlist.appendChild(div);
-        });
-
-    if(tracks.length){
-        playTrack(0);
+  <style>
+    body{
+      margin:0;
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background: radial-gradient(circle at center, #0b0f14, #000);
+      color:#d9f1ff;
+      font-family: Georgia, serif;
     }
-});
 
-player.addEventListener('ended',()=>{
-    if(!tracks.length) return;
+    a{
+      text-decoration:none;
+      color:#7fdfff;
+      font-size:30px;
+      letter-spacing:0.12em;
+    }
 
-    let next=current+1;
-    if(next>=tracks.length) next=0;
+    a:hover{
+      text-shadow:0 0 12px #7fdfff;
+    }
+  </style>
+</head>
 
-    playTrack(next);
-});
-</script>
+<body>
+
+  <a href="labyrinth/BAZAR/hall_01.html">
+
+ИГРА — ЭТО ФОРМА МОЛЧАНИЯ МЕЖДУ МЫСЛЯМИ 
+
+</a>
+
 </body>
 </html>
