@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -30,8 +30,6 @@
             pointer-events: none;
             user-select: none;
         }
-
-        /* ВЕРХНЯЯ НАДПИСЬ */
         #headerDate {
             position: absolute;
             top: 8px;
@@ -65,7 +63,6 @@
             font-size: 14px;
             margin-left: 2px;
         }
-
         .click-zone {
             position: absolute;
             bottom: 12px;
@@ -85,7 +82,6 @@
         #zoneRight {
             right: 10px;
         }
-
         #prod {
             position: absolute;
             left: 50%;
@@ -118,7 +114,6 @@
             background: rgba(255,255,255,0.2);
             transform: scale(0.97);
         }
-
         #sel {
             position: absolute;
             bottom: 165px;
@@ -143,7 +138,6 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.2; }
         }
-
         .price {
             position: absolute;
             color: #ff3030;
@@ -172,7 +166,6 @@
             margin-top: 2px;
             opacity: 0.9;
         }
-
         #footer {
             position: absolute;
             bottom: 55px;
@@ -193,14 +186,22 @@
             font-size: 13px;
             opacity: 0.5;
         }
-
-        /* МОДАЛЬНЫЕ ОКНА */
+        #loading {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            color: #ffcc00;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.8);
             backdrop-filter: blur(8px);
             z-index: 100;
@@ -209,9 +210,7 @@
             justify-content: center;
             padding: 20px;
         }
-        .modal-overlay.active {
-            display: flex;
-        }
+        .modal-overlay.active { display: flex; }
         .modal {
             background: #1a1a1a;
             border-radius: 24px;
@@ -266,31 +265,12 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .btn:active {
-            transform: scale(0.95);
-        }
-        .btn-primary {
-            background: #ffcc00;
-            color: #000;
-        }
-        .btn-secondary {
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-        }
-        .btn-success {
-            background: #00cc66;
-            color: #fff;
-        }
-        .btn-sm {
-            padding: 4px 12px;
-            font-size: 13px;
-        }
-
-        .city-list {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
+        .btn:active { transform: scale(0.95); }
+        .btn-primary { background: #ffcc00; color: #000; }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-success { background: #00cc66; color: #fff; }
+        .btn-sm { padding: 4px 12px; font-size: 13px; }
+        .city-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .city-item {
             background: rgba(255,255,255,0.05);
             padding: 12px 10px;
@@ -302,13 +282,8 @@
             font-size: 15px;
             font-weight: 500;
         }
-        .city-item:active {
-            transform: scale(0.95);
-            background: rgba(255,255,255,0.1);
-        }
-        .city-item.has-prices {
-            border-color: rgba(255, 204, 0, 0.3);
-        }
+        .city-item:active { transform: scale(0.95); background: rgba(255,255,255,0.1); }
+        .city-item.has-prices { border-color: rgba(255, 204, 0, 0.3); }
         .city-item .badge {
             display: block;
             font-size: 10px;
@@ -316,7 +291,6 @@
             margin-top: 3px;
             font-weight: 400;
         }
-
         .product-row {
             display: flex;
             align-items: center;
@@ -344,11 +318,7 @@
             outline: none;
             border-color: #ffcc00;
         }
-        .product-row .unit {
-            color: #999;
-            font-size: 13px;
-            min-width: 35px;
-        }
+        .product-row .unit { color: #999; font-size: 13px; min-width: 35px; }
         .product-row .delete-product {
             background: none;
             border: none;
@@ -358,10 +328,7 @@
             padding: 2px 6px;
             opacity: 0.4;
         }
-        .product-row .delete-product:active {
-            opacity: 1;
-        }
-
+        .product-row .delete-product:active { opacity: 1; }
         .add-product-area {
             display: flex;
             gap: 8px;
@@ -382,10 +349,7 @@
             outline: none;
             border-color: #ffcc00;
         }
-        .add-product-area input::placeholder {
-            color: #666;
-        }
-
+        .add-product-area input::placeholder { color: #666; }
         .code-input-area {
             display: flex;
             gap: 12px;
@@ -416,7 +380,6 @@
             margin-top: 8px;
             display: none;
         }
-
         @media (max-width: 480px) {
             #headerDate .label { font-size: 14px; }
             #headerDate .day { font-size: 14px; }
@@ -440,21 +403,19 @@
 </head>
 <body>
 
+<div id="loading">⏳ ЗАВАНТАЖЕННЯ ЦІН...</div>
+
 <div id="wrap">
     <img id="map" src="kartashema.png" alt="Народна карта цін" draggable="false">
-
     <div id="headerDate">
         <span class="label">ДОБРИЙ БАЗАРНИЙ ДЕНЬ</span>
         <span class="day" id="dayNumber">—</span>
         <span class="month" id="monthName">—</span>
     </div>
-
     <div class="click-zone" id="zoneLeft"></div>
     <div class="click-zone" id="zoneRight"></div>
-
     <div id="prod"></div>
     <div id="sel"></div>
-
     <div id="footer">
         <div class="devs">✦ НЕКС &amp; ЧИН ✦</div>
         <div>Народна система контролю цін · 2026</div>
@@ -515,14 +476,23 @@
 </div>
 
 <script>
-// === ДАННЫЕ ===
-var TOWNS = [
+// ============================================
+//  НАСТРОЙКИ РЕПОЗИТОРИЯ — ЗАМЕНИ НА СВОИ!
+// ============================================
+const REPO_OWNER = "ТВОЙ_НИК";          // например "nexus"
+const REPO_NAME = "ТВОЙ_РЕПОЗИТОРИЙ";   // например "bazar"
+const FILE_PATH = "prices.json";         // файл для хранения данных
+const GITHUB_TOKEN = "ТВОЙ_ТОКЕН";       // личный токен доступа
+
+// ============================================
+
+const TOWNS = [
     "Первомайск", "Помічна", "Лисогора", "Воєводське",
     "Благодатне", "Семенівка", "Арбузинка", "Братське",
     "Южноукраїнськ", "Вознесенськ"
 ];
 
-var TOWN_COORDS = {
+const TOWN_COORDS = {
     "Первомайск": {x:15, y:8}, "Помічна": {x:85, y:8},
     "Лисогора": {x:55, y:15}, "Воєводське": {x:50, y:22},
     "Благодатне": {x:35, y:35}, "Семенівка": {x:15, y:44},
@@ -530,73 +500,141 @@ var TOWN_COORDS = {
     "Южноукраїнськ": {x:18, y:62}, "Вознесенськ": {x:50, y:70}
 };
 
-var MONTHS_UA = [
+const MONTHS_UA = [
     "СІЧНЯ","ЛЮТОГО","БЕРЕЗНЯ","КВІТНЯ","ТРАВНЯ","ЧЕРВНЯ",
     "ЛИПНЯ","СЕРПНЯ","ВЕРЕСНЯ","ЖОВТНЯ","ЛИСТОПАДА","ГРУДНЯ"
 ];
 
-var allProducts = ["МЕД", "КАРТОШКА", "САЛО", "МЯКИШ", "КАВУНИ"];
-var pricesData = {};
-var currentProduct = null;
-var editingCity = null;
+let allProducts = ["МЕД", "КАРТОШКА", "САЛО", "МЯКИШ", "КАВУНИ"];
+let pricesData = {};
+let currentProduct = null;
+let editingCity = null;
+let fileSha = null; // для обновления файла
 
-// === ДАТА ===
-function updateDateDisplay() {
-    var now = new Date();
-    document.getElementById('dayNumber').textContent = now.getDate();
-    document.getElementById('monthName').textContent = MONTHS_UA[now.getMonth()];
-}
+// ==================== РАБОТА С GITHUB ====================
 
-// === ЗАГРУЗКА/СОХРАНЕНИЕ ===
-function loadData() {
+async function loadFromGitHub() {
+    const loading = document.getElementById('loading');
+    loading.style.display = 'flex';
+    
     try {
-        var saved = localStorage.getItem('priceMapData');
-        if (saved) {
-            var data = JSON.parse(saved);
-            if (data.products) allProducts = data.products;
-            if (data.prices) pricesData = data.prices;
+        const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+        const resp = await fetch(url, {
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+        
+        if (resp.ok) {
+            const data = await resp.json();
+            fileSha = data.sha;
+            const content = atob(data.content);
+            const parsed = JSON.parse(content);
+            
+            if (parsed.products) allProducts = parsed.products;
+            if (parsed.prices) pricesData = parsed.prices;
+            
+            // Кешируем
+            localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
+        } else if (resp.status === 404) {
+            // Файла нет — создадим
+            await saveToGitHub(true);
+        } else {
+            throw new Error('Ошибка загрузки');
         }
-    } catch(e) {}
+        return true;
+    } catch (e) {
+        console.error('Ошибка загрузки:', e);
+        // Пробуем кеш
+        try {
+            const cache = JSON.parse(localStorage.getItem('priceCache'));
+            if (cache) {
+                allProducts = cache.products || allProducts;
+                pricesData = cache.prices || {};
+                return true;
+            }
+        } catch(e2) {}
+        return false;
+    } finally {
+        loading.style.display = 'none';
+    }
 }
 
-function saveData() {
+async function saveToGitHub(create = false) {
     try {
-        localStorage.setItem('priceMapData', JSON.stringify({
+        const data = {
             products: allProducts,
             prices: pricesData
-        }));
-    } catch(e) {}
+        };
+        
+        const payload = {
+            message: "Обновление цен",
+            content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
+            branch: "main"
+        };
+        
+        if (!create && fileSha) {
+            payload.sha = fileSha;
+        }
+        
+        const method = create ? 'PUT' : 'PUT';
+        const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+        
+        const resp = await fetch(url, {
+            method: method,
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/vnd.github.v3+json'
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        if (!resp.ok) throw new Error('Ошибка сохранения');
+        
+        const result = await resp.json();
+        fileSha = result.content.sha;
+        
+        // Обновляем кеш
+        localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
+        return true;
+    } catch (e) {
+        console.error('Ошибка сохранения:', e);
+        return false;
+    }
 }
+
+// ==================== РАБОТА С ДАННЫМИ ====================
 
 function getPrice(city, product) {
     return (pricesData[city] && pricesData[city][product]) || null;
-}
-
-function setPrice(city, product, price) {
-    if (!pricesData[city]) pricesData[city] = {};
-    if (price && price > 0) {
-        pricesData[city][product] = price;
-    } else {
-        delete pricesData[city][product];
-        if (Object.keys(pricesData[city]).length === 0) delete pricesData[city];
-    }
 }
 
 function hasAnyPrices(city) {
     return pricesData[city] && Object.keys(pricesData[city]).length > 0;
 }
 
-// === ОТРИСОВКА ЦЕН ===
+// ==================== ДАТА ====================
+
+function updateDateDisplay() {
+    const now = new Date();
+    document.getElementById('dayNumber').textContent = now.getDate();
+    document.getElementById('monthName').textContent = MONTHS_UA[now.getMonth()];
+}
+
+// ==================== ОТРИСОВКА ====================
+
 function renderPrices() {
-    document.querySelectorAll('.price').forEach(function(el) { el.remove(); });
+    document.querySelectorAll('.price').forEach(el => el.remove());
     if (!currentProduct) return;
 
-    TOWNS.forEach(function(town) {
-        var price = getPrice(town, currentProduct);
-        var coords = TOWN_COORDS[town];
+    TOWNS.forEach(town => {
+        const price = getPrice(town, currentProduct);
+        const coords = TOWN_COORDS[town];
         if (!coords) return;
 
-        var div = document.createElement('div');
+        const div = document.createElement('div');
         div.className = 'price';
         div.style.left = coords.x + '%';
         div.style.top = coords.y + '%';
@@ -613,15 +651,14 @@ function renderPrices() {
     });
 }
 
-// === МЕНЮ ПРОДУКТОВ ===
 function buildProductMenu() {
-    var menu = document.getElementById('prod');
+    const menu = document.getElementById('prod');
     menu.innerHTML = '';
-    allProducts.forEach(function(p) {
-        var div = document.createElement('div');
+    allProducts.forEach(p => {
+        const div = document.createElement('div');
         div.className = 'item';
         div.textContent = p;
-        div.onclick = function(e) {
+        div.onclick = (e) => {
             e.stopPropagation();
             selectProduct(p);
         };
@@ -632,32 +669,18 @@ function buildProductMenu() {
 function selectProduct(product) {
     currentProduct = product;
     document.getElementById('prod').style.display = 'none';
-    var sel = document.getElementById('sel');
+    const sel = document.getElementById('sel');
     sel.style.display = 'block';
     sel.textContent = product;
     renderPrices();
     if (navigator.vibrate) navigator.vibrate(15);
 }
 
-// === МОДАЛЬНЫЕ ОКНА ===
-function openModal(id) {
-    document.getElementById(id).classList.add('active');
-}
-
-function closeModal(id) {
-    document.getElementById(id).classList.remove('active');
-    var err = document.getElementById('codeError');
-    if (err) err.style.display = 'none';
-    var inp = document.getElementById('codeInput');
-    if (inp) inp.value = '';
-}
-
-// === ВЫБОР ГОРОДА ===
 function buildCityList() {
-    var container = document.getElementById('cityList');
+    const container = document.getElementById('cityList');
     container.innerHTML = '';
-    TOWNS.forEach(function(town) {
-        var div = document.createElement('div');
+    TOWNS.forEach(town => {
+        const div = document.createElement('div');
         div.className = 'city-item';
         if (hasAnyPrices(town)) {
             div.classList.add('has-prices');
@@ -665,9 +688,23 @@ function buildCityList() {
         } else {
             div.innerHTML = town + '<span class="badge">⬜ нет цен</span>';
         }
-        div.onclick = function() { openPriceEditor(town); };
+        div.onclick = () => openPriceEditor(town);
         container.appendChild(div);
     });
+}
+
+// ==================== МОДАЛЬНЫЕ ОКНА ====================
+
+function openModal(id) {
+    document.getElementById(id).classList.add('active');
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+    const err = document.getElementById('codeError');
+    if (err) err.style.display = 'none';
+    const inp = document.getElementById('codeInput');
+    if (inp) inp.value = '';
 }
 
 function openCitySelector() {
@@ -675,7 +712,8 @@ function openCitySelector() {
     openModal('modalCity');
 }
 
-// === РЕДАКТОР ЦЕН ===
+// ==================== РЕДАКТОР ====================
+
 function openPriceEditor(city) {
     editingCity = city;
     closeModal('modalCity');
@@ -685,21 +723,21 @@ function openPriceEditor(city) {
 }
 
 function buildProductEditor(city) {
-    var container = document.getElementById('productList');
+    const container = document.getElementById('productList');
     container.innerHTML = '';
 
-    allProducts.forEach(function(product) {
-        var row = document.createElement('div');
+    allProducts.forEach(product => {
+        const row = document.createElement('div');
         row.className = 'product-row';
         
-        var price = getPrice(city, product);
-        var priceValue = (price && price > 0) ? price : '';
+        const price = getPrice(city, product);
+        const priceValue = (price && price > 0) ? price : '';
 
-        var nameSpan = document.createElement('span');
+        const nameSpan = document.createElement('span');
         nameSpan.className = 'pname';
         nameSpan.textContent = product;
 
-        var input = document.createElement('input');
+        const input = document.createElement('input');
         input.type = 'number';
         input.min = '0';
         input.step = '1';
@@ -707,14 +745,14 @@ function buildProductEditor(city) {
         input.placeholder = '—';
         input.dataset.product = product;
 
-        var unitSpan = document.createElement('span');
+        const unitSpan = document.createElement('span');
         unitSpan.className = 'unit';
         unitSpan.textContent = 'грн.';
 
-        var deleteBtn = document.createElement('button');
+        const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-product';
         deleteBtn.textContent = '✕';
-        deleteBtn.onclick = function() { deleteProduct(product); };
+        deleteBtn.onclick = () => deleteProduct(product);
 
         row.appendChild(nameSpan);
         row.appendChild(input);
@@ -727,12 +765,12 @@ function buildProductEditor(city) {
 }
 
 function addProduct() {
-    var input = document.getElementById('newProductName');
-    var name = input.value.trim().toUpperCase();
+    const input = document.getElementById('newProductName');
+    const name = input.value.trim().toUpperCase();
     if (!name) { alert('Введите название!'); return; }
     if (allProducts.indexOf(name) !== -1) { alert('Уже есть!'); return; }
     allProducts.push(name);
-    saveData();
+    allProducts.sort();
     buildProductEditor(editingCity);
     buildProductMenu();
     if (navigator.vibrate) navigator.vibrate(10);
@@ -741,8 +779,8 @@ function addProduct() {
 
 function deleteProduct(product) {
     if (!confirm('Удалить "' + product + '" из всех городов?')) return;
-    allProducts = allProducts.filter(function(p) { return p !== product; });
-    TOWNS.forEach(function(city) {
+    allProducts = allProducts.filter(p => p !== product);
+    TOWNS.forEach(city => {
         if (pricesData[city]) {
             delete pricesData[city][product];
             if (Object.keys(pricesData[city]).length === 0) delete pricesData[city];
@@ -751,38 +789,52 @@ function deleteProduct(product) {
     if (currentProduct === product) {
         currentProduct = null;
         document.getElementById('sel').style.display = 'none';
-        document.querySelectorAll('.price').forEach(function(el) { el.remove(); });
+        document.querySelectorAll('.price').forEach(el => el.remove());
     }
-    saveData();
     buildProductEditor(editingCity);
     buildProductMenu();
     renderPrices();
 }
 
-function savePrices() {
+async function savePrices() {
     if (!editingCity) return;
-    var inputs = document.querySelectorAll('#productList .product-row input[type="number"]');
-    inputs.forEach(function(input) {
-        var product = input.dataset.product;
-        var value = parseFloat(input.value.trim());
+    
+    const inputs = document.querySelectorAll('#productList .product-row input[type="number"]');
+    
+    inputs.forEach(input => {
+        const product = input.dataset.product;
+        const value = parseFloat(input.value.trim());
         if (value && value > 0) {
-            setPrice(editingCity, product, value);
+            if (!pricesData[editingCity]) pricesData[editingCity] = {};
+            pricesData[editingCity][product] = value;
         } else {
-            setPrice(editingCity, product, null);
+            if (pricesData[editingCity]) {
+                delete pricesData[editingCity][product];
+                if (Object.keys(pricesData[editingCity]).length === 0) delete pricesData[editingCity];
+            }
         }
     });
-    saveData();
+    
+    // Сохраняем в GitHub
+    const ok = await saveToGitHub();
+    if (!ok) {
+        alert('❌ Не удалось сохранить. Проверь настройки репозитория и токен.');
+        return;
+    }
+    
     renderPrices();
     closeModal('modalPrices');
     if (navigator.vibrate) navigator.vibrate(15);
     buildCityList();
+    alert('✅ Цены сохранены в репозитории!');
 }
 
-// === ПРОВЕРКА КОДА ===
+// ==================== ПРОВЕРКА КОДА ====================
+
 function checkCode() {
-    var input = document.getElementById('codeInput');
-    var code = input.value.trim();
-    var error = document.getElementById('codeError');
+    const input = document.getElementById('codeInput');
+    const code = input.value.trim();
+    const error = document.getElementById('codeError');
     
     if (code === '777') {
         error.style.display = 'none';
@@ -795,15 +847,18 @@ function checkCode() {
     }
 }
 
-// === ИНИЦИАЛИЗАЦИЯ ===
-function init() {
-    loadData();
+// ==================== ИНИЦИАЛИЗАЦИЯ ====================
+
+async function init() {
+    await loadFromGitHub();
+    
     updateDateDisplay();
     buildProductMenu();
     buildCityList();
+    renderPrices();
 
     document.getElementById('zoneLeft').onclick = function() {
-        var menu = document.getElementById('prod');
+        const menu = document.getElementById('prod');
         menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
         if (navigator.vibrate) navigator.vibrate(10);
     };
@@ -814,14 +869,12 @@ function init() {
         document.getElementById('codeInput').focus();
     };
 
-    // Закрытие модалок по клику на фон
-    document.querySelectorAll('.modal-overlay').forEach(function(el) {
+    document.querySelectorAll('.modal-overlay').forEach(el => {
         el.onclick = function(e) {
             if (e.target === this) this.classList.remove('active');
         };
     });
 
-    // Enter в поле кода
     document.getElementById('codeInput').onkeydown = function(e) {
         if (e.key === 'Enter') checkCode();
     };
@@ -831,6 +884,5 @@ function init() {
 
 init();
 </script>
-
 </body>
-</html>
+</html>﻿
