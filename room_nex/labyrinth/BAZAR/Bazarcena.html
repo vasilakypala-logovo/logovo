@@ -520,6 +520,30 @@ let fileSha = null;
 
 // ==================== РАБОТА С GITHUB ====================
 
+// Функция для правильного кодирования в Base64 с поддержкой UTF-8
+function utf8ToBase64(str) {
+    // Используем TextEncoder для правильной UTF-8 кодировки
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(str);
+    // Преобразуем Uint8Array в строку для btoa
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
+
+// Функция для декодирования из Base64 с поддержкой UTF-8
+function base64ToUtf8(base64) {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    const decoder = new TextDecoder('utf-8');
+    return decoder.decode(bytes);
+}
+
 async function loadFromGitHub() {
     const loading = document.getElementById('loading');
     loading.style.display = 'flex';
@@ -536,7 +560,8 @@ async function loadFromGitHub() {
         if (resp.ok) {
             const data = await resp.json();
             fileSha = data.sha;
-            const content = atob(data.content);
+            // Используем правильное декодирование
+            const content = base64ToUtf8(data.content);
             const parsed = JSON.parse(content);
             
             if (parsed.products) allProducts = parsed.products;
@@ -544,7 +569,6 @@ async function loadFromGitHub() {
             
             localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
         } else if (resp.status === 404) {
-            // Если файла нет — создаем (только если есть токен)
             if (GITHUB_TOKEN) {
                 await saveToGitHub(true);
             } else {
@@ -577,9 +601,13 @@ async function saveToGitHub(create = false) {
             prices: pricesData
         };
         
+        const jsonStr = JSON.stringify(data, null, 2);
+        // Используем правильное кодирование
+        const content = utf8ToBase64(jsonStr);
+        
         const payload = {
             message: "Обновление цен",
-            content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
+            content: content,
             branch: "main"
         };
         
@@ -796,7 +824,6 @@ function deleteProduct(product) {
 }
 
 async function savePrices() {
-    // Проверяем, есть ли токен
     if (!GITHUB_TOKEN) {
         alert('❌ Для редактирования цен нужен токен! Обратись к администратору.');
         return;
