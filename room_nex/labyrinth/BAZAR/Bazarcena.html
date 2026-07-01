@@ -9,10 +9,9 @@
     <title>БАЗАРНИЙ ДЕНЬ</title>
     <script>
         // ============================================
-        // ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ (работает на телефонах)
+        // ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ
         // ============================================
         (function() {
-            // Если нет параметра ?t= - добавляем его принудительно
             if (!window.location.search.includes('t=')) {
                 const url = window.location.href.split('?')[0];
                 const timestamp = Date.now();
@@ -494,11 +493,11 @@
 
 <script>
 // ============================================
-//  ВЕРСИЯ ПРИЛОЖЕНИЯ - МЕНЯЙ ПРИ ОБНОВЛЕНИИ!
+//  ВЕРСИЯ ПРИЛОЖЕНИЯ
 // ============================================
-const APP_VERSION = "2.0.0";
+const APP_VERSION = "3.0.0";
 
-// Принудительная очистка старого кеша
+// ПРИНУДИТЕЛЬНАЯ ОЧИСТКА СТАРОГО КЕША
 if (localStorage.getItem('app_version') !== APP_VERSION) {
     // Очищаем весь кеш браузера
     if ('caches' in window) {
@@ -509,7 +508,7 @@ if (localStorage.getItem('app_version') !== APP_VERSION) {
         });
     }
     
-    // Сохраняем токен если был
+    // СОХРАНЯЕМ ТОЛЬКО ТОКЕН!
     const token = localStorage.getItem('github_token');
     localStorage.clear();
     if (token) {
@@ -517,7 +516,7 @@ if (localStorage.getItem('app_version') !== APP_VERSION) {
     }
     localStorage.setItem('app_version', APP_VERSION);
     
-    // Перезагружаем страницу
+    // Перезагружаем
     setTimeout(function() {
         window.location.reload(true);
     }, 500);
@@ -607,28 +606,41 @@ async function loadFromGitHub() {
             if (parsed.products) allProducts = parsed.products;
             if (parsed.prices) pricesData = parsed.prices;
             
+            // ✅ GitHub ВСЕГДА главный - перезаписываем localStorage
             localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
+            
+            console.log('✅ Данные загружены с GitHub');
+            return true;
+            
         } else if (resp.status === 404) {
             if (GITHUB_TOKEN) {
                 await saveToGitHub(true);
             } else {
                 alert('❌ Нет токена! Цены не загружены.');
             }
+            return false;
+            
         } else {
             throw new Error('Ошибка загрузки');
         }
-        return true;
+        
     } catch (e) {
-        console.error('Ошибка загрузки:', e);
+        console.error('❌ Ошибка загрузки с GitHub:', e);
+        
+        // ⚠️ ТОЛЬКО АВАРИЙНЫЙ РЕЖИМ - если GitHub совсем не отвечает
         try {
             const cache = JSON.parse(localStorage.getItem('priceCache'));
             if (cache) {
                 allProducts = cache.products || allProducts;
                 pricesData = cache.prices || {};
+                alert('⚠️ Нет доступа к GitHub. Показываю локальный кэш.');
+                console.log('⚠️ Использую локальный кэш (аварийный режим)');
                 return true;
             }
         } catch(e2) {}
+        
         return false;
+        
     } finally {
         loading.style.display = 'none';
     }
@@ -671,10 +683,13 @@ async function saveToGitHub(create = false) {
         const result = await resp.json();
         fileSha = result.content.sha;
         
+        // ✅ После сохранения - обновляем localStorage
         localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
+        console.log('✅ Данные сохранены в GitHub и localStorage');
         return true;
+        
     } catch (e) {
-        console.error('Ошибка сохранения:', e);
+        console.error('❌ Ошибка сохранения:', e);
         return false;
     }
 }
