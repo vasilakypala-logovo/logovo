@@ -208,7 +208,7 @@
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background: #1a1a1a;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 999;
@@ -406,11 +406,11 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 15;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             backdrop-filter: blur(10px);
             padding: 20px;
             border-radius: 16px;
-            border: 1px solid rgba(255,204,0,0.2);
+            border: 2px solid rgba(255,204,0,0.3);
             width: 90%;
             max-width: 350px;
             display: none;
@@ -477,7 +477,7 @@
 </head>
 <body>
 
-<div id="loading" style="display:none;">⏳ ЗАВАНТАЖЕННЯ ЦІН...</div>
+<div id="loading" style="display:flex;">⏳ ЗАВАНТАЖЕННЯ ЦІН...</div>
 
 <div id="wrap">
     <img id="map" src="kartashema.png" alt="Народна карта цін" draggable="false">
@@ -492,7 +492,7 @@
     <div id="sel"></div>
     
     <!-- ОКНО ДЛЯ ВВОДА ТОКЕНА -->
-    <div id="tokenArea" class="active">
+    <div id="tokenArea">
         <label>🔑 Введите GitHub токен</label>
         <input type="password" id="tokenInput" placeholder="Вставьте токен сюда">
         <button class="btn btn-primary" onclick="saveToken()">✅ Сохранить токен</button>
@@ -568,14 +568,6 @@ const FILE_PATH = "prices.json";
 
 let GITHUB_TOKEN = localStorage.getItem('github_token');
 
-// Если токена нет - показываем окно ввода
-if (!GITHUB_TOKEN) {
-    document.getElementById('tokenArea').classList.add('active');
-} else {
-    document.getElementById('tokenArea').classList.remove('active');
-    document.getElementById('tokenStatus').textContent = '✅ Токен установлен';
-}
-
 // Функция сохранения токена
 function saveToken() {
     const input = document.getElementById('tokenInput');
@@ -590,62 +582,19 @@ function saveToken() {
     
     localStorage.setItem('github_token', token);
     GITHUB_TOKEN = token;
-    document.getElementById('tokenArea').classList.remove('active');
-    status.textContent = '✅ Токен сохранен! Перезагрузка...';
+    
+    status.textContent = '✅ Токен сохранен! Загрузка...';
     status.style.color = '#00cc66';
     
-    // Перезагружаем страницу через секунду
-    setTimeout(function() {
-        window.location.reload();
-    }, 1000);
+    // Скрываем окно токена
+    document.getElementById('tokenArea').classList.remove('active');
+    
+    // Загружаем данные
+    loadData();
 }
 
-const TOWNS = [
-    "Первомайск", "Помічна", "Лисогора", "Воєводське",
-    "Благодатне", "Семенівка", "Арбузинка", "Братське",
-    "Южноукраїнськ", "Вознесенськ"
-];
-
-const TOWN_COORDS = {
-    "Первомайск": {x:15, y:8}, "Помічна": {x:85, y:8},
-    "Лисогора": {x:55, y:15}, "Воєводське": {x:50, y:22},
-    "Благодатне": {x:35, y:35}, "Семенівка": {x:15, y:44},
-    "Арбузинка": {x:85, y:44}, "Братське": {x:68, y:62},
-    "Южноукраїнськ": {x:18, y:62}, "Вознесенськ": {x:50, y:70}
-};
-
-const MONTHS_UA = [
-    "СІЧНЯ","ЛЮТОГО","БЕРЕЗНЯ","КВІТНЯ","ТРАВНЯ","ЧЕРВНЯ",
-    "ЛИПНЯ","СЕРПНЯ","ВЕРЕСНЯ","ЖОВТНЯ","ЛИСТОПАДА","ГРУДНЯ"
-];
-
-let allProducts = ["МЕД", "КАРТОШКА", "САЛО", "МЯКИШ", "КАВУНИ"];
-let pricesData = {};
-let currentProduct = null;
-let editingCity = null;
-let fileSha = null;
-
-function utf8ToBase64(str) {
-    const encoder = new TextEncoder();
-    const bytes = encoder.encode(str);
-    let binary = '';
-    for (let i = 0; i < bytes.length; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary);
-}
-
-function base64ToUtf8(base64) {
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i);
-    }
-    const decoder = new TextDecoder('utf-8');
-    return decoder.decode(bytes);
-}
-
-async function loadFromGitHub() {
+// Функция загрузки данных
+async function loadData() {
     const loading = document.getElementById('loading');
     loading.style.display = 'flex';
     
@@ -669,12 +618,10 @@ async function loadFromGitHub() {
             
             localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
             console.log('✅ Загружено с GitHub');
-            return true;
         } else if (resp.status === 404) {
             if (GITHUB_TOKEN) {
                 await saveToGitHub(true);
             }
-            return false;
         } else {
             throw new Error('Ошибка загрузки');
         }
@@ -686,12 +633,15 @@ async function loadFromGitHub() {
                 allProducts = cache.products || allProducts;
                 pricesData = cache.prices || {};
                 alert('⚠️ Нет доступа к GitHub. Показываю локальный кэш.');
-                return true;
             }
         } catch(e2) {}
-        return false;
     } finally {
         loading.style.display = 'none';
+        // Обновляем интерфейс
+        updateDateDisplay();
+        buildProductMenu();
+        buildCityList();
+        renderPrices();
     }
 }
 
@@ -731,6 +681,51 @@ async function saveToGitHub(create = false) {
         return false;
     }
 }
+
+function utf8ToBase64(str) {
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(str);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
+
+function base64ToUtf8(base64) {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    const decoder = new TextDecoder('utf-8');
+    return decoder.decode(bytes);
+}
+
+const TOWNS = [
+    "Первомайск", "Помічна", "Лисогора", "Воєводське",
+    "Благодатне", "Семенівка", "Арбузинка", "Братське",
+    "Южноукраїнськ", "Вознесенськ"
+];
+
+const TOWN_COORDS = {
+    "Первомайск": {x:15, y:8}, "Помічна": {x:85, y:8},
+    "Лисогора": {x:55, y:15}, "Воєводське": {x:50, y:22},
+    "Благодатне": {x:35, y:35}, "Семенівка": {x:15, y:44},
+    "Арбузинка": {x:85, y:44}, "Братське": {x:68, y:62},
+    "Южноукраїнськ": {x:18, y:62}, "Вознесенськ": {x:50, y:70}
+};
+
+const MONTHS_UA = [
+    "СІЧНЯ","ЛЮТОГО","БЕРЕЗНЯ","КВІТНЯ","ТРАВНЯ","ЧЕРВНЯ",
+    "ЛИПНЯ","СЕРПНЯ","ВЕРЕСНЯ","ЖОВТНЯ","ЛИСТОПАДА","ГРУДНЯ"
+];
+
+let allProducts = ["МЕД", "КАРТОШКА", "САЛО", "МЯКИШ", "КАВУНИ"];
+let pricesData = {};
+let currentProduct = null;
+let editingCity = null;
+let fileSha = null;
 
 function getPrice(city, product) {
     return (pricesData[city] && pricesData[city][product]) || null;
@@ -904,7 +899,8 @@ function deleteProduct(product) {
 
 async function savePrices() {
     if (!GITHUB_TOKEN) {
-        alert('❌ Нет токена! Нажмите правую кнопку и введите токен.');
+        alert('❌ Нет токена!');
+        document.getElementById('tokenArea').classList.add('active');
         return;
     }
     if (!editingCity) return;
@@ -949,54 +945,17 @@ function checkCode() {
     }
 }
 
+// Инициализация
 async function init() {
-    // Если есть токен - грузим данные
+    // Проверяем есть ли токен
     if (GITHUB_TOKEN) {
-        await loadFromGitHub();
+        // Токен есть - скрываем окно и грузим данные
+        document.getElementById('tokenArea').classList.remove('active');
+        await loadData();
     } else {
-        // Если нет токена - скрываем загрузку
-        document.getElementById('loading').style.display = 'none';
-        // Показываем окно ввода токена
+        // Токена нет - показываем окно
         document.getElementById('tokenArea').classList.add('active');
-        return;
+        document.getElementById('loading').style.display = 'none';
     }
     
-    updateDateDisplay();
-    buildProductMenu();
-    buildCityList();
-    renderPrices();
-
-    document.getElementById('zoneLeft').onclick = function() {
-        const menu = document.getElementById('prod');
-        menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
-        if (navigator.vibrate) navigator.vibrate(10);
-    };
-
-    document.getElementById('zoneRight').onclick = function() {
-        // Если нет токена - показываем окно ввода
-        if (!GITHUB_TOKEN) {
-            document.getElementById('tokenArea').classList.add('active');
-            return;
-        }
-        openModal('modalCode');
-        if (navigator.vibrate) navigator.vibrate(10);
-        document.getElementById('codeInput').focus();
-    };
-
-    document.querySelectorAll('.modal-overlay').forEach(el => {
-        el.onclick = function(e) {
-            if (e.target === this) this.classList.remove('active');
-        };
-    });
-
-    document.getElementById('codeInput').onkeydown = function(e) {
-        if (e.key === 'Enter') checkCode();
-    };
-
-    console.log('✅ Загружено!');
-}
-
-init();
-</script>
-</body>
-</html>
+    // Настрой
