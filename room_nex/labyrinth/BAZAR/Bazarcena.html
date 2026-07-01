@@ -390,7 +390,7 @@
             display: none;
         }
         
-        /* Окно для ввода токена - ТОЛЬКО ДЛЯ АДМИНА */
+        /* Окно для ввода токена */
         #tokenArea {
             position: absolute;
             bottom: 100px;
@@ -443,7 +443,6 @@
             margin-top: 10px;
         }
         
-        /* Кнопка админа - маленькая и незаметная */
         #adminBtn {
             position: absolute;
             bottom: 140px;
@@ -460,6 +459,31 @@
         }
         #adminBtn:active {
             background: rgba(255,204,0,0.3);
+        }
+        
+        .token-close {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 0 8px;
+            line-height: 1;
+        }
+        .token-close:active {
+            color: #fff;
+        }
+        .token-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .token-header label {
+            margin: 0;
+            color: #ffcc00;
+            font-size: 14px;
+            font-weight: 600;
         }
         
         @media (max-width: 480px) {
@@ -503,18 +527,17 @@
     <div id="prod"></div>
     <div id="sel"></div>
     
-    <!-- Окно для ввода токена - появляется только при клике на adminBtn -->
-<div id="tokenArea">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <label style="margin:0; color:#ffcc00; font-size:14px; font-weight:600;">🔑 Введите GitHub токен</label>
-        <button onclick="closeTokenArea()" style="background:none; border:none; color:#999; font-size:20px; cursor:pointer; padding:0 5px;">✕</button>
+    <!-- Окно для ввода токена с кнопкой закрытия -->
+    <div id="tokenArea">
+        <div class="token-header">
+            <label>🔑 Введите GitHub токен</label>
+            <button class="token-close" onclick="closeTokenArea()">✕</button>
+        </div>
+        <input type="password" id="tokenInput" placeholder="Вставьте токен сюда">
+        <button class="btn btn-primary" onclick="saveToken()">✅ Сохранить токен</button>
+        <div id="tokenStatus"></div>
     </div>
-    <input type="password" id="tokenInput" placeholder="Вставьте токен сюда">
-    <button class="btn btn-primary" onclick="saveToken()">✅ Сохранить токен</button>
-    <div id="tokenStatus"></div>
-</div>
     
-    <!-- Кнопка для админа - незаметная для пользователей -->
     <button id="adminBtn" onclick="showTokenArea()">⚙️</button>
     
     <div id="footer">
@@ -591,10 +614,17 @@ let currentProduct = null;
 let editingCity = null;
 let fileSha = null;
 
-// Функция показа окна токена (по клику на шестеренку)
+// Функция показа окна токена
 function showTokenArea() {
     document.getElementById('tokenArea').classList.add('active');
     document.getElementById('tokenInput').focus();
+    document.getElementById('tokenStatus').textContent = '';
+}
+
+// Функция закрытия окна токена
+function closeTokenArea() {
+    document.getElementById('tokenArea').classList.remove('active');
+    document.getElementById('tokenStatus').textContent = '';
 }
 
 // Функция сохранения токена
@@ -615,11 +645,14 @@ function saveToken() {
     status.textContent = '✅ Токен сохранен! Загрузка...';
     status.style.color = '#00cc66';
     
-    document.getElementById('tokenArea').classList.remove('active');
-    loadData();
+    setTimeout(function() {
+        document.getElementById('tokenArea').classList.remove('active');
+        status.textContent = '';
+        loadData();
+    }, 800);
 }
 
-// Функция загрузки данных (без токена - публичная)
+// Функция загрузки данных
 async function loadData() {
     const loading = document.getElementById('loading');
     loading.style.display = 'flex';
@@ -652,7 +685,7 @@ async function loadData() {
             }
         }
         
-        // Если нет токена или ошибка - пробуем публичный доступ
+        // Публичный доступ
         const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${FILE_PATH}`;
         const resp = await fetch(url);
         
@@ -664,13 +697,13 @@ async function loadData() {
             if (parsed.prices) pricesData = parsed.prices;
             
             localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
-            console.log('✅ Загружено с GitHub (публичный доступ)');
+            console.log('✅ Загружено с GitHub (публичный)');
             updateUI();
             loading.style.display = 'none';
             return;
         }
         
-        // Если GitHub не отвечает - берем из кеша
+        // Кеш
         const cache = JSON.parse(localStorage.getItem('priceCache'));
         if (cache) {
             allProducts = cache.products || allProducts;
@@ -683,7 +716,6 @@ async function loadData() {
         
     } catch (e) {
         console.error('❌ Ошибка загрузки:', e);
-        // Пробуем кеш
         try {
             const cache = JSON.parse(localStorage.getItem('priceCache'));
             if (cache) {
@@ -1009,12 +1041,9 @@ function checkCode() {
     }
 }
 
-// Инициализация
 async function init() {
-    // Сразу загружаем данные (без токена - публичный доступ)
     await loadData();
     
-    // Настройка кнопок
     document.getElementById('zoneLeft').onclick = function() {
         const menu = document.getElementById('prod');
         menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
@@ -1023,19 +1052,14 @@ async function init() {
 
     document.getElementById('zoneRight').onclick = function() {
         if (!GITHUB_TOKEN) {
-            document.getElementById('tokenArea').classList.add('active');
-            document.getElementById('tokenInput').focus();
+            showTokenArea();
             return;
         }
         openModal('modalCode');
         if (navigator.vibrate) navigator.vibrate(10);
         document.getElementById('codeInput').focus();
     };
-// Функция закрытия окна токена
-function closeTokenArea() {
-    document.getElementById('tokenArea').classList.remove('active');
-    document.getElementById('tokenStatus').textContent = '';
-}
+
     document.querySelectorAll('.modal-overlay').forEach(el => {
         el.onclick = function(e) {
             if (e.target === this) this.classList.remove('active');
