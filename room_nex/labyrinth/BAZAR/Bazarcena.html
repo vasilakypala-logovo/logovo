@@ -958,4 +958,38 @@ async function init() {
         document.getElementById('loading').style.display = 'none';
     }
     
-    // Настрой
+    // Настройка кнопок
+    document.getElementById('zoneLeft').onclick = function() {
+        const menu = document.getElementById('prod');
+        menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        if (navigator.vibrate) navigator.vibrate(10);
+    };
+
+    document.getElementById('zoneRight').onclick = function() {
+        if (!GITHUB_TOKEN) {
+            document.getElementById('tokenArea').classList.add('active');
+            return;
+        }
+        openModal('modalCode');
+        if (navigator.vibrate) navigator.vibrate(10);
+        document.getElementById('codeInput').focus();
+    };
+
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+        el.onclick = function(e) {
+            if (e.target === this) this.classList.remove('active');
+        };
+    });
+
+    document.getElementById('codeInput').onkeydown = function(e) {
+        if (e.key === 'Enter') checkCode();
+    };
+
+    console.log('✅ Загружено!');
+}
+
+// Запускаем
+init();
+</script>
+</body>
+</html>
