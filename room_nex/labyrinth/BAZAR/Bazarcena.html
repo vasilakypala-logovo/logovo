@@ -504,12 +504,15 @@
     <div id="sel"></div>
     
     <!-- Окно для ввода токена - появляется только при клике на adminBtn -->
-    <div id="tokenArea">
-        <label>🔑 Введите GitHub токен (для админа)</label>
-        <input type="password" id="tokenInput" placeholder="Вставьте токен сюда">
-        <button class="btn btn-primary" onclick="saveToken()">✅ Сохранить токен</button>
-        <div id="tokenStatus"></div>
+<div id="tokenArea">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <label style="margin:0; color:#ffcc00; font-size:14px; font-weight:600;">🔑 Введите GitHub токен</label>
+        <button onclick="closeTokenArea()" style="background:none; border:none; color:#999; font-size:20px; cursor:pointer; padding:0 5px;">✕</button>
     </div>
+    <input type="password" id="tokenInput" placeholder="Вставьте токен сюда">
+    <button class="btn btn-primary" onclick="saveToken()">✅ Сохранить токен</button>
+    <div id="tokenStatus"></div>
+</div>
     
     <!-- Кнопка для админа - незаметная для пользователей -->
     <button id="adminBtn" onclick="showTokenArea()">⚙️</button>
