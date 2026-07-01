@@ -40,6 +40,7 @@
             max-width: 430px;
             margin: auto;
             background: #1a1a1a;
+            min-height: 100vh;
         }
         #map {
             width: 100%;
@@ -398,16 +399,16 @@
             display: none;
         }
         
-        /* Стили для ввода токена */
+        /* Окно для ввода токена */
         #tokenArea {
             position: absolute;
             bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 15;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.9);
             backdrop-filter: blur(10px);
-            padding: 15px 20px;
+            padding: 20px;
             border-radius: 16px;
             border: 1px solid rgba(255,204,0,0.2);
             width: 90%;
@@ -422,17 +423,18 @@
             font-size: 14px;
             font-weight: 600;
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            text-align: center;
         }
         #tokenArea input {
             width: 100%;
-            padding: 10px 14px;
+            padding: 12px 14px;
             border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.2);
             background: rgba(255,255,255,0.05);
             color: #fff;
             font-size: 14px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         #tokenArea input:focus {
             outline: none;
@@ -440,13 +442,14 @@
         }
         #tokenArea .btn {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
+            font-size: 16px;
         }
         #tokenStatus {
             color: #ffcc00;
             font-size: 12px;
             text-align: center;
-            margin-top: 8px;
+            margin-top: 10px;
         }
         
         @media (max-width: 480px) {
@@ -459,7 +462,7 @@
             #zoneRight { right: 5px; }
             .city-list { grid-template-columns: 1fr 1fr; gap: 6px; }
             .city-item { padding: 10px 8px; font-size: 14px; }
-            #tokenArea { bottom: 90px; padding: 12px 16px; }
+            #tokenArea { bottom: 90px; padding: 15px; }
         }
         @media (max-width: 380px) {
             #headerDate .label { font-size: 11px; }
@@ -468,13 +471,13 @@
             #sel { font-size: 16px; bottom: 145px; }
             .click-zone { width: 100px; height: 100px; }
             .item { font-size: 17px; padding: 8px 20px; }
-            #tokenArea { bottom: 80px; padding: 10px 12px; }
+            #tokenArea { bottom: 80px; padding: 12px; }
         }
     </style>
 </head>
 <body>
 
-<div id="loading">⏳ ЗАВАНТАЖЕННЯ ЦІН...</div>
+<div id="loading" style="display:none;">⏳ ЗАВАНТАЖЕННЯ ЦІН...</div>
 
 <div id="wrap">
     <img id="map" src="kartashema.png" alt="Народна карта цін" draggable="false">
@@ -577,17 +580,21 @@ if (!GITHUB_TOKEN) {
 function saveToken() {
     const input = document.getElementById('tokenInput');
     const token = input.value.trim();
+    const status = document.getElementById('tokenStatus');
+    
     if (!token) {
-        document.getElementById('tokenStatus').textContent = '❌ Введите токен';
-        document.getElementById('tokenStatus').style.color = '#ff3030';
+        status.textContent = '❌ Введите токен';
+        status.style.color = '#ff3030';
         return;
     }
+    
     localStorage.setItem('github_token', token);
     GITHUB_TOKEN = token;
     document.getElementById('tokenArea').classList.remove('active');
-    document.getElementById('tokenStatus').textContent = '✅ Токен сохранен!';
-    document.getElementById('tokenStatus').style.color = '#00cc66';
-    // Перезагружаем страницу для применения токена
+    status.textContent = '✅ Токен сохранен! Перезагрузка...';
+    status.style.color = '#00cc66';
+    
+    // Перезагружаем страницу через секунду
     setTimeout(function() {
         window.location.reload();
     }, 1000);
@@ -947,4 +954,49 @@ async function init() {
     if (GITHUB_TOKEN) {
         await loadFromGitHub();
     } else {
-       
+        // Если нет токена - скрываем загрузку
+        document.getElementById('loading').style.display = 'none';
+        // Показываем окно ввода токена
+        document.getElementById('tokenArea').classList.add('active');
+        return;
+    }
+    
+    updateDateDisplay();
+    buildProductMenu();
+    buildCityList();
+    renderPrices();
+
+    document.getElementById('zoneLeft').onclick = function() {
+        const menu = document.getElementById('prod');
+        menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        if (navigator.vibrate) navigator.vibrate(10);
+    };
+
+    document.getElementById('zoneRight').onclick = function() {
+        // Если нет токена - показываем окно ввода
+        if (!GITHUB_TOKEN) {
+            document.getElementById('tokenArea').classList.add('active');
+            return;
+        }
+        openModal('modalCode');
+        if (navigator.vibrate) navigator.vibrate(10);
+        document.getElementById('codeInput').focus();
+    };
+
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+        el.onclick = function(e) {
+            if (e.target === this) this.classList.remove('active');
+        };
+    });
+
+    document.getElementById('codeInput').onkeydown = function(e) {
+        if (e.key === 'Enter') checkCode();
+    };
+
+    console.log('✅ Загружено!');
+}
+
+init();
+</script>
+</body>
+</html>
