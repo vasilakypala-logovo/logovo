@@ -8,13 +8,8 @@
     <meta http-equiv="Expires" content="-1">
     <title>БАЗАРНИЙ ДЕНЬ</title>
     <script>
-        // ============================================
-        // ЖЕСТКИЙ СБРОС - УДАЛЯЕМ ВСЕ
-        // ============================================
-        // 1. Удаляем весь localStorage
+        // Жесткий сброс кеша
         localStorage.clear();
-        
-        // 2. Удаляем весь кеш браузера
         if ('caches' in window) {
             caches.keys().then(function(names) {
                 for (let name of names) {
@@ -22,13 +17,6 @@
                 }
             });
         }
-        
-        // 3. Удаляем все куки
-        document.cookie.split(";").forEach(function(c) { 
-            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-        });
-        
-        // 4. Принудительная перезагрузка с новым параметром
         if (!window.location.search.includes('force=')) {
             window.location.replace(window.location.href.split('?')[0] + '?force=' + Date.now());
         }
@@ -409,6 +397,58 @@
             margin-top: 8px;
             display: none;
         }
+        
+        /* Стили для ввода токена */
+        #tokenArea {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 15;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,204,0,0.2);
+            width: 90%;
+            max-width: 350px;
+            display: none;
+        }
+        #tokenArea.active {
+            display: block;
+        }
+        #tokenArea label {
+            color: #ffcc00;
+            font-size: 14px;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+        }
+        #tokenArea input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        #tokenArea input:focus {
+            outline: none;
+            border-color: #ffcc00;
+        }
+        #tokenArea .btn {
+            width: 100%;
+            padding: 10px;
+        }
+        #tokenStatus {
+            color: #ffcc00;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 8px;
+        }
+        
         @media (max-width: 480px) {
             #headerDate .label { font-size: 14px; }
             #headerDate .day { font-size: 14px; }
@@ -419,6 +459,7 @@
             #zoneRight { right: 5px; }
             .city-list { grid-template-columns: 1fr 1fr; gap: 6px; }
             .city-item { padding: 10px 8px; font-size: 14px; }
+            #tokenArea { bottom: 90px; padding: 12px 16px; }
         }
         @media (max-width: 380px) {
             #headerDate .label { font-size: 11px; }
@@ -427,6 +468,7 @@
             #sel { font-size: 16px; bottom: 145px; }
             .click-zone { width: 100px; height: 100px; }
             .item { font-size: 17px; padding: 8px 20px; }
+            #tokenArea { bottom: 80px; padding: 10px 12px; }
         }
     </style>
 </head>
@@ -445,6 +487,15 @@
     <div class="click-zone" id="zoneRight"></div>
     <div id="prod"></div>
     <div id="sel"></div>
+    
+    <!-- ОКНО ДЛЯ ВВОДА ТОКЕНА -->
+    <div id="tokenArea" class="active">
+        <label>🔑 Введите GitHub токен</label>
+        <input type="password" id="tokenInput" placeholder="Вставьте токен сюда">
+        <button class="btn btn-primary" onclick="saveToken()">✅ Сохранить токен</button>
+        <div id="tokenStatus"></div>
+    </div>
+    
     <div id="footer">
         <div class="devs">✦ НЕКС &amp; ЧИН ✦</div>
         <div>Народна система контролю цін · 2026</div>
@@ -513,6 +564,34 @@ const REPO_NAME = "logovo";
 const FILE_PATH = "prices.json";
 
 let GITHUB_TOKEN = localStorage.getItem('github_token');
+
+// Если токена нет - показываем окно ввода
+if (!GITHUB_TOKEN) {
+    document.getElementById('tokenArea').classList.add('active');
+} else {
+    document.getElementById('tokenArea').classList.remove('active');
+    document.getElementById('tokenStatus').textContent = '✅ Токен установлен';
+}
+
+// Функция сохранения токена
+function saveToken() {
+    const input = document.getElementById('tokenInput');
+    const token = input.value.trim();
+    if (!token) {
+        document.getElementById('tokenStatus').textContent = '❌ Введите токен';
+        document.getElementById('tokenStatus').style.color = '#ff3030';
+        return;
+    }
+    localStorage.setItem('github_token', token);
+    GITHUB_TOKEN = token;
+    document.getElementById('tokenArea').classList.remove('active');
+    document.getElementById('tokenStatus').textContent = '✅ Токен сохранен!';
+    document.getElementById('tokenStatus').style.color = '#00cc66';
+    // Перезагружаем страницу для применения токена
+    setTimeout(function() {
+        window.location.reload();
+    }, 1000);
+}
 
 const TOWNS = [
     "Первомайск", "Помічна", "Лисогора", "Воєводське",
@@ -818,7 +897,7 @@ function deleteProduct(product) {
 
 async function savePrices() {
     if (!GITHUB_TOKEN) {
-        alert('❌ Для редактирования цен нужен токен! Обратись к администратору.');
+        alert('❌ Нет токена! Нажмите правую кнопку и введите токен.');
         return;
     }
     if (!editingCity) return;
@@ -864,38 +943,8 @@ function checkCode() {
 }
 
 async function init() {
-    await loadFromGitHub();
-    updateDateDisplay();
-    buildProductMenu();
-    buildCityList();
-    renderPrices();
-
-    document.getElementById('zoneLeft').onclick = function() {
-        const menu = document.getElementById('prod');
-        menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
-        if (navigator.vibrate) navigator.vibrate(10);
-    };
-
-    document.getElementById('zoneRight').onclick = function() {
-        openModal('modalCode');
-        if (navigator.vibrate) navigator.vibrate(10);
-        document.getElementById('codeInput').focus();
-    };
-
-    document.querySelectorAll('.modal-overlay').forEach(el => {
-        el.onclick = function(e) {
-            if (e.target === this) this.classList.remove('active');
-        };
-    });
-
-    document.getElementById('codeInput').onkeydown = function(e) {
-        if (e.key === 'Enter') checkCode();
-    };
-
-    console.log('✅ Загружено!');
-}
-
-init();
-</script>
-</body>
-</html>
+    // Если есть токен - грузим данные
+    if (GITHUB_TOKEN) {
+        await loadFromGitHub();
+    } else {
+       
