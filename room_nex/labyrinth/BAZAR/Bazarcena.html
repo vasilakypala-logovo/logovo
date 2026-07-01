@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -13,7 +13,7 @@
         }
     </script>
     <style>
-        /* ... весь CSS такой же, добавлю только новое для кнопки */
+        /* ... весь CSS такий же, додаю нове для кнопки */
         .token-close-btn {
             background: none;
             border: none;
@@ -40,7 +40,7 @@
             font-size: 14px;
             font-weight: 600;
         }
-        /* остальные стили такие же как были */
+        /* інші стилі такі ж як були */
         * {
             -webkit-touch-callout: none;
             -webkit-user-select: none;
@@ -418,7 +418,7 @@
             display: none;
         }
         
-        /* Окно для ввода токена */
+        /* Вікно для введення токена */
         #tokenArea {
             position: absolute;
             bottom: 100px;
@@ -522,7 +522,7 @@
     <div id="prod"></div>
     <div id="sel"></div>
     
-    <!-- Окно для ввода токена с кнопкой закрытия -->
+    <!-- Вікно для введення токена з кнопкою закриття -->
     <div id="tokenArea">
         <div class="token-header">
             <label>🔑 Введите GitHub токен</label>
@@ -541,7 +541,7 @@
     </div>
 </div>
 
-<!-- МОДАЛЬНЫЕ ОКНА -->
+<!-- МОДАЛЬНІ ВІКНА -->
 <div class="modal-overlay" id="modalCity">
     <div class="modal">
         <div class="modal-header">
@@ -575,28 +575,9 @@
     </div>
 </div>
 
-<div class="modal-overlay" id="modalCode">
-    <div class="modal">
-        <div class="modal-header">
-            <h2>🔑 Введите код</h2>
-            <button class="modal-close" onclick="closeModal('modalCode')">✕</button>
-        </div>
-        <div class="modal-body">
-            <div class="code-input-area">
-                <input type="password" id="codeInput" maxlength="10" inputmode="numeric">
-            </div>
-            <div class="code-error" id="codeError">❌ Неверный код</div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeModal('modalCode')">Отмена</button>
-            <button class="btn btn-primary" onclick="checkCode()">✅ Войти</button>
-        </div>
-    </div>
-</div>
-
 <script>
 // ============================================
-//  ОСНОВНОЙ КОД
+//  ОСНОВНИЙ КОД
 // ============================================
 const REPO_OWNER = "vasilakypala-logovo";
 const REPO_NAME = "logovo";
@@ -609,9 +590,92 @@ let currentProduct = null;
 let editingCity = null;
 let fileSha = null;
 
-// ===== ФУНКЦИИ ДЛЯ ТОКЕНА =====
+// ========== ЛІЧИЛЬНИК ВІДВІДУВАНЬ ==========
 
-// Показать окно
+function updateVisitCounter() {
+    const today = new Date().toDateString();
+    const stored = localStorage.getItem('visitCounter');
+    
+    if (stored) {
+        const data = JSON.parse(stored);
+        if (data.date === today) {
+            data.count += 1;
+            localStorage.setItem('visitCounter', JSON.stringify(data));
+            return data.count;
+        } else {
+            const newData = { date: today, count: 1 };
+            localStorage.setItem('visitCounter', JSON.stringify(newData));
+            return 1;
+        }
+    } else {
+        const newData = { date: today, count: 1 };
+        localStorage.setItem('visitCounter', JSON.stringify(newData));
+        return 1;
+    }
+}
+
+const visitCount = updateVisitCounter();
+
+// ========== ТУМАННИЙ КРУЖОК ==========
+
+const fogCircle = document.createElement('div');
+fogCircle.id = 'fogCircle';
+fogCircle.innerHTML = `🌫️ Сьогодні відвідали <strong>${visitCount}</strong>`;
+fogCircle.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-radius: 50%;
+    width: 240px;
+    height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 22px;
+    font-weight: 600;
+    text-align: center;
+    padding: 25px;
+    z-index: 9999;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 0 100px rgba(255,204,0,0.03), inset 0 0 80px rgba(255,255,255,0.02);
+    pointer-events: none;
+    line-height: 1.5;
+    text-shadow: 0 0 40px rgba(255,255,255,0.08);
+    letter-spacing: 1px;
+    user-select: none;
+    font-family: 'Arial', sans-serif;
+`;
+document.body.appendChild(fogCircle);
+
+function hideFogCircle() {
+    const el = document.getElementById('fogCircle');
+    if (el && el.style.display !== 'none') {
+        el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+        el.style.opacity = '0';
+        el.style.transform = 'translate(-50%, -50%) scale(0.7)';
+        setTimeout(() => { el.style.display = 'none'; }, 800);
+    }
+    document.removeEventListener('click', hideFogCircle);
+    document.removeEventListener('touchstart', hideFogCircle);
+}
+
+document.addEventListener('click', hideFogCircle);
+document.addEventListener('touchstart', hideFogCircle);
+
+document.addEventListener('click', function(e) {
+    if (e.target.closest('button') || e.target.closest('.click-zone') || e.target.closest('.item')) {
+        hideFogCircle();
+    }
+});
+
+// ===== ФУНКЦІЇ ДЛЯ ТОКЕНА =====
+
+// Показати вікно
 function showTokenArea() {
     var area = document.getElementById('tokenArea');
     if (area) {
@@ -626,7 +690,7 @@ function showTokenArea() {
     }
 }
 
-// Закрыть окно - ГЛАВНАЯ ФУНКЦИЯ
+// Закрити вікно - ГОЛОВНА ФУНКЦІЯ
 function closeTokenArea() {
     var area = document.getElementById('tokenArea');
     if (area) {
@@ -637,7 +701,7 @@ function closeTokenArea() {
     console.log('❌ Окно токена закрыто');
 }
 
-// Сохранить токен
+// Зберегти токен
 function saveToken() {
     var input = document.getElementById('tokenInput');
     var token = input ? input.value.trim() : '';
@@ -659,14 +723,14 @@ function saveToken() {
         status.style.color = '#00cc66';
     }
     
-    // Закрываем окно и загружаем данные
+    // Закриваємо вікно і завантажуємо дані
     setTimeout(function() {
         closeTokenArea();
         loadData();
     }, 800);
 }
 
-// ===== ЗАГРУЗКА ДАННЫХ =====
+// ===== ЗАВАНТАЖЕННЯ ДАНИХ =====
 
 async function loadData() {
     var loading = document.getElementById('loading');
@@ -699,7 +763,7 @@ async function loadData() {
             }
         }
         
-        // Публичный доступ
+        // Публічний доступ
         var url2 = 'https://raw.githubusercontent.com/' + REPO_OWNER + '/' + REPO_NAME + '/main/' + FILE_PATH;
         var resp2 = await fetch(url2);
         
@@ -753,7 +817,7 @@ function updateUI() {
     renderPrices();
 }
 
-// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+// ===== ДОПОМІЖНІ ФУНКЦІЇ =====
 
 function utf8ToBase64(str) {
     var encoder = new TextEncoder();
@@ -818,7 +882,7 @@ async function saveToGitHub(create) {
     }
 }
 
-// ===== ДАННЫЕ =====
+// ===== ДАНІ =====
 
 var TOWNS = [
     "Первомайск", "Помічна", "Лисогора", "Воєводське",
@@ -940,10 +1004,6 @@ function openModal(id) {
 
 function closeModal(id) {
     document.getElementById(id).classList.remove('active');
-    var err = document.getElementById('codeError');
-    if (err) err.style.display = 'none';
-    var inp = document.getElementById('codeInput');
-    if (inp) inp.value = '';
 }
 
 function openCitySelector() {
@@ -1071,22 +1131,7 @@ async function savePrices() {
     alert('✅ Цены сохранены в репозитории!');
 }
 
-function checkCode() {
-    var input = document.getElementById('codeInput');
-    var code = input.value.trim();
-    var error = document.getElementById('codeError');
-    if (code === '777') {
-        error.style.display = 'none';
-        closeModal('modalCode');
-        openCitySelector();
-    } else {
-        error.style.display = 'block';
-        input.value = '';
-        if (navigator.vibrate) navigator.vibrate(50);
-    }
-}
-
-// ===== ИНИЦИАЛИЗАЦИЯ =====
+// ===== ІНІЦІАЛІЗАЦІЯ =====
 
 async function init() {
     await loadData();
@@ -1102,9 +1147,8 @@ async function init() {
             showTokenArea();
             return;
         }
-        openModal('modalCode');
+        openCitySelector();
         if (navigator.vibrate) navigator.vibrate(10);
-        document.getElementById('codeInput').focus();
     };
 
     var overlays = document.querySelectorAll('.modal-overlay');
@@ -1113,10 +1157,6 @@ async function init() {
             if (e.target === this) this.classList.remove('active');
         };
     }
-
-    document.getElementById('codeInput').onkeydown = function(e) {
-        if (e.key === 'Enter') checkCode();
-    };
 
     console.log('✅ Загружено!');
 }
