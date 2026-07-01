@@ -1031,7 +1031,11 @@ async function init() {
         if (navigator.vibrate) navigator.vibrate(10);
         document.getElementById('codeInput').focus();
     };
-
+// Функция закрытия окна токена
+function closeTokenArea() {
+    document.getElementById('tokenArea').classList.remove('active');
+    document.getElementById('tokenStatus').textContent = '';
+}
     document.querySelectorAll('.modal-overlay').forEach(el => {
         el.onclick = function(e) {
             if (e.target === this) this.classList.remove('active');
