@@ -13,6 +13,34 @@
         }
     </script>
     <style>
+        /* ... весь CSS такой же, добавлю только новое для кнопки */
+        .token-close-btn {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0 8px;
+            line-height: 1;
+            touch-action: manipulation;
+        }
+        .token-close-btn:active {
+            color: #fff;
+            transform: scale(1.2);
+        }
+        .token-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .token-header label {
+            margin: 0;
+            color: #ffcc00;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        /* остальные стили такие же как были */
         * {
             -webkit-touch-callout: none;
             -webkit-user-select: none;
@@ -409,14 +437,6 @@
         #tokenArea.active {
             display: block;
         }
-        #tokenArea label {
-            color: #ffcc00;
-            font-size: 14px;
-            font-weight: 600;
-            display: block;
-            margin-bottom: 10px;
-            text-align: center;
-        }
         #tokenArea input {
             width: 100%;
             padding: 12px 14px;
@@ -459,31 +479,6 @@
         }
         #adminBtn:active {
             background: rgba(255,204,0,0.3);
-        }
-        
-        .token-close {
-            background: none;
-            border: none;
-            color: #999;
-            font-size: 22px;
-            cursor: pointer;
-            padding: 0 8px;
-            line-height: 1;
-        }
-        .token-close:active {
-            color: #fff;
-        }
-        .token-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .token-header label {
-            margin: 0;
-            color: #ffcc00;
-            font-size: 14px;
-            font-weight: 600;
         }
         
         @media (max-width: 480px) {
@@ -531,7 +526,7 @@
     <div id="tokenArea">
         <div class="token-header">
             <label>🔑 Введите GitHub токен</label>
-            <button class="token-close" onclick="closeTokenArea()">✕</button>
+            <button class="token-close-btn" onclick="closeTokenArea()">✕</button>
         </div>
         <input type="password" id="tokenInput" placeholder="Вставьте токен сюда">
         <button class="btn btn-primary" onclick="saveToken()">✅ Сохранить токен</button>
@@ -614,65 +609,84 @@ let currentProduct = null;
 let editingCity = null;
 let fileSha = null;
 
-// Функция показа окна токена
+// ===== ФУНКЦИИ ДЛЯ ТОКЕНА =====
+
+// Показать окно
 function showTokenArea() {
-    document.getElementById('tokenArea').classList.add('active');
-    document.getElementById('tokenInput').focus();
-    document.getElementById('tokenStatus').textContent = '';
+    var area = document.getElementById('tokenArea');
+    if (area) {
+        area.classList.add('active');
+        var input = document.getElementById('tokenInput');
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
+        var status = document.getElementById('tokenStatus');
+        if (status) status.textContent = '';
+    }
 }
 
-// Функция закрытия окна токена
+// Закрыть окно - ГЛАВНАЯ ФУНКЦИЯ
 function closeTokenArea() {
-    document.getElementById('tokenArea').classList.remove('active');
-    document.getElementById('tokenStatus').textContent = '';
+    var area = document.getElementById('tokenArea');
+    if (area) {
+        area.classList.remove('active');
+        var status = document.getElementById('tokenStatus');
+        if (status) status.textContent = '';
+    }
+    console.log('❌ Окно токена закрыто');
 }
 
-// Функция сохранения токена
+// Сохранить токен
 function saveToken() {
-    const input = document.getElementById('tokenInput');
-    const token = input.value.trim();
-    const status = document.getElementById('tokenStatus');
+    var input = document.getElementById('tokenInput');
+    var token = input ? input.value.trim() : '';
+    var status = document.getElementById('tokenStatus');
     
     if (!token) {
-        status.textContent = '❌ Введите токен';
-        status.style.color = '#ff3030';
+        if (status) {
+            status.textContent = '❌ Введите токен';
+            status.style.color = '#ff3030';
+        }
         return;
     }
     
     localStorage.setItem('github_token', token);
     GITHUB_TOKEN = token;
     
-    status.textContent = '✅ Токен сохранен! Загрузка...';
-    status.style.color = '#00cc66';
+    if (status) {
+        status.textContent = '✅ Токен сохранен! Загрузка...';
+        status.style.color = '#00cc66';
+    }
     
+    // Закрываем окно и загружаем данные
     setTimeout(function() {
-        document.getElementById('tokenArea').classList.remove('active');
-        status.textContent = '';
+        closeTokenArea();
         loadData();
     }, 800);
 }
 
-// Функция загрузки данных
+// ===== ЗАГРУЗКА ДАННЫХ =====
+
 async function loadData() {
-    const loading = document.getElementById('loading');
-    loading.style.display = 'flex';
+    var loading = document.getElementById('loading');
+    if (loading) loading.style.display = 'flex';
     
     try {
-        // Пробуем загрузить с GitHub (если есть токен)
         if (GITHUB_TOKEN) {
-            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-            const resp = await fetch(url, {
+            var url = 'https://api.github.com/repos/' + REPO_OWNER + '/' + REPO_NAME + '/contents/' + FILE_PATH;
+            var resp = await fetch(url, {
                 headers: {
-                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Authorization': 'token ' + GITHUB_TOKEN,
                     'Accept': 'application/vnd.github.v3+json'
                 }
             });
             
             if (resp.ok) {
-                const data = await resp.json();
+                var data = await resp.json();
                 fileSha = data.sha;
-                const content = base64ToUtf8(data.content);
-                const parsed = JSON.parse(content);
+                var content = base64ToUtf8(data.content);
+                var parsed = JSON.parse(content);
                 
                 if (parsed.products) allProducts = parsed.products;
                 if (parsed.prices) pricesData = parsed.prices;
@@ -680,56 +694,56 @@ async function loadData() {
                 localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
                 console.log('✅ Загружено с GitHub (с токеном)');
                 updateUI();
-                loading.style.display = 'none';
+                if (loading) loading.style.display = 'none';
                 return;
             }
         }
         
         // Публичный доступ
-        const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${FILE_PATH}`;
-        const resp = await fetch(url);
+        var url2 = 'https://raw.githubusercontent.com/' + REPO_OWNER + '/' + REPO_NAME + '/main/' + FILE_PATH;
+        var resp2 = await fetch(url2);
         
-        if (resp.ok) {
-            const text = await resp.text();
-            const parsed = JSON.parse(text);
+        if (resp2.ok) {
+            var text = await resp2.text();
+            var parsed2 = JSON.parse(text);
             
-            if (parsed.products) allProducts = parsed.products;
-            if (parsed.prices) pricesData = parsed.prices;
+            if (parsed2.products) allProducts = parsed2.products;
+            if (parsed2.prices) pricesData = parsed2.prices;
             
             localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
             console.log('✅ Загружено с GitHub (публичный)');
             updateUI();
-            loading.style.display = 'none';
+            if (loading) loading.style.display = 'none';
             return;
         }
         
         // Кеш
-        const cache = JSON.parse(localStorage.getItem('priceCache'));
+        var cache = JSON.parse(localStorage.getItem('priceCache'));
         if (cache) {
             allProducts = cache.products || allProducts;
             pricesData = cache.prices || {};
             console.log('⚠️ Использую локальный кэш');
             updateUI();
-            loading.style.display = 'none';
+            if (loading) loading.style.display = 'none';
             return;
         }
         
     } catch (e) {
         console.error('❌ Ошибка загрузки:', e);
         try {
-            const cache = JSON.parse(localStorage.getItem('priceCache'));
-            if (cache) {
-                allProducts = cache.products || allProducts;
-                pricesData = cache.prices || {};
+            var cache2 = JSON.parse(localStorage.getItem('priceCache'));
+            if (cache2) {
+                allProducts = cache2.products || allProducts;
+                pricesData = cache2.prices || {};
                 console.log('⚠️ Использую локальный кэш (после ошибки)');
                 updateUI();
-                loading.style.display = 'none';
+                if (loading) loading.style.display = 'none';
                 return;
             }
         } catch(e2) {}
     }
     
-    loading.style.display = 'none';
+    if (loading) loading.style.display = 'none';
 }
 
 function updateUI() {
@@ -739,20 +753,43 @@ function updateUI() {
     renderPrices();
 }
 
-async function saveToGitHub(create = false) {
+// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+
+function utf8ToBase64(str) {
+    var encoder = new TextEncoder();
+    var bytes = encoder.encode(str);
+    var binary = '';
+    for (var i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
+
+function base64ToUtf8(base64) {
+    var binary = atob(base64);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    var decoder = new TextDecoder('utf-8');
+    return decoder.decode(bytes);
+}
+
+async function saveToGitHub(create) {
+    if (create === undefined) create = false;
     if (!GITHUB_TOKEN) {
         alert('❌ Нет токена! Нажми на шестеренку ⚙️ и введи токен.');
         return false;
     }
     
     try {
-        const data = {
+        var data = {
             products: allProducts,
             prices: pricesData
         };
-        const jsonStr = JSON.stringify(data, null, 2);
-        const content = utf8ToBase64(jsonStr);
-        const payload = {
+        var jsonStr = JSON.stringify(data, null, 2);
+        var content = utf8ToBase64(jsonStr);
+        var payload = {
             message: "Обновление цен",
             content: content,
             branch: "main"
@@ -760,18 +797,18 @@ async function saveToGitHub(create = false) {
         if (!create && fileSha) {
             payload.sha = fileSha;
         }
-        const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-        const resp = await fetch(url, {
+        var url = 'https://api.github.com/repos/' + REPO_OWNER + '/' + REPO_NAME + '/contents/' + FILE_PATH;
+        var resp = await fetch(url, {
             method: 'PUT',
             headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Authorization': 'token ' + GITHUB_TOKEN,
                 'Content-Type': 'application/json',
                 'Accept': 'application/vnd.github.v3+json'
             },
             body: JSON.stringify(payload)
         });
         if (!resp.ok) throw new Error('Ошибка сохранения');
-        const result = await resp.json();
+        var result = await resp.json();
         fileSha = result.content.sha;
         localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
         return true;
@@ -781,33 +818,15 @@ async function saveToGitHub(create = false) {
     }
 }
 
-function utf8ToBase64(str) {
-    const encoder = new TextEncoder();
-    const bytes = encoder.encode(str);
-    let binary = '';
-    for (let i = 0; i < bytes.length; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary);
-}
+// ===== ДАННЫЕ =====
 
-function base64ToUtf8(base64) {
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i);
-    }
-    const decoder = new TextDecoder('utf-8');
-    return decoder.decode(bytes);
-}
-
-const TOWNS = [
+var TOWNS = [
     "Первомайск", "Помічна", "Лисогора", "Воєводське",
     "Благодатне", "Семенівка", "Арбузинка", "Братське",
     "Южноукраїнськ", "Вознесенськ"
 ];
 
-const TOWN_COORDS = {
+var TOWN_COORDS = {
     "Первомайск": {x:15, y:8}, "Помічна": {x:85, y:8},
     "Лисогора": {x:55, y:15}, "Воєводське": {x:50, y:22},
     "Благодатне": {x:35, y:35}, "Семенівка": {x:15, y:44},
@@ -815,7 +834,7 @@ const TOWN_COORDS = {
     "Южноукраїнськ": {x:18, y:62}, "Вознесенськ": {x:50, y:70}
 };
 
-const MONTHS_UA = [
+var MONTHS_UA = [
     "СІЧНЯ","ЛЮТОГО","БЕРЕЗНЯ","КВІТНЯ","ТРАВНЯ","ЧЕРВНЯ",
     "ЛИПНЯ","СЕРПНЯ","ВЕРЕСНЯ","ЖОВТНЯ","ЛИСТОПАДА","ГРУДНЯ"
 ];
@@ -829,19 +848,27 @@ function hasAnyPrices(city) {
 }
 
 function updateDateDisplay() {
-    const now = new Date();
-    document.getElementById('dayNumber').textContent = now.getDate();
-    document.getElementById('monthName').textContent = MONTHS_UA[now.getMonth()];
+    var now = new Date();
+    var dayEl = document.getElementById('dayNumber');
+    var monthEl = document.getElementById('monthName');
+    if (dayEl) dayEl.textContent = now.getDate();
+    if (monthEl) monthEl.textContent = MONTHS_UA[now.getMonth()];
 }
 
 function renderPrices() {
-    document.querySelectorAll('.price').forEach(el => el.remove());
+    var prices = document.querySelectorAll('.price');
+    for (var i = 0; i < prices.length; i++) {
+        prices[i].remove();
+    }
     if (!currentProduct) return;
-    TOWNS.forEach(town => {
-        const price = getPrice(town, currentProduct);
-        const coords = TOWN_COORDS[town];
-        if (!coords) return;
-        const div = document.createElement('div');
+    
+    for (var t = 0; t < TOWNS.length; t++) {
+        var town = TOWNS[t];
+        var price = getPrice(town, currentProduct);
+        var coords = TOWN_COORDS[town];
+        if (!coords) continue;
+        
+        var div = document.createElement('div');
         div.className = 'price';
         div.style.left = coords.x + '%';
         div.style.top = coords.y + '%';
@@ -854,28 +881,31 @@ function renderPrices() {
         }
         div.style.display = 'block';
         document.getElementById('wrap').appendChild(div);
-    });
+    }
 }
 
 function buildProductMenu() {
-    const menu = document.getElementById('prod');
+    var menu = document.getElementById('prod');
     menu.innerHTML = '';
-    allProducts.forEach(p => {
-        const div = document.createElement('div');
+    for (var i = 0; i < allProducts.length; i++) {
+        var p = allProducts[i];
+        var div = document.createElement('div');
         div.className = 'item';
         div.textContent = p;
-        div.onclick = (e) => {
-            e.stopPropagation();
-            selectProduct(p);
-        };
+        div.onclick = (function(product) {
+            return function(e) {
+                e.stopPropagation();
+                selectProduct(product);
+            };
+        })(p);
         menu.appendChild(div);
-    });
+    }
 }
 
 function selectProduct(product) {
     currentProduct = product;
     document.getElementById('prod').style.display = 'none';
-    const sel = document.getElementById('sel');
+    var sel = document.getElementById('sel');
     sel.style.display = 'block';
     sel.textContent = product;
     renderPrices();
@@ -883,10 +913,11 @@ function selectProduct(product) {
 }
 
 function buildCityList() {
-    const container = document.getElementById('cityList');
+    var container = document.getElementById('cityList');
     container.innerHTML = '';
-    TOWNS.forEach(town => {
-        const div = document.createElement('div');
+    for (var i = 0; i < TOWNS.length; i++) {
+        var town = TOWNS[i];
+        var div = document.createElement('div');
         div.className = 'city-item';
         if (hasAnyPrices(town)) {
             div.classList.add('has-prices');
@@ -894,9 +925,13 @@ function buildCityList() {
         } else {
             div.innerHTML = town + '<span class="badge">⬜ нет цен</span>';
         }
-        div.onclick = () => openPriceEditor(town);
+        div.onclick = (function(city) {
+            return function() {
+                openPriceEditor(city);
+            };
+        })(town);
         container.appendChild(div);
-    });
+    }
 }
 
 function openModal(id) {
@@ -905,9 +940,9 @@ function openModal(id) {
 
 function closeModal(id) {
     document.getElementById(id).classList.remove('active');
-    const err = document.getElementById('codeError');
+    var err = document.getElementById('codeError');
     if (err) err.style.display = 'none';
-    const inp = document.getElementById('codeInput');
+    var inp = document.getElementById('codeInput');
     if (inp) inp.value = '';
 }
 
@@ -929,42 +964,47 @@ function openPriceEditor(city) {
 }
 
 function buildProductEditor(city) {
-    const container = document.getElementById('productList');
+    var container = document.getElementById('productList');
     container.innerHTML = '';
-    allProducts.forEach(product => {
-        const row = document.createElement('div');
+    for (var i = 0; i < allProducts.length; i++) {
+        var product = allProducts[i];
+        var row = document.createElement('div');
         row.className = 'product-row';
-        const price = getPrice(city, product);
-        const priceValue = (price && price > 0) ? price : '';
-        const nameSpan = document.createElement('span');
+        var price = getPrice(city, product);
+        var priceValue = (price && price > 0) ? price : '';
+        var nameSpan = document.createElement('span');
         nameSpan.className = 'pname';
         nameSpan.textContent = product;
-        const input = document.createElement('input');
+        var input = document.createElement('input');
         input.type = 'number';
         input.min = '0';
         input.step = '1';
         input.value = priceValue;
         input.placeholder = '—';
         input.dataset.product = product;
-        const unitSpan = document.createElement('span');
+        var unitSpan = document.createElement('span');
         unitSpan.className = 'unit';
         unitSpan.textContent = 'грн.';
-        const deleteBtn = document.createElement('button');
+        var deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-product';
         deleteBtn.textContent = '✕';
-        deleteBtn.onclick = () => deleteProduct(product);
+        deleteBtn.onclick = (function(prod) {
+            return function() {
+                deleteProduct(prod);
+            };
+        })(product);
         row.appendChild(nameSpan);
         row.appendChild(input);
         row.appendChild(unitSpan);
         row.appendChild(deleteBtn);
         container.appendChild(row);
-    });
+    }
     document.getElementById('newProductName').value = '';
 }
 
 function addProduct() {
-    const input = document.getElementById('newProductName');
-    const name = input.value.trim().toUpperCase();
+    var input = document.getElementById('newProductName');
+    var name = input.value.trim().toUpperCase();
     if (!name) { alert('Введите название!'); return; }
     if (allProducts.indexOf(name) !== -1) { alert('Уже есть!'); return; }
     allProducts.push(name);
@@ -977,17 +1017,21 @@ function addProduct() {
 
 function deleteProduct(product) {
     if (!confirm('Удалить "' + product + '" из всех городов?')) return;
-    allProducts = allProducts.filter(p => p !== product);
-    TOWNS.forEach(city => {
+    allProducts = allProducts.filter(function(p) { return p !== product; });
+    for (var i = 0; i < TOWNS.length; i++) {
+        var city = TOWNS[i];
         if (pricesData[city]) {
             delete pricesData[city][product];
             if (Object.keys(pricesData[city]).length === 0) delete pricesData[city];
         }
-    });
+    }
     if (currentProduct === product) {
         currentProduct = null;
         document.getElementById('sel').style.display = 'none';
-        document.querySelectorAll('.price').forEach(el => el.remove());
+        var prices = document.querySelectorAll('.price');
+        for (var j = 0; j < prices.length; j++) {
+            prices[j].remove();
+        }
     }
     buildProductEditor(editingCity);
     buildProductMenu();
@@ -1000,10 +1044,11 @@ async function savePrices() {
         return;
     }
     if (!editingCity) return;
-    const inputs = document.querySelectorAll('#productList .product-row input[type="number"]');
-    inputs.forEach(input => {
-        const product = input.dataset.product;
-        const value = parseFloat(input.value.trim());
+    var inputs = document.querySelectorAll('#productList .product-row input[type="number"]');
+    for (var i = 0; i < inputs.length; i++) {
+        var input = inputs[i];
+        var product = input.dataset.product;
+        var value = parseFloat(input.value.trim());
         if (value && value > 0) {
             if (!pricesData[editingCity]) pricesData[editingCity] = {};
             pricesData[editingCity][product] = value;
@@ -1013,8 +1058,8 @@ async function savePrices() {
                 if (Object.keys(pricesData[editingCity]).length === 0) delete pricesData[editingCity];
             }
         }
-    });
-    const ok = await saveToGitHub();
+    }
+    var ok = await saveToGitHub();
     if (!ok) {
         alert('❌ Не удалось сохранить. Проверь токен.');
         return;
@@ -1027,9 +1072,9 @@ async function savePrices() {
 }
 
 function checkCode() {
-    const input = document.getElementById('codeInput');
-    const code = input.value.trim();
-    const error = document.getElementById('codeError');
+    var input = document.getElementById('codeInput');
+    var code = input.value.trim();
+    var error = document.getElementById('codeError');
     if (code === '777') {
         error.style.display = 'none';
         closeModal('modalCode');
@@ -1041,11 +1086,13 @@ function checkCode() {
     }
 }
 
+// ===== ИНИЦИАЛИЗАЦИЯ =====
+
 async function init() {
     await loadData();
     
     document.getElementById('zoneLeft').onclick = function() {
-        const menu = document.getElementById('prod');
+        var menu = document.getElementById('prod');
         menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
         if (navigator.vibrate) navigator.vibrate(10);
     };
@@ -1060,11 +1107,12 @@ async function init() {
         document.getElementById('codeInput').focus();
     };
 
-    document.querySelectorAll('.modal-overlay').forEach(el => {
-        el.onclick = function(e) {
+    var overlays = document.querySelectorAll('.modal-overlay');
+    for (var i = 0; i < overlays.length; i++) {
+        overlays[i].onclick = function(e) {
             if (e.target === this) this.classList.remove('active');
         };
-    });
+    }
 
     document.getElementById('codeInput').onkeydown = function(e) {
         if (e.key === 'Enter') checkCode();
