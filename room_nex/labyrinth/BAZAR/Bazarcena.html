@@ -7,6 +7,20 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>БАЗАРНИЙ ДЕНЬ</title>
+    <script>
+        // ============================================
+        // ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ (работает на телефонах)
+        // ============================================
+        (function() {
+            // Если нет параметра ?t= - добавляем его принудительно
+            if (!window.location.search.includes('t=')) {
+                const url = window.location.href.split('?')[0];
+                const timestamp = Date.now();
+                window.location.replace(url + '?t=' + timestamp);
+                return;
+            }
+        })();
+    </script>
     <style>
         * {
             -webkit-touch-callout: none;
@@ -482,14 +496,11 @@
 // ============================================
 //  ВЕРСИЯ ПРИЛОЖЕНИЯ - МЕНЯЙ ПРИ ОБНОВЛЕНИИ!
 // ============================================
-const APP_VERSION = "1.0.5";
+const APP_VERSION = "2.0.0";
 
-// Проверяем версию
-const storedVersion = localStorage.getItem('app_version');
-if (storedVersion !== APP_VERSION) {
-    console.log('🔄 Обновление до версии', APP_VERSION);
-    
-    // Очищаем весь кеш
+// Принудительная очистка старого кеша
+if (localStorage.getItem('app_version') !== APP_VERSION) {
+    // Очищаем весь кеш браузера
     if ('caches' in window) {
         caches.keys().then(function(names) {
             for (let name of names) {
@@ -506,10 +517,10 @@ if (storedVersion !== APP_VERSION) {
     }
     localStorage.setItem('app_version', APP_VERSION);
     
-    // Принудительная перезагрузка
-    setTimeout(() => {
+    // Перезагружаем страницу
+    setTimeout(function() {
         window.location.reload(true);
-    }, 300);
+    }, 500);
 }
 
 // ============================================
