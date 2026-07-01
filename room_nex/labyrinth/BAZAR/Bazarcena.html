@@ -8,15 +8,6 @@
     <meta http-equiv="Expires" content="-1">
     <title>БАЗАРНИЙ ДЕНЬ</title>
     <script>
-        // Жесткий сброс кеша
-        localStorage.clear();
-        if ('caches' in window) {
-            caches.keys().then(function(names) {
-                for (let name of names) {
-                    caches.delete(name);
-                }
-            });
-        }
         if (!window.location.search.includes('force=')) {
             window.location.replace(window.location.href.split('?')[0] + '?force=' + Date.now());
         }
@@ -208,7 +199,7 @@
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background: #1a1a1a;
-            display: none;
+            display: flex;
             align-items: center;
             justify-content: center;
             z-index: 999;
@@ -399,7 +390,7 @@
             display: none;
         }
         
-        /* Окно для ввода токена */
+        /* Окно для ввода токена - ТОЛЬКО ДЛЯ АДМИНА */
         #tokenArea {
             position: absolute;
             bottom: 100px;
@@ -452,6 +443,25 @@
             margin-top: 10px;
         }
         
+        /* Кнопка админа - маленькая и незаметная */
+        #adminBtn {
+            position: absolute;
+            bottom: 140px;
+            right: 15px;
+            z-index: 25;
+            background: rgba(255,204,0,0.1);
+            border: 1px solid rgba(255,204,0,0.1);
+            color: rgba(255,204,0,0.3);
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        #adminBtn:active {
+            background: rgba(255,204,0,0.3);
+        }
+        
         @media (max-width: 480px) {
             #headerDate .label { font-size: 14px; }
             #headerDate .day { font-size: 14px; }
@@ -463,6 +473,7 @@
             .city-list { grid-template-columns: 1fr 1fr; gap: 6px; }
             .city-item { padding: 10px 8px; font-size: 14px; }
             #tokenArea { bottom: 90px; padding: 15px; }
+            #adminBtn { bottom: 130px; right: 10px; font-size: 10px; padding: 3px 8px; }
         }
         @media (max-width: 380px) {
             #headerDate .label { font-size: 11px; }
@@ -472,12 +483,13 @@
             .click-zone { width: 100px; height: 100px; }
             .item { font-size: 17px; padding: 8px 20px; }
             #tokenArea { bottom: 80px; padding: 12px; }
+            #adminBtn { bottom: 120px; right: 8px; }
         }
     </style>
 </head>
 <body>
 
-<div id="loading" style="display:flex;">⏳ ЗАВАНТАЖЕННЯ ЦІН...</div>
+<div id="loading">⏳ ЗАВАНТАЖЕННЯ ЦІН...</div>
 
 <div id="wrap">
     <img id="map" src="kartashema.png" alt="Народна карта цін" draggable="false">
@@ -491,13 +503,16 @@
     <div id="prod"></div>
     <div id="sel"></div>
     
-    <!-- ОКНО ДЛЯ ВВОДА ТОКЕНА -->
+    <!-- Окно для ввода токена - появляется только при клике на adminBtn -->
     <div id="tokenArea">
-        <label>🔑 Введите GitHub токен</label>
+        <label>🔑 Введите GitHub токен (для админа)</label>
         <input type="password" id="tokenInput" placeholder="Вставьте токен сюда">
         <button class="btn btn-primary" onclick="saveToken()">✅ Сохранить токен</button>
         <div id="tokenStatus"></div>
     </div>
+    
+    <!-- Кнопка для админа - незаметная для пользователей -->
+    <button id="adminBtn" onclick="showTokenArea()">⚙️</button>
     
     <div id="footer">
         <div class="devs">✦ НЕКС &amp; ЧИН ✦</div>
@@ -567,6 +582,17 @@ const REPO_NAME = "logovo";
 const FILE_PATH = "prices.json";
 
 let GITHUB_TOKEN = localStorage.getItem('github_token');
+let allProducts = ["МЕД", "КАРТОШКА", "САЛО", "МЯКИШ", "КАВУНИ"];
+let pricesData = {};
+let currentProduct = null;
+let editingCity = null;
+let fileSha = null;
+
+// Функция показа окна токена (по клику на шестеренку)
+function showTokenArea() {
+    document.getElementById('tokenArea').classList.add('active');
+    document.getElementById('tokenInput').focus();
+}
 
 // Функция сохранения токена
 function saveToken() {
@@ -586,66 +612,104 @@ function saveToken() {
     status.textContent = '✅ Токен сохранен! Загрузка...';
     status.style.color = '#00cc66';
     
-    // Скрываем окно токена
     document.getElementById('tokenArea').classList.remove('active');
-    
-    // Загружаем данные
     loadData();
 }
 
-// Функция загрузки данных
+// Функция загрузки данных (без токена - публичная)
 async function loadData() {
     const loading = document.getElementById('loading');
     loading.style.display = 'flex';
     
     try {
-        const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-        const resp = await fetch(url, {
-            headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`,
-                'Accept': 'application/vnd.github.v3+json'
+        // Пробуем загрузить с GitHub (если есть токен)
+        if (GITHUB_TOKEN) {
+            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+            const resp = await fetch(url, {
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            
+            if (resp.ok) {
+                const data = await resp.json();
+                fileSha = data.sha;
+                const content = base64ToUtf8(data.content);
+                const parsed = JSON.parse(content);
+                
+                if (parsed.products) allProducts = parsed.products;
+                if (parsed.prices) pricesData = parsed.prices;
+                
+                localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
+                console.log('✅ Загружено с GitHub (с токеном)');
+                updateUI();
+                loading.style.display = 'none';
+                return;
             }
-        });
+        }
+        
+        // Если нет токена или ошибка - пробуем публичный доступ
+        const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${FILE_PATH}`;
+        const resp = await fetch(url);
         
         if (resp.ok) {
-            const data = await resp.json();
-            fileSha = data.sha;
-            const content = base64ToUtf8(data.content);
-            const parsed = JSON.parse(content);
+            const text = await resp.text();
+            const parsed = JSON.parse(text);
             
             if (parsed.products) allProducts = parsed.products;
             if (parsed.prices) pricesData = parsed.prices;
             
             localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
-            console.log('✅ Загружено с GitHub');
-        } else if (resp.status === 404) {
-            if (GITHUB_TOKEN) {
-                await saveToGitHub(true);
-            }
-        } else {
-            throw new Error('Ошибка загрузки');
+            console.log('✅ Загружено с GitHub (публичный доступ)');
+            updateUI();
+            loading.style.display = 'none';
+            return;
         }
+        
+        // Если GitHub не отвечает - берем из кеша
+        const cache = JSON.parse(localStorage.getItem('priceCache'));
+        if (cache) {
+            allProducts = cache.products || allProducts;
+            pricesData = cache.prices || {};
+            console.log('⚠️ Использую локальный кэш');
+            updateUI();
+            loading.style.display = 'none';
+            return;
+        }
+        
     } catch (e) {
-        console.error('❌ Ошибка:', e);
+        console.error('❌ Ошибка загрузки:', e);
+        // Пробуем кеш
         try {
             const cache = JSON.parse(localStorage.getItem('priceCache'));
             if (cache) {
                 allProducts = cache.products || allProducts;
                 pricesData = cache.prices || {};
-                alert('⚠️ Нет доступа к GitHub. Показываю локальный кэш.');
+                console.log('⚠️ Использую локальный кэш (после ошибки)');
+                updateUI();
+                loading.style.display = 'none';
+                return;
             }
         } catch(e2) {}
-    } finally {
-        loading.style.display = 'none';
-        // Обновляем интерфейс
-        updateDateDisplay();
-        buildProductMenu();
-        buildCityList();
-        renderPrices();
     }
+    
+    loading.style.display = 'none';
+}
+
+function updateUI() {
+    updateDateDisplay();
+    buildProductMenu();
+    buildCityList();
+    renderPrices();
 }
 
 async function saveToGitHub(create = false) {
+    if (!GITHUB_TOKEN) {
+        alert('❌ Нет токена! Нажми на шестеренку ⚙️ и введи токен.');
+        return false;
+    }
+    
     try {
         const data = {
             products: allProducts,
@@ -720,12 +784,6 @@ const MONTHS_UA = [
     "СІЧНЯ","ЛЮТОГО","БЕРЕЗНЯ","КВІТНЯ","ТРАВНЯ","ЧЕРВНЯ",
     "ЛИПНЯ","СЕРПНЯ","ВЕРЕСНЯ","ЖОВТНЯ","ЛИСТОПАДА","ГРУДНЯ"
 ];
-
-let allProducts = ["МЕД", "КАРТОШКА", "САЛО", "МЯКИШ", "КАВУНИ"];
-let pricesData = {};
-let currentProduct = null;
-let editingCity = null;
-let fileSha = null;
 
 function getPrice(city, product) {
     return (pricesData[city] && pricesData[city][product]) || null;
@@ -824,6 +882,10 @@ function openCitySelector() {
 }
 
 function openPriceEditor(city) {
+    if (!GITHUB_TOKEN) {
+        alert('❌ Нет токена! Нажми на шестеренку ⚙️ и введи токен.');
+        return;
+    }
     editingCity = city;
     closeModal('modalCity');
     document.getElementById('priceEditorTitle').textContent = '📝 ' + city;
@@ -899,8 +961,7 @@ function deleteProduct(product) {
 
 async function savePrices() {
     if (!GITHUB_TOKEN) {
-        alert('❌ Нет токена!');
-        document.getElementById('tokenArea').classList.add('active');
+        alert('❌ Нет токена! Нажми на шестеренку ⚙️ и введи токен.');
         return;
     }
     if (!editingCity) return;
@@ -947,16 +1008,8 @@ function checkCode() {
 
 // Инициализация
 async function init() {
-    // Проверяем есть ли токен
-    if (GITHUB_TOKEN) {
-        // Токен есть - скрываем окно и грузим данные
-        document.getElementById('tokenArea').classList.remove('active');
-        await loadData();
-    } else {
-        // Токена нет - показываем окно
-        document.getElementById('tokenArea').classList.add('active');
-        document.getElementById('loading').style.display = 'none';
-    }
+    // Сразу загружаем данные (без токена - публичный доступ)
+    await loadData();
     
     // Настройка кнопок
     document.getElementById('zoneLeft').onclick = function() {
@@ -968,6 +1021,7 @@ async function init() {
     document.getElementById('zoneRight').onclick = function() {
         if (!GITHUB_TOKEN) {
             document.getElementById('tokenArea').classList.add('active');
+            document.getElementById('tokenInput').focus();
             return;
         }
         openModal('modalCode');
@@ -988,7 +1042,6 @@ async function init() {
     console.log('✅ Загружено!');
 }
 
-// Запускаем
 init();
 </script>
 </body>
