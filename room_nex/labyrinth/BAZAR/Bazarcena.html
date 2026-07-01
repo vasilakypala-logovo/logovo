@@ -3,22 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Expires" content="-1">
     <title>БАЗАРНИЙ ДЕНЬ</title>
     <script>
         // ============================================
-        // ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ
+        // ЖЕСТКИЙ СБРОС - УДАЛЯЕМ ВСЕ
         // ============================================
-        (function() {
-            if (!window.location.search.includes('t=')) {
-                const url = window.location.href.split('?')[0];
-                const timestamp = Date.now();
-                window.location.replace(url + '?t=' + timestamp);
-                return;
-            }
-        })();
+        // 1. Удаляем весь localStorage
+        localStorage.clear();
+        
+        // 2. Удаляем весь кеш браузера
+        if ('caches' in window) {
+            caches.keys().then(function(names) {
+                for (let name of names) {
+                    caches.delete(name);
+                }
+            });
+        }
+        
+        // 3. Удаляем все куки
+        document.cookie.split(";").forEach(function(c) { 
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+        });
+        
+        // 4. Принудительная перезагрузка с новым параметром
+        if (!window.location.search.includes('force=')) {
+            window.location.replace(window.location.href.split('?')[0] + '?force=' + Date.now());
+        }
     </script>
     <style>
         * {
@@ -493,49 +506,13 @@
 
 <script>
 // ============================================
-//  ВЕРСИЯ ПРИЛОЖЕНИЯ
-// ============================================
-const APP_VERSION = "3.0.0";
-
-// ПРИНУДИТЕЛЬНАЯ ОЧИСТКА СТАРОГО КЕША
-if (localStorage.getItem('app_version') !== APP_VERSION) {
-    // Очищаем весь кеш браузера
-    if ('caches' in window) {
-        caches.keys().then(function(names) {
-            for (let name of names) {
-                caches.delete(name);
-            }
-        });
-    }
-    
-    // СОХРАНЯЕМ ТОЛЬКО ТОКЕН!
-    const token = localStorage.getItem('github_token');
-    localStorage.clear();
-    if (token) {
-        localStorage.setItem('github_token', token);
-    }
-    localStorage.setItem('app_version', APP_VERSION);
-    
-    // Перезагружаем
-    setTimeout(function() {
-        window.location.reload(true);
-    }, 500);
-}
-
-// ============================================
-//  НАСТРОЙКИ
+//  ОСНОВНОЙ КОД
 // ============================================
 const REPO_OWNER = "vasilakypala-logovo";
 const REPO_NAME = "logovo";
 const FILE_PATH = "prices.json";
 
 let GITHUB_TOKEN = localStorage.getItem('github_token');
-
-if (!GITHUB_TOKEN) {
-    console.log('🔑 Токен не найден. Режим "только чтение".');
-}
-
-// ============================================
 
 const TOWNS = [
     "Первомайск", "Помічна", "Лисогора", "Воєводське",
@@ -561,8 +538,6 @@ let pricesData = {};
 let currentProduct = null;
 let editingCity = null;
 let fileSha = null;
-
-// ==================== РАБОТА С GITHUB ====================
 
 function utf8ToBase64(str) {
     const encoder = new TextEncoder();
@@ -606,41 +581,29 @@ async function loadFromGitHub() {
             if (parsed.products) allProducts = parsed.products;
             if (parsed.prices) pricesData = parsed.prices;
             
-            // ✅ GitHub ВСЕГДА главный - перезаписываем localStorage
             localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
-            
-            console.log('✅ Данные загружены с GitHub');
+            console.log('✅ Загружено с GitHub');
             return true;
-            
         } else if (resp.status === 404) {
             if (GITHUB_TOKEN) {
                 await saveToGitHub(true);
-            } else {
-                alert('❌ Нет токена! Цены не загружены.');
             }
             return false;
-            
         } else {
             throw new Error('Ошибка загрузки');
         }
-        
     } catch (e) {
-        console.error('❌ Ошибка загрузки с GitHub:', e);
-        
-        // ⚠️ ТОЛЬКО АВАРИЙНЫЙ РЕЖИМ - если GitHub совсем не отвечает
+        console.error('❌ Ошибка:', e);
         try {
             const cache = JSON.parse(localStorage.getItem('priceCache'));
             if (cache) {
                 allProducts = cache.products || allProducts;
                 pricesData = cache.prices || {};
                 alert('⚠️ Нет доступа к GitHub. Показываю локальный кэш.');
-                console.log('⚠️ Использую локальный кэш (аварийный режим)');
                 return true;
             }
         } catch(e2) {}
-        
         return false;
-        
     } finally {
         loading.style.display = 'none';
     }
@@ -652,22 +615,17 @@ async function saveToGitHub(create = false) {
             products: allProducts,
             prices: pricesData
         };
-        
         const jsonStr = JSON.stringify(data, null, 2);
         const content = utf8ToBase64(jsonStr);
-        
         const payload = {
             message: "Обновление цен",
             content: content,
             branch: "main"
         };
-        
         if (!create && fileSha) {
             payload.sha = fileSha;
         }
-        
         const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-        
         const resp = await fetch(url, {
             method: 'PUT',
             headers: {
@@ -677,24 +635,16 @@ async function saveToGitHub(create = false) {
             },
             body: JSON.stringify(payload)
         });
-        
         if (!resp.ok) throw new Error('Ошибка сохранения');
-        
         const result = await resp.json();
         fileSha = result.content.sha;
-        
-        // ✅ После сохранения - обновляем localStorage
         localStorage.setItem('priceCache', JSON.stringify({ products: allProducts, prices: pricesData, time: Date.now() }));
-        console.log('✅ Данные сохранены в GitHub и localStorage');
         return true;
-        
     } catch (e) {
         console.error('❌ Ошибка сохранения:', e);
         return false;
     }
 }
-
-// ==================== РАБОТА С ДАННЫМИ ====================
 
 function getPrice(city, product) {
     return (pricesData[city] && pricesData[city][product]) || null;
@@ -713,17 +663,14 @@ function updateDateDisplay() {
 function renderPrices() {
     document.querySelectorAll('.price').forEach(el => el.remove());
     if (!currentProduct) return;
-
     TOWNS.forEach(town => {
         const price = getPrice(town, currentProduct);
         const coords = TOWN_COORDS[town];
         if (!coords) return;
-
         const div = document.createElement('div');
         div.className = 'price';
         div.style.left = coords.x + '%';
         div.style.top = coords.y + '%';
-        
         if (price && price > 0) {
             div.innerHTML = price + ' грн.<span class="town">' + town + '</span>';
         } else {
@@ -806,18 +753,14 @@ function openPriceEditor(city) {
 function buildProductEditor(city) {
     const container = document.getElementById('productList');
     container.innerHTML = '';
-
     allProducts.forEach(product => {
         const row = document.createElement('div');
         row.className = 'product-row';
-        
         const price = getPrice(city, product);
         const priceValue = (price && price > 0) ? price : '';
-
         const nameSpan = document.createElement('span');
         nameSpan.className = 'pname';
         nameSpan.textContent = product;
-
         const input = document.createElement('input');
         input.type = 'number';
         input.min = '0';
@@ -825,23 +768,19 @@ function buildProductEditor(city) {
         input.value = priceValue;
         input.placeholder = '—';
         input.dataset.product = product;
-
         const unitSpan = document.createElement('span');
         unitSpan.className = 'unit';
         unitSpan.textContent = 'грн.';
-
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-product';
         deleteBtn.textContent = '✕';
         deleteBtn.onclick = () => deleteProduct(product);
-
         row.appendChild(nameSpan);
         row.appendChild(input);
         row.appendChild(unitSpan);
         row.appendChild(deleteBtn);
         container.appendChild(row);
     });
-
     document.getElementById('newProductName').value = '';
 }
 
@@ -882,11 +821,8 @@ async function savePrices() {
         alert('❌ Для редактирования цен нужен токен! Обратись к администратору.');
         return;
     }
-    
     if (!editingCity) return;
-    
     const inputs = document.querySelectorAll('#productList .product-row input[type="number"]');
-    
     inputs.forEach(input => {
         const product = input.dataset.product;
         const value = parseFloat(input.value.trim());
@@ -900,13 +836,11 @@ async function savePrices() {
             }
         }
     });
-    
     const ok = await saveToGitHub();
     if (!ok) {
         alert('❌ Не удалось сохранить. Проверь токен.');
         return;
     }
-    
     renderPrices();
     closeModal('modalPrices');
     if (navigator.vibrate) navigator.vibrate(15);
@@ -918,7 +852,6 @@ function checkCode() {
     const input = document.getElementById('codeInput');
     const code = input.value.trim();
     const error = document.getElementById('codeError');
-    
     if (code === '777') {
         error.style.display = 'none';
         closeModal('modalCode');
@@ -932,7 +865,6 @@ function checkCode() {
 
 async function init() {
     await loadFromGitHub();
-    
     updateDateDisplay();
     buildProductMenu();
     buildCityList();
@@ -960,7 +892,7 @@ async function init() {
         if (e.key === 'Enter') checkCode();
     };
 
-    console.log('✅ Народна карта цін завантажена! Версия:', APP_VERSION);
+    console.log('✅ Загружено!');
 }
 
 init();
