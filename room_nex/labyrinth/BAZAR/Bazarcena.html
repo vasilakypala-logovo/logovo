@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>БАЗАРНИЙ ДЕНЬ</title>
     <style>
         * {
@@ -477,18 +480,49 @@
 
 <script>
 // ============================================
-//  НАСТРОЙКИ (ТВОИ ДАННЫЕ)
+//  ВЕРСИЯ ПРИЛОЖЕНИЯ - МЕНЯЙ ПРИ ОБНОВЛЕНИИ!
+// ============================================
+const APP_VERSION = "1.0.4";
+
+// Проверяем версию
+const storedVersion = localStorage.getItem('app_version');
+if (storedVersion !== APP_VERSION) {
+    console.log('🔄 Обновление до версии', APP_VERSION);
+    
+    // Очищаем весь кеш
+    if ('caches' in window) {
+        caches.keys().then(function(names) {
+            for (let name of names) {
+                caches.delete(name);
+            }
+        });
+    }
+    
+    // Сохраняем токен если был
+    const token = localStorage.getItem('github_token');
+    localStorage.clear();
+    if (token) {
+        localStorage.setItem('github_token', token);
+    }
+    localStorage.setItem('app_version', APP_VERSION);
+    
+    // Принудительная перезагрузка
+    setTimeout(() => {
+        window.location.reload(true);
+    }, 300);
+}
+
+// ============================================
+//  НАСТРОЙКИ
 // ============================================
 const REPO_OWNER = "vasilakypala-logovo";
 const REPO_NAME = "logovo";
 const FILE_PATH = "prices.json";
 
-// Токен берем из localStorage (сохраняется в телефоне)
 let GITHUB_TOKEN = localStorage.getItem('github_token');
 
-// Если токена нет — НЕ просим, просто работаем в режиме "только чтение"
 if (!GITHUB_TOKEN) {
-    console.log('🔑 Токен не найден. Работаем в режиме "только чтение".');
+    console.log('🔑 Токен не найден. Режим "только чтение".');
 }
 
 // ============================================
@@ -520,12 +554,9 @@ let fileSha = null;
 
 // ==================== РАБОТА С GITHUB ====================
 
-// Функция для правильного кодирования в Base64 с поддержкой UTF-8
 function utf8ToBase64(str) {
-    // Используем TextEncoder для правильной UTF-8 кодировки
     const encoder = new TextEncoder();
     const bytes = encoder.encode(str);
-    // Преобразуем Uint8Array в строку для btoa
     let binary = '';
     for (let i = 0; i < bytes.length; i++) {
         binary += String.fromCharCode(bytes[i]);
@@ -533,7 +564,6 @@ function utf8ToBase64(str) {
     return btoa(binary);
 }
 
-// Функция для декодирования из Base64 с поддержкой UTF-8
 function base64ToUtf8(base64) {
     const binary = atob(base64);
     const bytes = new Uint8Array(binary.length);
@@ -560,7 +590,6 @@ async function loadFromGitHub() {
         if (resp.ok) {
             const data = await resp.json();
             fileSha = data.sha;
-            // Используем правильное декодирование
             const content = base64ToUtf8(data.content);
             const parsed = JSON.parse(content);
             
@@ -602,7 +631,6 @@ async function saveToGitHub(create = false) {
         };
         
         const jsonStr = JSON.stringify(data, null, 2);
-        // Используем правильное кодирование
         const content = utf8ToBase64(jsonStr);
         
         const payload = {
@@ -906,7 +934,7 @@ async function init() {
         if (e.key === 'Enter') checkCode();
     };
 
-    console.log('✅ Народна карта цін завантажена!');
+    console.log('✅ Народна карта цін завантажена! Версия:', APP_VERSION);
 }
 
 init();
