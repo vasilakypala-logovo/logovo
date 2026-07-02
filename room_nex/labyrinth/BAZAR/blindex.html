@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Добрий базарний день</title>
+
+<style>
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:black;
+}
+
+body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.wrapper{
+    position:relative;
+    height:100vh;
+}
+
+.wrapper img{
+    height:100%;
+    display:block;
+}
+
+/* Кнопка-монета */
+
+.coin{
+
+    position:absolute;
+
+    left:50%;
+    top:57.5%;
+
+    width:150px;
+    height:150px;
+
+    transform:translate(-50%,-50%);
+
+    border-radius:50%;
+
+    cursor:pointer;
+
+    background:rgba(255,255,255,0);
+
+}
+
+.coin:hover{
+
+    background:rgba(255,255,255,.05);
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<img src="titylka.png">
+
+<div class="coin"
+onclick="location.href='Bazarcena.html'">
+</div>
+
+</div>
+
+</body>
+</html>
