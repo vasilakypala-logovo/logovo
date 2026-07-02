@@ -1,0 +1,883 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Куплю-Продам — Братське</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #1a1a2e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            height: 780px;
+            background: url("bratske.png") no-repeat center center;
+            background-size: cover;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 10px 12px 20px;
+            padding-top: max(60px, env(safe-area-inset-top, 60px));
+            padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
+            position: relative;
+        }
+
+        @media (min-width: 768px) {
+            .app-container {
+                border-radius: 36px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            }
+        }
+
+        @media (max-height: 800px) {
+            .app-container {
+                height: 100vh;
+                height: 100dvh;
+                max-height: 780px;
+            }
+        }
+
+        @media (max-height: 650px) {
+            .app-container {
+                height: 100vh;
+                height: 100dvh;
+                max-height: 650px;
+                padding-top: 40px;
+                padding-bottom: 10px;
+            }
+            #city {
+                font-size: 22px;
+                top: 4px;
+            }
+            .content {
+                margin-top: 80px;
+            }
+            #coin {
+                width: 60px;
+                height: 60px;
+                margin: 2px 0 10px 0;
+            }
+            .card {
+                padding: 10px 12px 8px;
+            }
+            .card .text {
+                font-size: 0.8rem;
+            }
+        }
+
+        .app-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.25);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #city {
+            position: absolute;
+            top: max(10px, env(safe-area-inset-top, 10px));
+            left: 0;
+            right: 0;
+            z-index: 10;
+            text-align: center;
+            font-size: clamp(24px, 6vw, 34px);
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #ffd84a;
+            text-shadow: 
+                0 0 20px rgba(255, 184, 0, 0.9),
+                0 0 40px rgba(255, 140, 0, 0.7),
+                0 0 60px rgba(255, 102, 0, 0.5),
+                0 4px 20px rgba(0, 0, 0, 0.8);
+            animation: blink 2.2s infinite ease-in-out;
+            margin: 0;
+            padding: 8px 0;
+            background: transparent;
+            pointer-events: none;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.97); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .content {
+            margin-top: clamp(120px, 20vh, 150px);
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            z-index: 5;
+            min-height: 0;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            flex-shrink: 0;
+            padding: 0 4px;
+            margin-bottom: clamp(4px, 1vh, 8px);
+            position: relative;
+            z-index: 10;
+        }
+
+        #coin {
+            width: clamp(60px, 13vw, 85px);
+            height: clamp(60px, 13vw, 85px);
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            border-radius: 0;
+            cursor: pointer;
+            flex-shrink: 0;
+            touch-action: manipulation;
+            position: relative;
+            z-index: 10;
+        }
+        #coin:active {
+            transform: none;
+        }
+
+        #backZone {
+            width: clamp(60px, 13vw, 85px);
+            height: clamp(60px, 13vw, 85px);
+            cursor: pointer;
+            flex-shrink: 0;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+            z-index: 10;
+            background: transparent;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #backZone:active {
+            transform: scale(0.92);
+        }
+
+        #backHint {
+            font-size: clamp(11px, 2vw, 14px);
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.6);
+            text-shadow: 0 2px 20px rgba(0,0,0,0.9);
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.25);
+            padding: 6px 14px 6px 10px;
+            border-radius: 30px;
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.08);
+            user-select: none;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        #backHint .arrow {
+            display: inline-block;
+            animation: arrowPulse 1.8s infinite ease-in-out;
+            font-size: clamp(14px, 2.5vw, 18px);
+        }
+        @keyframes arrowPulse {
+            0%, 100% { transform: translateX(0); opacity: 0.6; }
+            50% { transform: translateX(-4px); opacity: 1; }
+        }
+
+        #ads {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(10px, 1.8vh, 14px);
+            padding-bottom: clamp(16px, 3vh, 30px);
+            position: relative;
+            z-index: 5;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: clamp(18px, 4vw, 24px);
+            padding: clamp(12px, 2.5vw, 18px) clamp(14px, 3vw, 20px) clamp(10px, 2vw, 16px);
+            color: #fff;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            animation: show 0.3s ease;
+            transition: background 0.2s;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .card:active {
+            background: rgba(255, 255, 255, 0.30);
+        }
+
+        @keyframes show {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .card .meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .card .date {
+            font-weight: 600;
+            font-size: clamp(0.8rem, 1.8vw, 0.95rem);
+            opacity: 0.95;
+            letter-spacing: 0.5px;
+        }
+        .card .views {
+            font-size: clamp(0.7rem, 1.6vw, 0.85rem);
+            background: rgba(0,0,0,0.3);
+            padding: 2px clamp(8px, 2vw, 14px) 2px clamp(6px, 1.5vw, 10px);
+            border-radius: 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.1);
+            font-weight: 500;
+        }
+        .card .views::before {
+            content: "👁";
+            font-size: clamp(0.7rem, 1.6vw, 0.95rem);
+        }
+        .card .name {
+            font-weight: 700;
+            font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+            margin: 4px 0 2px;
+            color: #fff;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+        }
+        .card .text {
+            font-size: clamp(0.85rem, 2vw, 1rem);
+            line-height: 1.5;
+            opacity: 0.95;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-top: 4px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255,255,255,0.12);
+        }
+
+        #editor {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(16px, 4vw, 30px);
+            animation: fadeIn 0.25s ease;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        #panel {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: clamp(24px, 5vw, 32px);
+            padding: clamp(20px, 4vw, 30px) clamp(16px, 4vw, 26px) clamp(22px, 4vw, 32px);
+            max-width: 440px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.7);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #1a1a1a;
+            position: relative;
+            z-index: 1000;
+        }
+        #panel h2 {
+            font-weight: 700;
+            font-size: clamp(1.2rem, 4vw, 1.7rem);
+            margin-top: 0;
+            margin-bottom: clamp(12px, 2.5vh, 18px);
+            color: #222;
+            letter-spacing: -0.5px;
+            text-align: center;
+            border-bottom: 2px solid rgba(0,0,0,0.06);
+            padding-bottom: clamp(10px, 2vh, 14px);
+        }
+
+        #panel label {
+            font-weight: 600;
+            font-size: clamp(0.8rem, 1.8vw, 0.9rem);
+            color: #333;
+            display: block;
+            margin: clamp(10px, 2vh, 14px) 0 4px;
+            letter-spacing: 0.3px;
+        }
+        #panel input,
+        #panel textarea {
+            width: 100%;
+            padding: clamp(12px, 2.5vw, 14px) clamp(14px, 3vw, 18px);
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            border: none;
+            border-radius: clamp(16px, 3vw, 20px);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(4px);
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.06);
+            transition: 0.2s;
+            font-family: inherit;
+            color: #111;
+            margin-top: 2px;
+        }
+        #panel input:focus,
+        #panel textarea:focus {
+            outline: 2px solid #ffb347;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        #panel textarea {
+            resize: vertical;
+            min-height: clamp(80px, 15vh, 100px);
+        }
+
+        .donate-btn {
+            width: 100%;
+            padding: clamp(12px, 2.5vh, 16px);
+            margin-top: clamp(10px, 2vh, 16px);
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            font-weight: 700;
+            border: none;
+            border-radius: 40px;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+            cursor: pointer;
+            transition: 0.15s;
+            letter-spacing: 0.5px;
+            touch-action: manipulation;
+        }
+        .donate-btn:active {
+            transform: scale(0.96);
+        }
+        .donate-btn .heart {
+            display: inline-block;
+            animation: heartBeat 1.8s infinite ease-in-out;
+        }
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            15% { transform: scale(1.25); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.15); }
+            60% { transform: scale(1); }
+        }
+
+        #panel .save-btn {
+            width: 100%;
+            padding: clamp(14px, 3vh, 18px);
+            margin-top: clamp(12px, 2vh, 16px);
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            font-weight: 700;
+            border: none;
+            border-radius: 40px;
+            background: linear-gradient(135deg, #f7b731, #f5a623);
+            color: #1a1a1a;
+            box-shadow: 0 6px 24px rgba(245, 166, 35, 0.4);
+            cursor: pointer;
+            transition: 0.15s;
+            letter-spacing: 0.5px;
+            touch-action: manipulation;
+        }
+        #panel .save-btn:active {
+            transform: scale(0.96);
+        }
+
+        #donateModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(20px, 5vw, 40px);
+            animation: fadeIn 0.3s ease;
+        }
+        #donateModal .donate-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: clamp(28px, 5vw, 40px);
+            padding: clamp(28px, 5vw, 40px) clamp(20px, 4vw, 36px);
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: center;
+            animation: slideUp 0.35s ease;
+        }
+        @keyframes slideUp {
+            0% { opacity: 0; transform: translateY(40px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        #donateModal .donate-panel .icon {
+            font-size: clamp(48px, 10vw, 64px);
+            margin-bottom: 8px;
+            display: block;
+        }
+        #donateModal .donate-panel h2 {
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            font-weight: 800;
+            color: #2d3436;
+            margin-bottom: 6px;
+        }
+        #donateModal .donate-panel .sub {
+            font-size: clamp(0.85rem, 2vw, 1rem);
+            color: #636e72;
+            margin-bottom: clamp(18px, 3vh, 24px);
+            line-height: 1.5;
+        }
+        #donateModal .donate-panel .sub .highlight {
+            color: #6c5ce7;
+            font-weight: 600;
+        }
+        #donateModal .donate-panel .donate-info {
+            background: rgba(108, 92, 231, 0.08);
+            border-radius: clamp(16px, 3vw, 20px);
+            padding: clamp(14px, 2.5vh, 20px);
+            margin-bottom: clamp(14px, 2vh, 18px);
+            border: 1px dashed rgba(108, 92, 231, 0.25);
+        }
+        #donateModal .donate-panel .donate-info .label {
+            font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+            font-weight: 600;
+            color: #6c5ce7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        #donateModal .donate-panel .donate-info .value {
+            font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+            font-weight: 700;
+            color: #2d3436;
+            background: rgba(255,255,255,0.7);
+            padding: 8px 16px;
+            border-radius: 12px;
+            display: inline-block;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+            word-break: break-all;
+            cursor: pointer;
+            transition: 0.2s;
+            user-select: all;
+        }
+        #donateModal .donate-panel .donate-info .value:active {
+            background: rgba(108, 92, 231, 0.15);
+        }
+        #donateModal .donate-panel .donate-info .copy-hint {
+            font-size: clamp(0.6rem, 1.2vw, 0.7rem);
+            color: #b2bec3;
+            margin-top: 4px;
+        }
+        #donateModal .donate-panel .donate-info .divider {
+            width: 40px;
+            height: 2px;
+            background: rgba(108, 92, 231, 0.2);
+            margin: 12px auto;
+            border-radius: 2px;
+        }
+        #donateModal .donate-panel .close-donate {
+            width: 100%;
+            padding: clamp(14px, 3vh, 18px);
+            font-size: clamp(0.95rem, 2vw, 1.1rem);
+            font-weight: 700;
+            border: none;
+            border-radius: 40px;
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: #fff;
+            box-shadow: 0 6px 24px rgba(0, 206, 201, 0.35);
+            cursor: pointer;
+            transition: 0.15s;
+            touch-action: manipulation;
+            margin-top: 4px;
+        }
+        #donateModal .donate-panel .close-donate:active {
+            transform: scale(0.96);
+        }
+        #donateModal .donate-panel .thanks-text {
+            font-size: clamp(0.75rem, 1.6vw, 0.85rem);
+            color: #b2bec3;
+            margin-top: 12px;
+        }
+
+        .spacer {
+            height: 4px;
+            width: 100%;
+        }
+
+        #ads::-webkit-scrollbar {
+            width: 3px;
+        }
+        #ads::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        #ads::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .app-container::before {
+                background: rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 500px) {
+            .content {
+                margin-top: 60px;
+            }
+            #coin {
+                width: 50px;
+                height: 50px;
+            }
+            #backZone {
+                width: 50px;
+                height: 50px;
+            }
+            #city {
+                font-size: 20px;
+                top: 4px;
+            }
+            .card {
+                padding: 8px 12px 8px;
+            }
+            .card .text {
+                font-size: 0.75rem;
+            }
+            #panel {
+                max-height: 85vh;
+                padding: 14px 16px 18px;
+            }
+            #panel textarea {
+                min-height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div id="city">БРАТСЬКЕ</div>
+        
+        <div class="content">
+            <div class="top-bar">
+                <div id="coin" role="button" aria-label="Додати оголошення"></div>
+                <div id="backZone" onclick="window.location.href='Bazarcena.html';">
+                    <span id="backHint"><span class="arrow">←</span> НАЗАД</span>
+                </div>
+            </div>
+            
+            <div id="ads"></div>
+            <div class="spacer"></div>
+        </div>
+    </div>
+
+    <div id="editor">
+        <div id="panel">
+            <h2>Вставити своє оголошення</h2>
+            <label for="date">Дата</label>
+            <input id="date" type="text" placeholder="02.07.2026" value="">
+            <label for="name">Ім'я</label>
+            <input id="name" type="text" placeholder="Олександр" value="">
+            <label for="text">Оголошення</label>
+            <textarea id="text" rows="5" placeholder="Продам велосипед. Стан хороший. Телефон..."></textarea>
+            
+            <button class="donate-btn" id="donateBtn">
+                <span class="heart">❤️</span> Бажаєш заплатити?
+            </button>
+            
+            <button class="save-btn" id="saveBtn">Зберегти</button>
+        </div>
+    </div>
+
+    <div id="donateModal">
+        <div class="donate-panel">
+            <span class="icon">🙏</span>
+            <h2>Дякуємо за підтримку!</h2>
+            <p class="sub">
+                Донат — <span class="highlight">не обов'язковий</span>, але дуже приємний.<br>
+                Якщо хочеш подякувати за роботу — ось реквізити:
+            </p>
+
+            <div class="donate-info">
+                <div class="label">💳 Номер картки (Райфайзен)</div>
+                <div class="value" id="cardNumber">4149 5001 1083 9332</div>
+                <div class="copy-hint">👆 натисни, щоб скопіювати</div>
+                
+                <div class="divider"></div>
+                
+                <div class="label">🪙 Номер гаманця</div>
+                <div class="value" id="walletNumber">90687182498794</div>
+                <div class="copy-hint">👆 натисни, щоб скопіювати</div>
+            </div>
+
+            <button class="close-donate" id="closeDonate">💚 Дякую, закрити</button>
+            <p class="thanks-text">Ваша підтримка надихає робити краще ❤️</p>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const coin = document.getElementById('coin');
+            const editor = document.getElementById('editor');
+            const adsContainer = document.getElementById('ads');
+            const dateInput = document.getElementById('date');
+            const nameInput = document.getElementById('name');
+            const textInput = document.getElementById('text');
+            const saveBtn = document.getElementById('saveBtn');
+            const donateBtn = document.getElementById('donateBtn');
+            const donateModal = document.getElementById('donateModal');
+            const closeDonate = document.getElementById('closeDonate');
+
+            // ===== УНИКАЛЬНЫЙ КЛЮЧ ДЛЯ БРАТСЬКОГО =====
+            const STORAGE_KEY = 'kupiproday_bratske';
+
+            document.querySelectorAll('.donate-info .value').forEach(el => {
+                el.addEventListener('click', function() {
+                    const text = this.textContent.trim();
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(text).then(() => {
+                            const original = this.textContent;
+                            this.textContent = '✅ Скопійовано!';
+                            setTimeout(() => { this.textContent = original; }, 1500);
+                        }).catch(() => {
+                            fallbackCopy(text, this);
+                        });
+                    } else {
+                        fallbackCopy(text, this);
+                    }
+                });
+            });
+
+            function fallbackCopy(text, el) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.left = '-9999px';
+                textarea.style.top = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    const original = el.textContent;
+                    el.textContent = '✅ Скопійовано!';
+                    setTimeout(() => { el.textContent = original; }, 1500);
+                } catch (e) {
+                    alert('Не вдалося скопіювати. Будь ласка, скопіюйте вручну: ' + text);
+                }
+                document.body.removeChild(textarea);
+            }
+
+            donateBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                donateModal.style.display = 'flex';
+            });
+
+            function closeDonateModal() {
+                donateModal.style.display = 'none';
+            }
+
+            closeDonate.addEventListener('click', closeDonateModal);
+            donateModal.addEventListener('click', function(e) {
+                if (e.target === donateModal) {
+                    closeDonateModal();
+                }
+            });
+
+            function loadAds() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (raw) return JSON.parse(raw);
+                } catch (_) {}
+                return [];
+            }
+
+            function saveAdsToStorage(list) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+            }
+
+            function renderAds() {
+                const list = loadAds();
+                adsContainer.innerHTML = '';
+
+                list.forEach((ad, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+
+                    const meta = document.createElement('div');
+                    meta.className = 'meta';
+
+                    const dateSpan = document.createElement('span');
+                    dateSpan.className = 'date';
+                    dateSpan.textContent = ad.date || '—';
+
+                    const viewsSpan = document.createElement('span');
+                    viewsSpan.className = 'views';
+                    viewsSpan.textContent = ` ${ad.views || 0}`;
+
+                    meta.appendChild(dateSpan);
+                    meta.appendChild(viewsSpan);
+
+                    const nameDiv = document.createElement('div');
+                    nameDiv.className = 'name';
+                    nameDiv.textContent = ad.name || 'Анонім';
+
+                    const textDiv = document.createElement('div');
+                    textDiv.className = 'text';
+                    textDiv.textContent = ad.text || '';
+
+                    card.appendChild(meta);
+                    card.appendChild(nameDiv);
+                    card.appendChild(textDiv);
+
+                    card.addEventListener('click', function(e) {
+                        if (e.target.closest('#editor')) return;
+                        const currentList = loadAds();
+                        const idx = currentList.findIndex((item, i) => i === index);
+                        if (idx !== -1) {
+                            if (typeof currentList[idx].views !== 'number') {
+                                currentList[idx].views = 0;
+                            }
+                            currentList[idx].views += 1;
+                            saveAdsToStorage(currentList);
+                            const viewsEl = card.querySelector('.views');
+                            if (viewsEl) {
+                                viewsEl.textContent = ` ${currentList[idx].views}`;
+                            }
+                        }
+                    });
+
+                    adsContainer.appendChild(card);
+                });
+            }
+
+            function saveNewAd() {
+                const dateVal = dateInput.value.trim() || '—';
+                const nameVal = nameInput.value.trim() || 'Анонім';
+                const textVal = textInput.value.trim() || '';
+
+                if (!textVal) {
+                    alert('Будь ласка, напишіть текст оголошення.');
+                    return;
+                }
+
+                const newAd = {
+                    date: dateVal,
+                    name: nameVal,
+                    text: textVal,
+                    views: 0
+                };
+
+                const list = loadAds();
+                list.unshift(newAd);
+                saveAdsToStorage(list);
+
+                editor.style.display = 'none';
+                dateInput.value = '';
+                nameInput.value = '';
+                textInput.value = '';
+
+                renderAds();
+            }
+
+            function openEditor() {
+                if (!dateInput.value) {
+                    const now = new Date();
+                    const d = String(now.getDate()).padStart(2, '0');
+                    const m = String(now.getMonth() + 1).padStart(2, '0');
+                    const y = now.getFullYear();
+                    dateInput.value = `${d}.${m}.${y}`;
+                }
+                editor.style.display = 'flex';
+                setTimeout(() => dateInput.focus(), 100);
+            }
+
+            editor.addEventListener('click', function(e) {
+                if (e.target === editor) {
+                    editor.style.display = 'none';
+                }
+            });
+
+            coin.addEventListener('click', openEditor);
+            saveBtn.addEventListener('click', saveNewAd);
+
+            document.querySelectorAll('#panel input, #panel textarea').forEach(field => {
+                field.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                        e.preventDefault();
+                        saveNewAd();
+                    }
+                });
+            });
+
+            renderAds();
+
+            const initialList = loadAds();
+            if (initialList.length === 0) {
+                const demo = [
+                    { date: '02.07.2026', name: 'Олександр', text: 'Продам велосипед.\nСтан хороший.\nТелефон...', views: 23 },
+                    { date: '01.07.2026', name: 'Марія', text: 'Продам диван', views: 5 },
+                    { date: '30.06.2026', name: 'Сергій', text: 'Шукаю роботу', views: 12 }
+                ];
+                saveAdsToStorage(demo);
+                renderAds();
+            }
+        })();
+    </script>
+
+</body>
+</html>
