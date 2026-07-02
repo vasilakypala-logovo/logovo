@@ -448,6 +448,24 @@
             background: rgba(255,204,0,0.3);
         }
         
+        /* ===== КЛИКАБЕЛЬНЫЕ ЗОНЫ ГОРОДОВ ===== */
+        .city-click-zone {
+            position: absolute;
+            z-index: 12;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .city-click-zone:active {
+            transform: scale(0.95);
+        }
+        #zonePervomaysk { width: 16%; height: 13%; top: 5%; left: 9%; }
+        #zonePomichna { width: 16%; height: 13%; top: 5%; left: 78%; }
+        #zoneYuzhnoukrainsk { width: 16%; height: 13%; top: 58%; left: 12%; }
+        #zoneArbuzinka { width: 16%; height: 13%; top: 40%; left: 78%; }
+        
         @media (max-width: 480px) {
             #headerDate .label { font-size: 14px; }
             #headerDate .day { font-size: 14px; }
@@ -460,6 +478,7 @@
             .city-item { padding: 10px 8px; font-size: 14px; }
             #tokenArea { bottom: 90px; padding: 15px; }
             #adminBtn { bottom: 130px; right: 10px; font-size: 10px; padding: 3px 8px; }
+            .city-click-zone { width: 20%; height: 12%; }
         }
         @media (max-width: 380px) {
             #headerDate .label { font-size: 11px; }
@@ -470,6 +489,7 @@
             .item { font-size: 17px; padding: 8px 20px; }
             #tokenArea { bottom: 80px; padding: 12px; }
             #adminBtn { bottom: 120px; right: 8px; }
+            .city-click-zone { width: 22%; height: 11%; }
         }
     </style>
 </head>
@@ -488,6 +508,12 @@
     <div class="click-zone" id="zoneRight"></div>
     <div id="prod"></div>
     <div id="sel"></div>
+    
+    <!-- ===== КЛИКАБЕЛЬНЫЕ ГОРОДА ===== -->
+    <div class="city-click-zone" id="zonePervomaysk" onclick="window.location.href='kupiproday-pervomaysk.html';"></div>
+    <div class="city-click-zone" id="zonePomichna" onclick="window.location.href='kupiproday-pomichna.html';"></div>
+    <div class="city-click-zone" id="zoneYuzhnoukrainsk" onclick="window.location.href='kupiproday-yuzhnoukrainsk.html';"></div>
+    <div class="city-click-zone" id="zoneArbuzinka" onclick="window.location.href='kupiproday-arbuzinka.html';"></div>
     
     <div id="tokenArea">
         <div class="token-header">
@@ -577,7 +603,7 @@ function updateClickCounter() {
 function updateFogCircle(count) {
     const el = document.getElementById('fogCircle');
     if (el) {
-        el.innerHTML = `🌫️ Сьогодні відвідали <strong>${count}</strong>`;
+        el.innerHTML = '🌫️ Сьогодні відвідали <strong>' + count + '</strong>';
     }
 }
 
@@ -599,7 +625,7 @@ const visitCount = getCurrentCount();
 
 const fogCircle = document.createElement('div');
 fogCircle.id = 'fogCircle';
-fogCircle.innerHTML = `🌫️ Сьогодні відвідали <strong>${visitCount}</strong>`;
+fogCircle.innerHTML = '🌫️ Сьогодні відвідали <strong>' + visitCount + '</strong>';
 fogCircle.style.cssText = `
     position: fixed;
     top: 50%;
