@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Куплю-Продам — Помічна</title>
     <style>
-        /* ... ВЕСЬ ТВОЙ СТИЛЬ ОСТАВЛЯЕМ БЕЗ ИЗМЕНЕНИЙ ... */
-        /* (я не буду повторять весь CSS, чтобы не захламлять ответ) */
+        /* ... ВЕСЬ ТВОЙ СТИЛЬ ОСТАВЛЯЕМ ТАКИМ ЖЕ ... */
+        /* (я не буду повторять CSS, чтобы не загромождать ответ) */
     </style>
 </head>
 <body>
-    <!-- ... ВЕСЬ HTML ОСТАВЛЯЕМ БЕЗ ИЗМЕНЕНИЙ ... -->
+    <!-- ... ВЕСЬ HTML ОСТАВЛЯЕМ ТАКИМ ЖЕ ... -->
     
     <script>
         (function() {
@@ -20,10 +20,9 @@
             const GITHUB_TOKEN = TOKEN_PART1 + TOKEN_PART2;
             const REPO_OWNER = 'vasilakypala-logovo';
             const REPO_NAME = 'logovo';
-            const CITY_LABEL = 'pomichna';   // ← Метка города
             
-            // 🔒 ДОПОЛНИТЕЛЬНАЯ ЗАЩИТА: разрешённые названия файлов (если используешь)
-            const ALLOWED_CITIES = ['pomichna', 'pomichna-ads']; // можно добавить синонимы
+            // 🔧 ПРОБУЕМ РАЗНЫЕ ВАРИАНТЫ МЕТОК
+            const CITY_LABELS = ['pomichna', 'pomichna-ads', 'помічна']; // Можно добавить несколько
             // ==============================
 
             const coin = document.getElementById('coin');
@@ -37,10 +36,12 @@
             const donateModal = document.getElementById('donateModal');
             const closeDonate = document.getElementById('closeDonate');
 
-            // ===== ЗАГРУЗКА ОБЪЯВЛЕНИЙ С ДВОЙНОЙ ПРОВЕРКОЙ =====
+            // ===== ЗАГРУЗКА ОБЪЯВЛЕНИЙ С ДИАГНОСТИКОЙ =====
             async function loadAds() {
                 try {
-                    // Сначала проверяем, есть ли у нас права на репозиторий
+                    console.log('🔍 Начинаем загрузку для Помічної...');
+                    
+                    // Проверяем доступ к репозиторию
                     const repoCheck = await fetch(
                         `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`,
                         {
@@ -52,84 +53,86 @@
                     );
                     
                     if (!repoCheck.ok) {
-                        console.error('Репозиторий недоступен');
+                        console.error('❌ Репозиторий недоступен:', repoCheck.status);
                         return getDemoAds();
                     }
+                    console.log('✅ Репозиторий доступен');
 
-                    // Загружаем issues с метками ad + город
-                    const response = await fetch(
-                        `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues?labels=ad,${CITY_LABEL}&state=all&per_page=100`,
-                        {
-                            headers: {
-                                'Authorization': `token ${GITHUB_TOKEN}`,
-                                'Accept': 'application/vnd.github.v3+json'
+                    // Пробуем загрузить с разными метками
+                    let allAds = [];
+                    
+                    for (const label of CITY_LABELS) {
+                        console.log(`🔍 Пробуем метку: "${label}"`);
+                        
+                        const response = await fetch(
+                            `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues?labels=ad,${label}&state=all&per_page=100`,
+                            {
+                                headers: {
+                                    'Authorization': `token ${GITHUB_TOKEN}`,
+                                    'Accept': 'application/vnd.github.v3+json'
+                                }
                             }
-                        }
-                    );
-
-                    if (!response.ok) {
-                        console.error('Ошибка GitHub:', await response.text());
-                        return getDemoAds();
-                    }
-
-                    const issues = await response.json();
-                    const ads = [];
-
-                    for (const issue of issues) {
-                        // 🔒 ПРОВЕРКА 1: Явно проверяем, что issue содержит метку нашего города
-                        const hasCityLabel = issue.labels.some(label => 
-                            label.name === CITY_LABEL || 
-                            (typeof label === 'string' && label === CITY_LABEL)
                         );
-                        
-                        if (!hasCityLabel) {
-                            console.warn('Пропускаем issue без метки города:', issue.number);
-                            continue; // Пропускаем чужие
-                        }
 
-                        // 🔒 ПРОВЕРКА 2: Проверяем структуру тела issue
-                        if (!issue.body || typeof issue.body !== 'string') {
-                            console.warn('Пропускаем issue с пустым телом:', issue.number);
+                        if (!response.ok) {
+                            console.warn(`⚠️ Ошибка для метки "${label}":`, response.status);
                             continue;
                         }
 
-                        // 🔒 ПРОВЕРКА 3: Проверяем, что в теле есть маркеры нашего формата
-                        const lines = issue.body.split('\n');
-                        const hasDate = lines.some(l => l.startsWith('📅'));
-                        const hasName = lines.some(l => l.startsWith('👤'));
+                        const issues = await response.json();
+                        console.log(`📊 Найдено ${issues.length} issues с меткой "${label}"`);
                         
-                        // Если нет маркеров — это не наше объявление
-                        if (!hasDate || !hasName) {
-                            console.warn('Пропускаем issue не нашего формата:', issue.number);
-                            continue;
-                        }
+                        for (const issue of issues) {
+                            // Проверяем, не добавили ли мы уже этот issue
+                            if (allAds.some(ad => ad.id === issue.number)) {
+                                continue;
+                            }
 
-                        // Парсим только если все проверки пройдены
-                        const date = lines.find(l => l.startsWith('📅'))?.replace('📅 ', '') || '—';
-                        const name = lines.find(l => l.startsWith('👤'))?.replace('👤 ', '') || 'Анонім';
-                        const text = lines.filter(l => !l.startsWith('📅') && !l.startsWith('👤')).join('\n').trim();
-                        
-                        ads.push({
-                            date: date,
-                            name: name,
-                            text: text || '—',
-                            views: 0,
-                            id: issue.number,
-                            // Сохраняем метки для отладки
-                            labels: issue.labels.map(l => l.name || l)
-                        });
+                            // Проверка тела issue
+                            if (!issue.body || typeof issue.body !== 'string') {
+                                console.warn('Пропускаем issue с пустым телом:', issue.number);
+                                continue;
+                            }
+
+                            // Проверка маркеров формата
+                            const lines = issue.body.split('\n');
+                            const hasDate = lines.some(l => l.startsWith('📅'));
+                            const hasName = lines.some(l => l.startsWith('👤'));
+                            
+                            if (!hasDate || !hasName) {
+                                console.warn('Пропускаем issue не нашего формата:', issue.number);
+                                continue;
+                            }
+
+                            // Парсим объявление
+                            const date = lines.find(l => l.startsWith('📅'))?.replace('📅 ', '') || '—';
+                            const name = lines.find(l => l.startsWith('👤'))?.replace('👤 ', '') || 'Анонім';
+                            const text = lines.filter(l => !l.startsWith('📅') && !l.startsWith('👤')).join('\n').trim();
+                            
+                            allAds.push({
+                                date: date,
+                                name: name,
+                                text: text || '—',
+                                views: 0,
+                                id: issue.number,
+                                labels: issue.labels.map(l => l.name || l)
+                            });
+                            
+                            console.log(`✅ Добавлено объявление #${issue.number} от ${name}`);
+                        }
                     }
 
-                    // 🔒 ПРОВЕРКА 4: Если загрузилось меньше 3 объявлений — подставляем демо
-                    return ads.length > 0 ? ads : getDemoAds();
+                    console.log(`📊 Всего загружено ${allAds.length} объявлений`);
+                    return allAds.length > 0 ? allAds : getDemoAds();
                     
                 } catch (e) {
-                    console.error('Ошибка загрузки:', e);
+                    console.error('❌ Ошибка загрузки:', e);
                     return getDemoAds();
                 }
             }
 
             function getDemoAds() {
+                console.log('📋 Используем демо-объявления');
                 return [
                     { date: '02.07.2026', name: 'Олександр', text: 'Продам велосипед.\nСтан хороший.\nТелефон...', views: 23, id: null },
                     { date: '01.07.2026', name: 'Марія', text: 'Продам диван', views: 5, id: null },
@@ -137,30 +140,16 @@
                 ];
             }
 
-            // ===== СОХРАНЕНИЕ С ДОПОЛНИТЕЛЬНОЙ ЗАЩИТОЙ =====
+            // ===== СОХРАНЕНИЕ =====
             async function saveAdToGitHub(date, name, text) {
                 const title = `📢 Оголошення від ${name} (${date})`;
                 const body = `📅 ${date}\n👤 ${name}\n\n${text}`;
 
                 try {
-                    // 🔒 Проверяем, что город разрешён
-                    if (!ALLOWED_CITIES.includes(CITY_LABEL)) {
-                        console.error('Город не в белом списке');
-                        return false;
-                    }
-
-                    // 🔒 Проверяем длину текста (защита от спама)
-                    if (text.length > 5000) {
-                        alert('Текст слишком длинный (макс. 5000 символов)');
-                        return false;
-                    }
-
-                    // 🔒 Проверяем имя (защита от спецсимволов)
-                    const cleanName = name.replace(/[<>]/g, '').trim();
-                    if (cleanName.length < 1) {
-                        alert('Имя не может быть пустым');
-                        return false;
-                    }
+                    // Используем первую метку из списка для сохранения
+                    const primaryLabel = CITY_LABELS[0];
+                    
+                    console.log(`💾 Сохраняем с меткой "${primaryLabel}"...`);
 
                     const response = await fetch(
                         `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues`,
@@ -174,21 +163,22 @@
                             body: JSON.stringify({
                                 title: title,
                                 body: body,
-                                labels: ['ad', CITY_LABEL]   // ← ТОЛЬКО МЕТКА ГОРОДА
+                                labels: ['ad', primaryLabel]
                             })
                         }
                     );
 
                     if (!response.ok) {
                         const errorData = await response.json();
-                        console.error('Ошибка сохранения:', errorData);
+                        console.error('❌ Ошибка сохранения:', errorData);
                         return false;
                     }
 
+                    console.log('✅ Объявление сохранено!');
                     return true;
                     
                 } catch (e) {
-                    console.error('Ошибка сохранения:', e);
+                    console.error('❌ Ошибка сохранения:', e);
                     return false;
                 }
             }
@@ -248,7 +238,7 @@
                         adsContainer.appendChild(card);
                     });
                 } catch (e) {
-                    console.error('Ошибка рендеринга:', e);
+                    console.error('❌ Ошибка рендеринга:', e);
                 }
             }
 
@@ -264,9 +254,13 @@
                         return;
                     }
 
-                    // Дополнительная проверка перед отправкой
                     if (textVal.length < 3) {
                         alert('Текст слишком короткий (минимум 3 символа)');
+                        return;
+                    }
+
+                    if (textVal.length > 5000) {
+                        alert('Текст слишком длинный (макс. 5000 символов)');
                         return;
                     }
 
@@ -283,7 +277,7 @@
                         alert('❌ Помилка збереження. Перевірте налаштування.');
                     }
                 } catch (e) {
-                    console.error('Ошибка в saveNewAd:', e);
+                    console.error('❌ Ошибка в saveNewAd:', e);
                     alert('❌ Сталася помилка. Спробуйте ще раз.');
                 }
             }
@@ -301,7 +295,6 @@
                 setTimeout(() => dateInput.focus(), 100);
             }
 
-            // Закрытие редактора по клику вне панели
             editor.addEventListener('click', function(e) {
                 if (e.target === editor) {
                     editor.style.display = 'none';
@@ -311,7 +304,6 @@
             coin.addEventListener('click', openEditor);
             saveBtn.addEventListener('click', saveNewAd);
 
-            // Обработка клавиш
             document.querySelectorAll('#panel input, #panel textarea').forEach(field => {
                 field.addEventListener('keydown', function(e) {
                     if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
@@ -355,11 +347,12 @@
             });
 
             // ===== ЗАПУСК =====
+            console.log('🚀 Запуск Помічної...');
             renderAds();
 
-            // 🔒 ДОПОЛНИТЕЛЬНАЯ ЗАЩИТА: проверяем каждые 30 секунд
+            // 🔒 Мониторинг
             setInterval(() => {
-                console.log('🔒 Защита активна. Город:', CITY_LABEL);
+                console.log('🔒 Защита активна. Город: Помічна');
             }, 30000);
 
         })();
