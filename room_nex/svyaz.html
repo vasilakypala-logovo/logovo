@@ -526,7 +526,13 @@ async function loadFromGitHub() {
     }
     
     const data = await response.json();
-    const content = atob(data.content);
+    // ✅ ПРАВИЛЬНОЕ ДЕКОДИРОВАНИЕ ДЛЯ РУССКИХ БУКВ
+    const binary = atob(data.content);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    const content = new TextDecoder('utf-8').decode(bytes);
     links = JSON.parse(content);
     render();
     updateCounter();
@@ -546,7 +552,7 @@ async function loadFromGitHub() {
 }
 
 // ============================================================
-// 💾 СОХРАНЕНИЕ В GITHUB
+// 💾 СОХРАНЕНИЕ В GITHUB (с правильной кодировкой)
 // ============================================================
 async function saveToGitHub(silent = false) {
   if (isSaving) return;
@@ -565,7 +571,13 @@ async function saveToGitHub(silent = false) {
     } catch(e) {}
     
     const jsonString = JSON.stringify(links, null, 2);
-    const content = btoa(unescape(encodeURIComponent(jsonString)));
+    
+    // ✅ ПРАВИЛЬНАЯ КОДИРОВКА ДЛЯ РУССКИХ БУКВ
+    const encoder = new TextEncoder();
+    const data = encoder.encode(jsonString);
+    let binary = '';
+    data.forEach(byte => binary += String.fromCharCode(byte));
+    const content = btoa(binary);
     
     const body = {
       message: `Обновление узлов связи ${new Date().toLocaleString()}`,
@@ -586,7 +598,6 @@ async function saveToGitHub(silent = false) {
       throw new Error(`Ошибка ${response.status}: ${await response.text()}`);
     }
     
-    // Резерв в localStorage
     localStorage.setItem(KEY, JSON.stringify(links));
     if (!silent) showMessage('✅ Сохранено в GitHub!');
   } catch(e) {
