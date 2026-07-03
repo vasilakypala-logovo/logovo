@@ -121,13 +121,15 @@ body::before{
 }
 
 .clock{
-  min-width:90px;
+  min-width:130px;
   text-align:right;
-  color:#9fb9c9;
-  font-size:12px;
+  color:#00ff88;
+  font-size:20px;
+  font-weight:700;
   letter-spacing:.08em;
   line-height:1.45;
   padding-top:3px;
+  text-shadow: 0 0 20px rgba(0,255,136,0.6), 0 0 60px rgba(0,255,136,0.2);
 }
 
 .controlPanel{
@@ -657,7 +659,11 @@ function render() {
     `;
 
     card.querySelector(".openBtn").onclick = function() {
-      window.open(x.url, "_blank");
+      let url = x.url.trim();
+      if (!/^https?:\/\//i.test(url)) {
+        url = "https://" + url;
+      }
+      window.open(url, "_blank");
     };
 
     card.querySelector(".deleteBtn").onclick = async function() {
