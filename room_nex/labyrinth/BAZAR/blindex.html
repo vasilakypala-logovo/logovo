@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Добрий базарний день</title>
 
 <style>
@@ -12,6 +13,7 @@ html,body{
     height:100%;
     overflow:hidden;
     background:black;
+    -webkit-tap-highlight-color: transparent; /* убирает серый фон при тапе */
 }
 
 body{
@@ -28,6 +30,7 @@ body{
 .wrapper img{
     height:100%;
     display:block;
+    pointer-events: none; /* чтобы клик проходил сквозь картинку на монету */
 }
 
 /* Кнопка-монета */
@@ -50,12 +53,21 @@ body{
 
     background:rgba(255,255,255,0);
 
+    /* Мобильные фиксы */
+    touch-action: manipulation; /* отключает задержку 300мс */
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
 }
 
 .coin:hover{
 
     background:rgba(255,255,255,.05);
 
+}
+
+/* Добавляем активное состояние для мобильных */
+.coin:active {
+    background: rgba(255,255,255,.1);
 }
 
 </style>
@@ -67,8 +79,10 @@ body{
 
 <img src="titylka.png">
 
+<!-- Используем ontouchstart как резерв для мобильных -->
 <div class="coin"
-onclick="location.href='Bazarcena.html'">
+     onclick="location.href='Bazarcena.html'"
+     ontouchstart="location.href='Bazarcena.html'">
 </div>
 
 </div>
