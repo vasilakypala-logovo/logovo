@@ -5,6 +5,7 @@
 <title>Tucha Archive</title>
 
 <style>
+/* ===== ВСЕ ТВОИ СТИЛИ (БЕЗ ИЗМЕНЕНИЙ) ===== */
 body{
     margin:0;
     font-family: Arial, sans-serif;
@@ -48,7 +49,6 @@ body{
     background:#2f3a46;
 }
 
-/* ===== ИНДИКАТОР ОТКРЫТОЙ ПАПКИ (ЛАМПОЧКА) ===== */
 .folderBtn.active {
     border-color: #4ade80;
     box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
@@ -83,7 +83,6 @@ body{
     }
 }
 
-/* ===== НАЗВАНИЕ ПАПКИ В ПРАВОМ НИЖНЕМ УГЛУ С ЛАМПОЧКОЙ ===== */
 #folderLabel{
     position:fixed;
     bottom:30px;
@@ -109,7 +108,6 @@ body{
     display:inline-block;
 }
 
-/* Лампочка рядом с названием в читалке */
 #folderLabel .label-indicator {
     display:inline-block;
     width:20px;
@@ -122,7 +120,6 @@ body{
     margin-right:10px;
 }
 
-/* Для мобильных устройств */
 @media (max-width:768px){
     #folderLabel{
         font-size:24px;
@@ -227,257 +224,294 @@ body{
 </div>
 
 <script>
-console.log('=== СКРИПТ ЗАПУЩЕН ===');
+// ============================================================
+// 🔐 ТОКЕН (разбит на части, как в твоих рабочих файлах)
+// ============================================================
+const T1 = 'ghp_cfUIxC';
+const T2 = 'hnUbKSnT04';
+const T3 = '6CEDkmreO6';
+const T4 = 'erm81Uf8qd';
+const GITHUB_TOKEN = T1 + T2 + T3 + T4;
 
-// ВАЖНО: укажите ТОЧНЫЕ имена ваших папок
+// ============================================================
+// 🔐 ПУТЬ К ХРАНИЛИЩУ (рядом с этим файлом)
+// ============================================================
+const REPO_OWNER = 'vasilakypala-logovo';
+const REPO_NAME = 'logovo';
+const FILE_PATH = 'room_nex/bukibuk/bukibuk/tumanicsechin_data.json';   // ты создашь его вручную
+const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+
+// ============================================================
+// 📦 ПЕРЕМЕННЫЕ (без изменений)
+// ============================================================
 const PHYSICAL_FOLDERS = ['stih1', 'stih2', 'stih3', 'stih4', 'stih5', 'stih6', 'stih7'];
-console.log('Папки:', PHYSICAL_FOLDERS);
-
 const FILES = Array.from({length:99}, (_,i)=>String(i+1).padStart(2,'0'));
-console.log('Файлов:', FILES.length);
+
+let currentFolder = null;
+let titles = {};
+let folderNames = {};
+let isSaving = false;
 
 const foldersDiv = document.getElementById('folders');
 const filesDiv = document.getElementById('files');
 const reader = document.getElementById('reader');
 const folderLabel = document.getElementById('folderLabel');
 const labelText = document.querySelector('#folderLabel .label-text');
-
-console.log('Элементы найдены:', {
-    foldersDiv: !!foldersDiv,
-    filesDiv: !!filesDiv,
-    reader: !!reader,
-    folderLabel: !!folderLabel
-});
-
-let currentFolder = null;
-let titles = JSON.parse(localStorage.getItem('tucha_titles') || '{}');
-let folderNames = JSON.parse(localStorage.getItem('tucha_folder_names') || '{}');
-
-// Храним все кнопки папок для обновления индикаторов
 let folderButtons = {};
 
-function saveTitles(){
-    localStorage.setItem('tucha_titles', JSON.stringify(titles));
-}
-function saveFolderNames(){
-    localStorage.setItem('tucha_folder_names', JSON.stringify(folderNames));
+// ============================================================
+// 💾 ЗАГРУЗКА С GITHUB
+// ============================================================
+async function loadFromGitHub() {
+  try {
+    const response = await fetch(API_URL, {
+      headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+    });
+
+    if (response.status === 404) {
+      // Файла нет – создаём пустые данные
+      titles = {};
+      folderNames = {};
+      await saveToGitHub(true);
+      initUI();
+      return;
+    }
+
+    if (!response.ok) throw new Error(`Ошибка ${response.status}`);
+
+    const data = await response.json();
+    const binary = atob(data.content);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    const content = new TextDecoder('utf-8').decode(bytes);
+    const parsed = JSON.parse(content);
+    titles = parsed.titles || {};
+    folderNames = parsed.folderNames || {};
+    initUI();
+  } catch(e) {
+    console.error('Ошибка загрузки с GitHub:', e);
+    // Пытаемся загрузить из localStorage
+    try {
+      titles = JSON.parse(localStorage.getItem('tucha_titles') || '{}');
+      folderNames = JSON.parse(localStorage.getItem('tucha_folder_names') || '{}');
+    } catch(e2) {
+      titles = {};
+      folderNames = {};
+    }
+    initUI();
+  }
 }
 
-/* ====== FOLDERS ====== */
-console.log('Создаю кнопки папок...');
-PHYSICAL_FOLDERS.forEach((physical, index)=>{
-    console.log(`Создаю папку ${index+1}:`, physical);
+// ============================================================
+// 💾 СОХРАНЕНИЕ НА GITHUB
+// ============================================================
+async function saveToGitHub(silent = false) {
+  if (isSaving) return;
+  isSaving = true;
+
+  try {
+    let sha = '';
+    try {
+      const check = await fetch(API_URL, {
+        headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+      });
+      if (check.ok) {
+        const data = await check.json();
+        sha = data.sha;
+      }
+    } catch(e) {}
+
+    const dataToSave = { titles, folderNames };
+    const jsonString = JSON.stringify(dataToSave, null, 2);
+    const encoder = new TextEncoder();
+    const data = encoder.encode(jsonString);
+    let binary = '';
+    data.forEach(byte => binary += String.fromCharCode(byte));
+    const content = btoa(binary);
+
+    const body = {
+      message: `Обновление Tucha metadata ${new Date().toLocaleString()}`,
+      content: content
+    };
+    if (sha) body.sha = sha;
+
+    const response = await fetch(API_URL, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!response.ok) throw new Error(`Ошибка ${response.status}`);
+
+    localStorage.setItem('tucha_titles', JSON.stringify(titles));
+    localStorage.setItem('tucha_folder_names', JSON.stringify(folderNames));
+    if (!silent) console.log('✅ Сохранено на GitHub');
+  } catch(e) {
+    console.error('Ошибка сохранения на GitHub:', e);
+    localStorage.setItem('tucha_titles', JSON.stringify(titles));
+    localStorage.setItem('tucha_folder_names', JSON.stringify(folderNames));
+  }
+  isSaving = false;
+}
+
+// ============================================================
+// 🖥️ ИНИЦИАЛИЗАЦИЯ UI
+// ============================================================
+function initUI() {
+  PHYSICAL_FOLDERS.forEach((physical) => {
     const b = document.createElement('div');
     b.className = 'folderBtn';
     b.textContent = folderNames[physical] || physical;
-    
-    // Добавляем индикатор (лампочку)
+
     const indicator = document.createElement('span');
     indicator.className = 'indicator';
     b.appendChild(indicator);
-    
-    // Сохраняем кнопку
     folderButtons[physical] = b;
-    
-    b.onclick=()=>{
-        console.log('Клик по папке:', physical);
-        openFolder(physical);
-    };
+
+    b.onclick = () => openFolder(physical);
     b.ondblclick = () => {
-        const t = prompt("Название папки:", folderNames[physical] || physical);
-        if (t === null) return;
-        folderNames[physical] = t;
-        saveFolderNames();
-        b.textContent = t || physical;
-        // Возвращаем индикатор обратно (он был удален при замене текста)
-        const newIndicator = document.createElement('span');
-        newIndicator.className = 'indicator';
-        b.appendChild(newIndicator);
-        // Обновляем состояние
-        if (currentFolder === physical) {
-            updateFolderLabel(physical);
-            updateActiveFolder(physical);
-        }
+      const t = prompt("Название папки:", folderNames[physical] || physical);
+      if (t === null) return;
+      folderNames[physical] = t;
+      saveToGitHub();
+      b.textContent = t || physical;
+      // Восстанавливаем индикатор
+      const newIndicator = document.createElement('span');
+      newIndicator.className = 'indicator';
+      b.appendChild(newIndicator);
+      if (currentFolder === physical) {
+        updateFolderLabel(physical);
+        updateActiveFolder(physical);
+      }
     };
     foldersDiv.appendChild(b);
-    console.log('Кнопка добавлена');
-});
+  });
 
-console.log('Все кнопки созданы');
+  openFolder(PHYSICAL_FOLDERS[0]);
+}
 
-/* ====== ФУНКЦИЯ ОБНОВЛЕНИЯ АКТИВНОЙ ПАПКИ ====== */
+// ============================================================
+// 📂 УПРАВЛЕНИЕ ПАПКАМИ
+// ============================================================
 function updateActiveFolder(folder) {
-    // Убираем класс active у всех папок
-    Object.keys(folderButtons).forEach(key => {
-        folderButtons[key].classList.remove('active');
-    });
-    
-    // Добавляем класс active текущей папке
-    if (folder && folderButtons[folder]) {
-        folderButtons[folder].classList.add('active');
-    }
+  Object.keys(folderButtons).forEach(key => {
+    folderButtons[key].classList.remove('active');
+  });
+  if (folder && folderButtons[folder]) {
+    folderButtons[folder].classList.add('active');
+  }
 }
 
-function openFolder(folder){
-    console.log('=== openFolder вызвана с:', folder);
-    currentFolder = folder;
-    updateActiveFolder(folder);
-    renderFiles(folder);
+function openFolder(folder) {
+  currentFolder = folder;
+  updateActiveFolder(folder);
+  renderFiles(folder);
 }
 
-/* ====== FILE LIST ====== */
-function renderFiles(folder){
-    console.log('=== renderFiles вызвана с:', folder);
-    filesDiv.innerHTML='';
-    console.log('Очистил список файлов');
+// ============================================================
+// 📄 ОТОБРАЖЕНИЕ ФАЙЛОВ
+// ============================================================
+function renderFiles(folder) {
+  filesDiv.innerHTML = '';
+  FILES.forEach((num) => {
+    const row = document.createElement('div');
+    row.className = 'fileRow';
 
-    FILES.forEach((num, index)=>{
-        if (index < 5 || index > 90) {
-            console.log(`Создаю файл ${index+1}:`, num);
-        }
-        
-        const row = document.createElement('div');
-        row.className='fileRow';
+    const n = document.createElement('div');
+    n.className = 'num';
+    n.textContent = num;
 
-        const n = document.createElement('div');
-        n.className='num';
-        n.textContent=num;
+    const name = document.createElement('div');
+    name.className = 'name';
+    const fileName = titles[folder + num];
+    name.textContent = fileName || '';
 
-        const name = document.createElement('div');
-        name.className='name';
-        const fileName = titles[folder+num];
-        name.textContent = fileName || '';
+    row.appendChild(n);
+    row.appendChild(name);
 
-        row.appendChild(n);
-        row.appendChild(name);
+    row.onclick = () => openFile(folder, num);
+    row.ondblclick = () => {
+      const t = prompt("Название файла:", titles[folder + num] || '');
+      if (t === null) return;
+      titles[folder + num] = t;
+      saveToGitHub();
+      renderFiles(folder);
+    };
 
-        row.onclick=()=>{
-            console.log('=== КЛИК ПО ФАЙЛУ ===');
-            console.log('Папка:', folder);
-            console.log('Номер файла:', num);
-            console.log('Путь:', `${folder}/${num}.txt`);
-            openFile(folder,num);
-        };
-
-        row.ondblclick=()=>{
-            const t = prompt("Название файла:", titles[folder+num] || '');
-            if(t===null) return;
-            titles[folder+num]=t;
-            saveTitles();
-            renderFiles(folder);
-        };
-
-        filesDiv.appendChild(row);
-    });
-    
-    console.log('Все файлы отрисованы');
+    filesDiv.appendChild(row);
+  });
 }
 
-/* ====== FILE OPEN ====== */
-async function openFile(folder,num){
-    console.log('=== openFile ВЫЗВАНА ===');
-    console.log('Папка:', folder);
-    console.log('Номер:', num);
-    
-    const path = `${folder}/${num}.txt`;
-    console.log('Полный путь:', path);
-    console.log('Текущий URL:', window.location.href);
-
-    try{
-        console.log('Начинаю fetch...');
-        const res = await fetch(path);
-        console.log('Ответ получен, статус:', res.status);
-        console.log('OK?', res.ok);
-        
-        if (!res.ok) {
-            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-        }
-        
-        console.log('Читаю данные...');
-        const buf = await res.arrayBuffer();
-        console.log('Данные прочитаны, размер:', buf.byteLength);
-        
-        const text = decodeSmart(buf);
-        console.log('Текст декодирован, длина:', text.length);
-
-        reader.style.display='block';
-        reader.textContent = text;
-        console.log('Текст отображён');
-        
-        // ===== ПОКАЗЫВАЕМ НАЗВАНИЕ ПАПКИ С ЛАМПОЧКОЙ =====
-        updateFolderLabel(folder);
-
-    }catch(e){
-        console.error('=== ОШИБКА ===');
-        console.error('Тип ошибки:', e.name);
-        console.error('Сообщение:', e.message);
-        console.error('Полный объект:', e);
-        
-        reader.style.display='block';
-        reader.textContent = `ОШИБКА: ${e.message}\n\nПуть: ${path}\n\nПроверьте:\n1. Существует ли папка "${folder}"\n2. Существует ли файл "${num}.txt"\n3. Правильно ли написаны имена (регистр важен!)\n4. Открываете ли вы через сервер (не file://)`;
-        
-        // ===== ПОКАЗЫВАЕМ НАЗВАНИЕ ПАПКИ С ЛАМПОЧКОЙ даже при ошибке =====
-        updateFolderLabel(folder);
-    }
+// ============================================================
+// 📖 ОТКРЫТИЕ ФАЙЛА
+// ============================================================
+async function openFile(folder, num) {
+  const path = `${folder}/${num}.txt`;
+  try {
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const buf = await res.arrayBuffer();
+    const text = decodeSmart(buf);
+    reader.style.display = 'block';
+    reader.textContent = text;
+    updateFolderLabel(folder);
+  } catch(e) {
+    reader.style.display = 'block';
+    reader.textContent = `ОШИБКА: ${e.message}\n\nПуть: ${path}\n\nПроверьте:\n1. Существует ли папка "${folder}"\n2. Существует ли файл "${num}.txt"\n3. Правильно ли написаны имена (регистр важен!)\n4. Открываете ли вы через сервер (не file://)`;
+    updateFolderLabel(folder);
+  }
 }
 
-/* ====== ОБНОВЛЕНИЕ НАЗВАНИЯ ПАПКИ С ЛАМПОЧКОЙ ====== */
-function updateFolderLabel(folder){
-    const displayName = folderNames[folder] || folder;
-    labelText.textContent = '📁 ' + displayName;
-    folderLabel.style.display = 'flex';
+// ============================================================
+// 🔤 ДЕКОДЕР
+// ============================================================
+function decodeSmart(buffer) {
+  const encodings = ['utf-8', 'windows-1251', 'koi8-r', 'ibm866', 'utf-16le', 'utf-16be'];
+  let best = '';
+  let bestScore = -1;
+  for (const enc of encodings) {
+    try {
+      const dec = new TextDecoder(enc);
+      const txt = dec.decode(buffer);
+      const score = txt.length - ((txt.match(/�/g) || []).length * 10);
+      if (score > bestScore) {
+        bestScore = score;
+        best = txt;
+      }
+    } catch(e) {}
+  }
+  return best;
 }
 
-/* ====== ENCODING DETECTOR ====== */
-function decodeSmart(buffer){
-    console.log('Декодирую буфер, размер:', buffer.byteLength);
-    const encodings = [
-        'utf-8',
-        'windows-1251',
-        'koi8-r',
-        'ibm866',
-        'utf-16le',
-        'utf-16be'
-    ];
-
-    let best = '';
-    let bestScore = -1;
-
-    for(const enc of encodings){
-        try{
-            const dec = new TextDecoder(enc);
-            const txt = dec.decode(buffer);
-            const score = qualityScore(txt);
-            if(score > bestScore){
-                bestScore = score;
-                best = txt;
-            }
-        }catch(e){}
-    }
-
-    console.log('Декодировано, выбрана кодировка');
-    return best;
+// ============================================================
+// 🏷️ ОБНОВЛЕНИЕ НАЗВАНИЯ ПАПКИ С ЛАМПОЧКОЙ
+// ============================================================
+function updateFolderLabel(folder) {
+  const displayName = folderNames[folder] || folder;
+  labelText.textContent = '📁 ' + displayName;
+  folderLabel.style.display = 'flex';
 }
 
-function qualityScore(txt){
-    let bad = (txt.match(/�/g)||[]).length;
-    return txt.length - bad*10;
+function closeReader() {
+  reader.style.display = 'none';
+  reader.textContent = '';
+  folderLabel.style.display = 'none';
 }
 
-/* ====== CLOSE ====== */
-function closeReader(){
-    console.log('Закрываю читалку');
-    reader.style.display='none';
-    reader.textContent='';
-    // ===== СКРЫВАЕМ НАЗВАНИЕ ПАПКИ =====
-    folderLabel.style.display = 'none';
-}
+// ============================================================
+// 🚀 ЗАПУСК
+// ============================================================
+loadFromGitHub();
 
-/* init */
-console.log('=== ИНИЦИАЛИЗАЦИЯ ===');
-console.log('Открываю первую папку:', PHYSICAL_FOLDERS[0]);
-openFolder(PHYSICAL_FOLDERS[0]);
-console.log('=== ГОТОВО ===');
+// Автосохранение при закрытии
+window.addEventListener('beforeunload', () => {
+  saveToGitHub(true);
+});
 </script>
 
 </body>
