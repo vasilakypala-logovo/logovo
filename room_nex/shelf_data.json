@@ -1,0 +1,12 @@
+﻿[
+  {
+    "icon": "001.png",
+    "title": "Моя первая книга",
+    "file": "book1.pdf"
+  },
+  {
+    "icon": "002.png",
+    "title": "Сказки",
+    "file": "skazki.exe"
+  }
+]
