@@ -5,27 +5,131 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>БУКИНИСТлогово</title>
 <style>
-#globePortal{
-  position:absolute;
-  right:3%;
-  bottom:6%;
-  width:9%;
-  height:18%;
-  border-radius:50%;
-  cursor:pointer;
-  z-index:200;
-
- background:transparent;
-border:none;
+/* ===== КРУГЛЫЕ КНОПКИ В ЛЕВОМ ВЕРХНЕМ УГЛУ ===== */
+#leftTopButtons{
+  position:fixed;
+  top:20px;
+  left:20px;
+  z-index:5000;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
 }
-  *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050403;font-family:Georgia,'Times New Roman',serif;color:#f0d28a}body{user-select:none}.scene{position:relative;width:100vw;height:100vh;background:url('fonpolka.png') center center/cover no-repeat}.velvet-field{position:absolute;left:12.5%;top:11.8%;width:73.8%;height:69.4%;}.book-grid{position:absolute;inset:0;padding:2.1vw 2.5vw;display:grid;grid-template-columns:repeat(8, minmax(72px, 1fr));grid-auto-rows:minmax(178px, 20vh);gap:1.25vw 1.15vw;align-content:start}.book-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;animation:appear .36s ease-out both;cursor:pointer;filter:drop-shadow(0 12px 15px rgba(0,0,0,.72))}.book-card:hover .cover{transform:translateY(-4px) scale(1.035);filter:brightness(1.13) drop-shadow(0 0 12px rgba(218,174,84,.35))}.cover{width:min(7.4vw,98px);max-height:13.2vh;object-fit:contain;transition:.22s}.plaque{margin-top:.65vh;min-width:min(8.7vw,125px);height:2.65vh;min-height:22px;padding:.18vh .6vw;border-radius:6px;background:linear-gradient(180deg,#b8843e 0%,#6c3d18 48%,#c0924e 100%);border:1px solid rgba(255,214,139,.55);box-shadow:inset 0 1px 3px rgba(255,230,160,.35),inset 0 -2px 5px rgba(0,0,0,.55),0 4px 7px rgba(0,0,0,.5);color:#241103;text-align:center;font-size:clamp(10px,.82vw,14px);line-height:2.1vh;letter-spacing:.04em;text-transform:uppercase;text-shadow:0 1px 0 rgba(255,234,168,.24);outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.plaque:empty:after{content:''}.balls{position:absolute;left:25.6%;bottom:4.8%;display:flex;gap:2.75vw;align-items:center}.ball{width:clamp(30px,3.1vw,52px);height:clamp(30px,3.1vw,52px);border-radius:50%;border:1px solid rgba(250,222,154,.55);cursor:pointer;box-shadow:inset -10px -12px 18px rgba(0,0,0,.72),inset 7px 6px 12px rgba(255,255,255,.28),0 8px 12px rgba(0,0,0,.7),0 0 9px rgba(224,177,88,.18);position:relative;transition:.18s}.ball:before{content:'';position:absolute;left:22%;top:16%;width:28%;height:22%;border-radius:50%;background:rgba(255,255,255,.72);filter:blur(1px)}.ball:hover{transform:translateY(-4px) scale(1.06);box-shadow:inset -10px -12px 18px rgba(0,0,0,.72),inset 7px 6px 12px rgba(255,255,255,.31),0 11px 16px rgba(0,0,0,.78),0 0 18px rgba(244,203,111,.35)}.b1{background:radial-gradient(circle at 33% 26%,#f9f3db 0 10%,#d9b769 19%,#5f3414 61%,#170a05 100%)}.b2{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#a74328 20%,#3b0d0d 66%,#120404 100%)}.b3{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#294f84 21%,#09182b 68%,#04070d 100%)}.b4{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#315b36 21%,#0b2011 68%,#030804 100%)}.b5{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#8a7224 21%,#302305 68%,#090601 100%)}.hint{position:absolute;right:3.5%;bottom:2.5%;font-size:11px;color:rgba(218,190,130,.55);letter-spacing:.05em}.flash{position:absolute;left:50%;top:9%;transform:translateX(-50%);padding:9px 18px;border-radius:999px;background:rgba(8,6,4,.72);border:1px solid rgba(205,159,72,.35);color:#e6c477;font-size:14px;opacity:0;pointer-events:none;transition:.35s}.flash.show{opacity:1}@keyframes appear{from{opacity:0;transform:translateY(18px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
+.circleBtn{
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  background:#222831;
+  border:2px solid #444;
+  color:#ddd;
+  cursor:pointer;
+  font-size:20px;
+  transition:all 0.3s ease;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 0 20px rgba(0,0,0,0.6);
+}
+.circleBtn:hover{
+  background:#2f3a46;
+  border-color:#666;
+  transform:scale(1.05);
+}
+.circleBtn.github{
+  border-color:#6a2a6a;
+  font-size:22px;
+}
+.circleBtn.github.active{
+  border-color:#4ade80;
+  box-shadow:0 0 30px rgba(74,222,128,0.3);
+}
+.circleBtn.tucha{
+  border-color:#2a6a4a;
+  font-size:13px;
+  font-weight:bold;
+  line-height:1.2;
+}
+.circleBtn.tucha:hover{
+  background:#1a3a2a;
+  border-color:#4a8a4a;
+}
+
+#githubSettings{
+  position:fixed;
+  top:80px;
+  left:20px;
+  z-index:5001;
+  background:#15181d;
+  border:1px solid #333;
+  border-radius:8px;
+  padding:15px;
+  display:none;
+  width:340px;
+  box-shadow:0 0 50px rgba(0,0,0,0.9)
+}
+#githubSettings input{
+  width:100%;
+  padding:8px;
+  background:#222831;
+  border:1px solid #444;
+  color:#ddd;
+  border-radius:4px;
+  margin-bottom:8px;
+  font-size:13px
+}
+#githubSettings button{
+  padding:8px 16px;
+  background:#2a3a2a;
+  border:1px solid #4a6a4a;
+  color:#ddd;
+  border-radius:4px;
+  cursor:pointer
+}
+#githubSettings button:hover{background:#3a4a3a}
+#githubSettings .close{
+  position:absolute;
+  top:5px;
+  right:10px;
+  background:none;
+  border:none;
+  color:#888;
+  font-size:20px;
+  cursor:pointer
+}
+#githubSettings .close:hover{color:#fff}
+
+/* ===== ОСТАЛЬНЫЕ СТИЛИ (НЕ ИЗМЕНЯЮТСЯ) ===== */
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050403;font-family:Georgia,'Times New Roman',serif;color:#f0d28a}body{user-select:none}.scene{position:relative;width:100vw;height:100vh;background:url('fonpolka.png') center center/cover no-repeat}.velvet-field{position:absolute;left:12.5%;top:11.8%;width:73.8%;height:69.4%;}.book-grid{position:absolute;inset:0;padding:2.1vw 2.5vw;display:grid;grid-template-columns:repeat(8, minmax(72px, 1fr));grid-auto-rows:minmax(178px, 20vh);gap:1.25vw 1.15vw;align-content:start}.book-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;animation:appear .36s ease-out both;cursor:pointer;filter:drop-shadow(0 12px 15px rgba(0,0,0,.72))}.book-card:hover .cover{transform:translateY(-4px) scale(1.035);filter:brightness(1.13) drop-shadow(0 0 12px rgba(218,174,84,.35))}.cover{width:min(7.4vw,98px);max-height:13.2vh;object-fit:contain;transition:.22s}.plaque{margin-top:.65vh;min-width:min(8.7vw,125px);height:2.65vh;min-height:22px;padding:.18vh .6vw;border-radius:6px;background:linear-gradient(180deg,#b8843e 0%,#6c3d18 48%,#c0924e 100%);border:1px solid rgba(255,214,139,.55);box-shadow:inset 0 1px 3px rgba(255,230,160,.35),inset 0 -2px 5px rgba(0,0,0,.55),0 4px 7px rgba(0,0,0,.5);color:#241103;text-align:center;font-size:clamp(10px,.82vw,14px);line-height:2.1vh;letter-spacing:.04em;text-transform:uppercase;text-shadow:0 1px 0 rgba(255,234,168,.24);outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.plaque:empty:after{content:''}.balls{position:absolute;left:25.6%;bottom:4.8%;display:flex;gap:2.75vw;align-items:center}.ball{width:clamp(30px,3.1vw,52px);height:clamp(30px,3.1vw,52px);border-radius:50%;border:1px solid rgba(250,222,154,.55);cursor:pointer;box-shadow:inset -10px -12px 18px rgba(0,0,0,.72),inset 7px 6px 12px rgba(255,255,255,.28),0 8px 12px rgba(0,0,0,.7),0 0 9px rgba(224,177,88,.18);position:relative;transition:.18s}.ball:before{content:'';position:absolute;left:22%;top:16%;width:28%;height:22%;border-radius:50%;background:rgba(255,255,255,.72);filter:blur(1px)}.ball:hover{transform:translateY(-4px) scale(1.06);box-shadow:inset -10px -12px 18px rgba(0,0,0,.72),inset 7px 6px 12px rgba(255,255,255,.31),0 11px 16px rgba(0,0,0,.78),0 0 18px rgba(244,203,111,.35)}.b1{background:radial-gradient(circle at 33% 26%,#f9f3db 0 10%,#d9b769 19%,#5f3414 61%,#170a05 100%)}.b2{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#a74328 20%,#3b0d0d 66%,#120404 100%)}.b3{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#294f84 21%,#09182b 68%,#04070d 100%)}.b4{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#315b36 21%,#0b2011 68%,#030804 100%)}.b5{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#8a7224 21%,#302305 68%,#090601 100%)}.b6{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#8a2244 21%,#3d051a 68%,#0d0106 100%)}.b7{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#5a7a8a 21%,#0a1a22 68%,#020609 100%)}.b8{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#9a7a3a 21%,#3d2608 68%,#0d0601 100%)}.b9{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#6a4a7a 21%,#1a0a22 68%,#06020a 100%)}.b10{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#3a7a6a 21%,#08221a 68%,#020a08 100%)}.b11{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#9a5a3a 21%,#3d1808 68%,#0d0401 100%)}.hint{position:absolute;right:3.5%;bottom:2.5%;font-size:11px;color:rgba(218,190,130,.55);letter-spacing:.05em}.flash{position:absolute;left:50%;top:9%;transform:translateX(-50%);padding:9px 18px;border-radius:999px;background:rgba(8,6,4,.72);border:1px solid rgba(205,159,72,.35);color:#e6c477;font-size:14px;opacity:0;pointer-events:none;transition:.35s}.flash.show{opacity:1}@keyframes appear{from{opacity:0;transform:translateY(18px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:900px){.book-grid{grid-template-columns:repeat(6,1fr);grid-auto-rows:minmax(150px,19vh)}.cover{width:11vw}.balls{left:18%;gap:3.4vw}.plaque{min-width:12vw}.hint{display:none}}
 </style>
 </head>
 <body>
+
+<!-- ===== КРУГЛЫЕ КНОПКИ В ЛЕВОМ ВЕРХНЕМ УГЛУ ===== -->
+<div id="leftTopButtons">
+  <!-- Кнопка GitHub (шестерёнка) -->
+  <button class="circleBtn github" id="githubCircleBtn" onclick="document.getElementById('githubSettings').style.display='block'" title="Настройки GitHub">⚙️</button>
+  <!-- Кнопка Туча (открывает Tucha.html) -->
+  <button class="circleBtn tucha" onclick="window.location.href='Tucha.html'" title="Открыть архив Туча">Туча</button>
+</div>
+
+<!-- ===== ОКНО НАСТРОЕК GITHUB ===== -->
+<div id="githubSettings">
+  <button class="close" onclick="document.getElementById('githubSettings').style.display='none'">✕</button>
+  <h3 style="margin-bottom:10px;color:#ddd;font-size:16px;">Подключение к GitHub</h3>
+  <label style="color:#888;font-size:12px;">Токен доступа:</label>
+  <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+  <label style="color:#888;font-size:12px;margin-top:5px;display:block;">Репозиторий:</label>
+  <input type="text" id="repoInput" placeholder="vasilakypala-logovo/logovo" value="vasilakypala-logovo/logovo">
+  <label style="color:#888;font-size:12px;margin-top:5px;display:block;">Путь к папке с данными:</label>
+  <input type="text" id="pathInput" placeholder="room_nex/bukibuk/bukibuk" value="room_nex/bukibuk/bukibuk">
+  <button onclick="connectGitHub()" style="margin-top:10px;width:100%;background:#2a4a3a;border-color:#4a8a4a;">🔗 Подключиться</button>
+  <button onclick="disconnectGitHub()" style="margin-top:5px;width:100%;background:#4a2a2a;border-color:#8a4a4a;">🔓 Отключиться</button>
+</div>
+
+<!-- ===== ОСНОВНАЯ СЦЕНА ===== -->
 <div class="scene">
   <div id="globePortal" title="В библиотеку Дворца"></div>
-
   <div class="velvet-field"><div id="bookGrid" class="book-grid"></div></div>
   <div class="balls" aria-label="выбор иконок">
     <button class="ball b1" data-icon="001.png" title="Поставить иконку 001"></button>
@@ -33,36 +137,196 @@ border:none;
     <button class="ball b3" data-icon="003.png" title="Поставить иконку 003"></button>
     <button class="ball b4" data-icon="004.png" title="Поставить иконку 004"></button>
     <button class="ball b5" data-icon="005.png" title="Поставить иконку 005"></button>
-     <button class="ball b6" data-icon="006.png" title="Поставить иконку 006"></button>
+    <button class="ball b6" data-icon="006.png" title="Поставить иконку 006"></button>
     <button class="ball b7" data-icon="007.png" title="Поставить иконку 007"></button>
     <button class="ball b8" data-icon="008.png" title="Поставить иконку 008"></button>
     <button class="ball b9" data-icon="009.png" title="Поставить иконку 009"></button>
     <button class="ball b10" data-icon="010.png" title="Поставить иконку 010"></button>
-    <button class="ball b10" data-icon="011.png" title="Поставить иконку 011"></button>
+    <button class="ball b11" data-icon="011.png" title="Поставить иконку 011"></button>
   </div>
   <div id="flash" class="flash"></div>
   <div class="hint">двойной клик по табличке — вписать книгу</div>
 </div>
+
 <script>
+// ===== НАСТРОЙКИ =====
 const BOOK_FOLDER = 'bookinist/';
 const STORAGE_KEY = 'nex_bookinist_logovo_shelf_v1';
+const DATA_FILE = 'shelf_data.json';
 const MAX_BOOKS = 40;
 const grid = document.getElementById('bookGrid');
 const flash = document.getElementById('flash');
-let shelf = loadShelf();
 
+// ===== СОСТОЯНИЕ =====
+let shelf = loadShelf();
+let isConnected = false;
+let githubToken = '';
+let githubRepo = '';
+let githubPath = '';
+
+// ===== DOM =====
+const githubCircleBtn = document.getElementById('githubCircleBtn');
+
+// ===== ЗАГРУЗКА НАСТРОЕК GITHUB =====
+function loadGitHubSettings(){
+  githubToken = localStorage.getItem('bukinist_github_token') || '';
+  githubRepo = localStorage.getItem('bukinist_github_repo') || 'vasilakypala-logovo/logovo';
+  githubPath = localStorage.getItem('bukinist_github_path') || 'room_nex/bukibuk/bukibuk';
+  document.getElementById('tokenInput').value = githubToken;
+  document.getElementById('repoInput').value = githubRepo;
+  document.getElementById('pathInput').value = githubPath;
+  if(githubToken && githubRepo){
+    isConnected = true;
+    githubCircleBtn.classList.add('active');
+  }
+}
+
+// ===== ПОДКЛЮЧЕНИЕ К GITHUB =====
+function connectGitHub(){
+  const token = document.getElementById('tokenInput').value.trim();
+  const repo = document.getElementById('repoInput').value.trim();
+  const path = document.getElementById('pathInput').value.trim();
+  
+  if(!token || !repo){
+    alert('Введите токен и название репозитория!');
+    return;
+  }
+  
+  githubToken = token;
+  githubRepo = repo;
+  githubPath = path;
+  
+  localStorage.setItem('bukinist_github_token', token);
+  localStorage.setItem('bukinist_github_repo', repo);
+  localStorage.setItem('bukinist_github_path', path);
+  
+  isConnected = true;
+  githubCircleBtn.classList.add('active');
+  document.getElementById('githubSettings').style.display = 'none';
+  
+  loadFromGitHub();
+}
+
+function disconnectGitHub(){
+  githubToken = '';
+  isConnected = false;
+  localStorage.removeItem('bukinist_github_token');
+  githubCircleBtn.classList.remove('active');
+  document.getElementById('githubSettings').style.display = 'none';
+}
+
+// ===== СОХРАНЕНИЕ НА GITHUB =====
+async function saveToGitHub(){
+  if(!isConnected || !githubToken){
+    saveShelf();
+    return;
+  }
+  
+  try{
+    const [owner, repo] = githubRepo.split('/');
+    const path = `${githubPath}/${DATA_FILE}`;
+    const sha = await getFileSha(owner, repo, path);
+    
+    const jsonData = JSON.stringify(shelf, null, 2);
+    const content = btoa(unescape(encodeURIComponent(jsonData)));
+    
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    const body = {
+      message: `Автосохранение: ${DATA_FILE}`,
+      content: content
+    };
+    if(sha) body.sha = sha;
+    
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    
+    if(response.ok){
+      console.log('✅ Данные сохранены на GitHub');
+    } else {
+      const err = await response.json();
+      console.warn('⚠️ Ошибка сохранения:', err.message);
+      saveShelf();
+    }
+  } catch(e){
+    console.warn('⚠️ Ошибка сохранения:', e.message);
+    saveShelf();
+  }
+}
+
+async function getFileSha(owner, repo, path){
+  try{
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+      headers: {
+        'Authorization': `token ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if(response.ok){
+      const data = await response.json();
+      return data.sha;
+    }
+    return null;
+  } catch(e){
+    return null;
+  }
+}
+
+// ===== ЗАГРУЗКА С GITHUB =====
+async function loadFromGitHub(){
+  if(!isConnected || !githubToken) return;
+  
+  try{
+    const [owner, repo] = githubRepo.split('/');
+    const path = `${githubPath}/${DATA_FILE}`;
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+      headers: {
+        'Authorization': `token ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if(!response.ok) return;
+    
+    const data = await response.json();
+    const content = decodeURIComponent(escape(atob(data.content)));
+    const json = JSON.parse(content);
+    
+    if(Array.isArray(json)){
+      shelf = json;
+      saveShelf();
+      render();
+      console.log(`✅ Загружено ${shelf.length} книг с GitHub`);
+    }
+  } catch(e){
+    console.warn('⚠️ Ошибка загрузки:', e.message);
+  }
+}
+
+// ===== ОСНОВНЫЕ ФУНКЦИИ =====
 function loadShelf(){
   try{return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];}catch(e){return []}
 }
-function saveShelf(){localStorage.setItem(STORAGE_KEY, JSON.stringify(shelf));}
-function message(t){flash.textContent=t;flash.classList.add('show');setTimeout(()=>flash.classList.remove('show'),1500)}
+function saveShelf(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(shelf));
+}
+function message(t){
+  flash.textContent=t;
+  flash.classList.add('show');
+  setTimeout(()=>flash.classList.remove('show'),1500)
+}
 
- 
 function addBook(icon){
   if(shelf.length >= MAX_BOOKS){ message('Витрина заполнена'); return; }
   shelf.push({icon, title:'', file:''});
   saveShelf();
   render();
+  saveToGitHub();
 }
 
 function render(){
@@ -99,12 +363,16 @@ function render(){
       shelf[index].file = file.trim();
       saveShelf();
       render();
+      saveToGitHub();
     });
 
     card.addEventListener('contextmenu',(ev)=>{
       ev.preventDefault();
       if(confirm('Убрать эту книгу с витрины?')){
-        shelf.splice(index,1); saveShelf(); render();
+        shelf.splice(index,1);
+        saveShelf();
+        render();
+        saveToGitHub();
       }
     });
 
@@ -114,13 +382,24 @@ function render(){
   });
 }
 
+// ===== СОБЫТИЯ =====
 document.querySelectorAll('.ball').forEach(btn=>{
   btn.addEventListener('click',()=>addBook(btn.dataset.icon));
 });
+
 document.getElementById('globePortal').addEventListener('click',()=>{
   window.location.href = 'https://vasilakypala-logovo.github.io/dvorets-nex/vestibul/seas/dvorets_library_room/bookinist_stand%207.html';
 });
-render();
+
+// ===== ЗАПУСК =====
+loadGitHubSettings();
+if(isConnected){
+  loadFromGitHub().then(() => {
+    render();
+  });
+} else {
+  render();
+}
 </script>
 </body>
 </html>
