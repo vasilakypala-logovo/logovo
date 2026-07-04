@@ -35,8 +35,8 @@ body{font-family:Arial,sans-serif;background:#0b0c0f;color:#ddd;overflow:hidden;
 #closeReader{position:fixed;right:20px;top:20px;padding:10px 14px;background:#111;color:#fff;border:none;cursor:pointer;z-index:1001}
 #title{position:absolute;left:159px;top:10px;padding:10px;font-size:14px;color:#888}
 
-#fileControls{position:absolute;left:159px;bottom:0;width:280px;padding:10px;background:#15181d;border-top:1px solid #222;display:flex;gap:8px;z-index:5}
-#fileControls button{padding:8px 16px;background:#222831;border:1px solid #444;color:#ddd;cursor:pointer;border-radius:4px;font-size:12px;flex:1;transition:all 0.3s ease}
+#fileControls{position:absolute;left:159px;bottom:0;width:280px;padding:10px;background:#15181d;border-top:1px solid #222;display:flex;gap:8px;z-index:5;flex-wrap:wrap}
+#fileControls button{padding:8px 16px;background:#222831;border:1px solid #444;color:#ddd;cursor:pointer;border-radius:4px;font-size:12px;flex:1;transition:all 0.3s ease;min-width:60px}
 #fileControls button:hover{background:#2f3a46;border-color:#666}
 #fileControls button.addBtn{background:#1a3a2a;border-color:#2a6a4a}
 #fileControls button.addBtn:hover{background:#1e4a32}
@@ -56,8 +56,8 @@ body{font-family:Arial,sans-serif;background:#0b0c0f;color:#ddd;overflow:hidden;
 <div id="title">Tucha Archive</div>
 
 <div id="fileControls">
-    <button class="addBtn" onclick="addFile()">➕ Добавить файл</button>
-    <button class="saveBtn" onclick="saveToGitHub()">💾 Сохранить на GitHub</button>
+    <button class="addBtn" onclick="addFile()">➕ Добавить</button>
+    <button class="saveBtn" onclick="saveToGitHub()">💾 Сохранить</button>
 </div>
 
 <div id="reader"></div>
@@ -360,9 +360,14 @@ function loadFromJSON(file){
 async function loadDataFromGitHub(folder){
     try{
         const url = `${GITHUB_RAW_URL}${folder}_data.json`;
+        console.log(`Пробую загрузить: ${url}`);
         const response = await fetch(url);
-        if(!response.ok) throw new Error('Файл не найден');
+        if(!response.ok) {
+            console.log(`❌ Нет данных для папки ${folder} (${response.status})`);
+            return false;
+        }
         const data = await response.json();
+        console.log(`✅ Загружены данные для папки ${folder}`);
         if(data.files && data.files.length > 0) {
             fileLists[folder] = data.files;
         }
@@ -378,7 +383,7 @@ async function loadDataFromGitHub(folder){
         saveAllData();
         return true;
     } catch(e) {
-        console.log(`Нет данных для папки ${folder} на GitHub`);
+        console.log(`⚠️ Ошибка загрузки для папки ${folder}:`, e.message);
         return false;
     }
 }
@@ -396,6 +401,8 @@ async function loadAllDataFromGitHub(){
         if(currentFolder){
             renderFiles(currentFolder);
         }
+    } else {
+        console.log('ℹ️ Нет JSON-файлов на GitHub, используем локальные данные');
     }
 }
 
@@ -423,6 +430,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ===== ЗАПУСК =====
 async function init(){
+    console.log('🚀 Tucha Archive запущен');
     renderFolders();
     const firstFolders = getCurrentFolders();
     if(firstFolders.length > 0){
@@ -433,6 +441,7 @@ async function init(){
     if(currentFolder){
         renderFiles(currentFolder);
     }
+    console.log('✅ Готово');
 }
 
 init();
