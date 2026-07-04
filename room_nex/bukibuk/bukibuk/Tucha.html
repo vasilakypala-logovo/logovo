@@ -35,15 +35,11 @@ body{font-family:Arial,sans-serif;background:#0b0c0f;color:#ddd;overflow:hidden;
 #closeReader{position:fixed;right:20px;top:20px;padding:10px 14px;background:#111;color:#fff;border:none;cursor:pointer;z-index:1001}
 #title{position:absolute;left:159px;top:10px;padding:10px;font-size:14px;color:#888}
 
-#fileControls{position:absolute;left:159px;bottom:0;width:280px;padding:10px;background:#15181d;border-top:1px solid #222;display:flex;gap:8px;z-index:5;flex-wrap:wrap}
-#fileControls button{padding:8px 16px;background:#222831;border:1px solid #444;color:#ddd;cursor:pointer;border-radius:4px;font-size:12px;flex:1;transition:all 0.3s ease;min-width:60px}
+#fileControls{position:absolute;left:159px;bottom:0;width:280px;padding:10px;background:#15181d;border-top:1px solid #222;display:flex;gap:8px;z-index:5}
+#fileControls button{padding:8px 16px;background:#222831;border:1px solid #444;color:#ddd;cursor:pointer;border-radius:4px;font-size:12px;flex:1;transition:all 0.3s ease}
 #fileControls button:hover{background:#2f3a46;border-color:#666}
 #fileControls button.addBtn{background:#1a3a2a;border-color:#2a6a4a}
 #fileControls button.addBtn:hover{background:#1e4a32}
-#fileControls button.saveBtn{background:#1a2a3a;border-color:#2a4a6a}
-#fileControls button.saveBtn:hover{background:#1e3a4a}
-#fileControls button.githubBtn{background:#2a1a2a;border-color:#6a2a6a}
-#fileControls button.githubBtn:hover{background:#3a2a3a}
 
 #statusBar{position:fixed;bottom:0;left:0;right:0;height:30px;background:#0b0c0f;border-top:1px solid #222;display:flex;align-items:center;padding:0 20px;font-size:12px;color:#888;z-index:100}
 #statusBar .green{color:#4ade80}
@@ -63,7 +59,6 @@ body{font-family:Arial,sans-serif;background:#0b0c0f;color:#ddd;overflow:hidden;
 <div id="tuchaSwitch">
     <button class="tuchaBtn active" id="tucha1Btn" onclick="switchTucha('1')">☁️ Туча 1</button>
     <button class="tuchaBtn" id="tucha2Btn" onclick="switchTucha('2')">☁️ Туча 2</button>
-    <button class="tuchaBtn" id="githubToggleBtn" onclick="toggleGitHubSettings()" style="background:#2a1a2a;border-color:#6a2a6a;">⚙️ GitHub</button>
 </div>
 
 <div id="folders"></div>
@@ -87,7 +82,7 @@ body{font-family:Arial,sans-serif;background:#0b0c0f;color:#ddd;overflow:hidden;
 </div>
 
 <div id="githubSettings">
-    <button class="close" onclick="toggleGitHubSettings()">✕</button>
+    <button class="close" onclick="document.getElementById('githubSettings').style.display='none'">✕</button>
     <h3 style="margin-bottom:10px;color:#ddd;font-size:16px;">Подключение к GitHub</h3>
     <label style="color:#888;font-size:12px;">Токен доступа:</label>
     <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
@@ -97,6 +92,13 @@ body{font-family:Arial,sans-serif;background:#0b0c0f;color:#ddd;overflow:hidden;
     <input type="text" id="pathInput" placeholder="room_nex/bukibuk/bukibuk" value="room_nex/bukibuk/bukibuk">
     <button onclick="connectGitHub()" style="margin-top:10px;width:100%;background:#2a4a3a;border-color:#4a8a4a;">🔗 Подключиться</button>
     <button onclick="disconnectGitHub()" style="margin-top:5px;width:100%;background:#4a2a2a;border-color:#8a4a4a;">🔓 Отключиться</button>
+</div>
+
+<!-- Кнопка GitHub в левом нижнем углу -->
+<div style="position:fixed;bottom:40px;left:20px;z-index:2000;">
+    <button class="tuchaBtn" onclick="document.getElementById('githubSettings').style.display='block'" style="background:#2a1a2a;border-color:#6a2a6a;padding:8px 16px;font-size:13px;border-radius:6px;border:1px solid #6a2a6a;color:#ddd;cursor:pointer;">
+        ⚙️ GitHub
+    </button>
 </div>
 
 <script>
@@ -139,7 +141,6 @@ function loadGitHubSettings(){
         isConnected = true;
         statusText.textContent = '✅ Подключено к GitHub';
         statusText.className = 'green';
-        document.getElementById('githubToggleBtn').style.borderColor = '#4ade80';
     }
 }
 
@@ -165,10 +166,8 @@ function connectGitHub(){
     isConnected = true;
     statusText.textContent = '✅ Подключено к GitHub';
     statusText.className = 'green';
-    document.getElementById('githubToggleBtn').style.borderColor = '#4ade80';
-    toggleGitHubSettings();
+    document.getElementById('githubSettings').style.display = 'none';
     
-    // Проверяем соединение
     testGitHubConnection();
 }
 
@@ -178,13 +177,7 @@ function disconnectGitHub(){
     localStorage.removeItem('tucha_github_token');
     statusText.textContent = '💾 Локальный режим (не подключено к GitHub)';
     statusText.className = '';
-    document.getElementById('githubToggleBtn').style.borderColor = '#6a2a6a';
-    toggleGitHubSettings();
-}
-
-function toggleGitHubSettings(){
-    const panel = document.getElementById('githubSettings');
-    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    document.getElementById('githubSettings').style.display = 'none';
 }
 
 async function testGitHubConnection(){
@@ -212,7 +205,6 @@ async function testGitHubConnection(){
 // ===== СОХРАНЕНИЕ НА GITHUB (автоматическое) =====
 async function saveToGitHub(folder){
     if(!isConnected || !githubToken){
-        // Если не подключены — просто сохраняем в localStorage
         saveAllData();
         return;
     }
@@ -265,7 +257,6 @@ async function saveToGitHub(folder){
             const err = await response.json();
             statusText.textContent = `⚠️ Ошибка сохранения: ${err.message}`;
             statusText.className = 'red';
-            // Всё равно сохраняем в localStorage
             saveAllData();
         }
     } catch(e){
@@ -362,7 +353,6 @@ function getFileList(folder){
     if(!fileLists[folder] || fileLists[folder].length === 0) {
         fileLists[folder] = ['01','02','03','04','05'];
         saveAllData();
-        // Автосохранение на GitHub
         if(isConnected) saveToGitHub(folder);
     }
     return fileLists[folder];
@@ -385,7 +375,6 @@ function addFile(){
     fileLists[currentFolder] = list;
     saveAllData();
     renderFiles(currentFolder);
-    // Автосохранение на GitHub
     if(isConnected) saveToGitHub(currentFolder);
 }
 
@@ -399,7 +388,6 @@ function deleteFile(folder, num){
         fileLists[folder] = list;
         saveAllData();
         renderFiles(folder);
-        // Автосохранение на GitHub
         if(isConnected) saveToGitHub(folder);
     }
 }
@@ -448,7 +436,6 @@ function renderFolders(){
                 updateFolderLabel(f);
                 updateActiveFolder(f);
             }
-            // Автосохранение на GitHub
             if(isConnected) saveToGitHub(f);
         };
         foldersDiv.appendChild(b);
@@ -501,7 +488,6 @@ function renderFiles(folder){
             titles[folder + num] = t;
             saveAllData();
             renderFiles(folder);
-            // Автосохранение на GitHub
             if(isConnected) saveToGitHub(folder);
         };
         
@@ -578,4 +564,4 @@ async function init(){
 init();
 </script>
 </body>
-</html>﻿
+</html>
