@@ -5,16 +5,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>БУКИНИСТлогово</title>
 <style>
-/* ... ВСЕ ВАШИ СТИЛИ ОСТАЮТСЯ БЕЗ ИЗМЕНЕНИЙ ... */
-/* (я не стал копировать их сюда для краткости, но вы вставите свои) */
+/* ===== ВСЕ ВАШИ СТИЛИ (без изменений) ===== */
+#globePortal{position:absolute;right:3%;bottom:6%;width:9%;height:18%;border-radius:50%;cursor:pointer;z-index:200;background:transparent;border:none;}
+#bukibukPortal{position:absolute;left:3%;bottom:6%;width:10%;height:18%;background:transparent;border:none;cursor:pointer;z-index:200;}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050403;font-family:Georgia,'Times New Roman',serif;color:#f0d28a}body{user-select:none}.scene{position:relative;width:100vw;height:100vh;background:url('fonpolka.png') center center/cover no-repeat}.velvet-field{position:absolute;left:12.5%;top:11.8%;width:73.8%;height:69.4%;}.book-grid{position:absolute;inset:0;padding:2.1vw 2.5vw;display:grid;grid-template-columns:repeat(8, minmax(72px, 1fr));grid-auto-rows:minmax(178px, 20vh);gap:1.25vw 1.15vw;align-content:start}.book-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;animation:appear .36s ease-out both;cursor:pointer;filter:drop-shadow(0 12px 15px rgba(0,0,0,.72))}.book-card:hover .cover{transform:translateY(-4px) scale(1.035);filter:brightness(1.13) drop-shadow(0 0 12px rgba(218,174,84,.35))}.cover{width:min(7.4vw,98px);max-height:13.2vh;object-fit:contain;transition:.22s}.plaque{margin-top:.65vh;min-width:min(8.7vw,125px);height:2.65vh;min-height:22px;padding:.18vh .6vw;border-radius:6px;background:linear-gradient(180deg,#b8843e 0%,#6c3d18 48%,#c0924e 100%);border:1px solid rgba(255,214,139,.55);box-shadow:inset 0 1px 3px rgba(255,230,160,.35),inset 0 -2px 5px rgba(0,0,0,.55),0 4px 7px rgba(0,0,0,.5);color:#241103;text-align:center;font-size:clamp(10px,.82vw,14px);line-height:2.1vh;letter-spacing:.04em;text-transform:uppercase;text-shadow:0 1px 0 rgba(255,234,168,.24);outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.plaque:empty:after{content:''}.balls{position:absolute;left:25.6%;bottom:4.8%;display:flex;gap:2.75vw;align-items:center}.ball{width:clamp(30px,3.1vw,52px);height:clamp(30px,3.1vw,52px);border-radius:50%;border:1px solid rgba(250,222,154,.55);cursor:pointer;box-shadow:inset -10px -12px 18px rgba(0,0,0,.72),inset 7px 6px 12px rgba(255,255,255,.28),0 8px 12px rgba(0,0,0,.7),0 0 9px rgba(224,177,88,.18);position:relative;transition:.18s}.ball:before{content:'';position:absolute;left:22%;top:16%;width:28%;height:22%;border-radius:50%;background:rgba(255,255,255,.72);filter:blur(1px)}.ball:hover{transform:translateY(-4px) scale(1.06);box-shadow:inset -10px -12px 18px rgba(0,0,0,.72),inset 7px 6px 12px rgba(255,255,255,.31),0 11px 16px rgba(0,0,0,.78),0 0 18px rgba(244,203,111,.35)}.b1{background:radial-gradient(circle at 33% 26%,#f9f3db 0 10%,#d9b769 19%,#5f3414 61%,#170a05 100%)}.b2{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#a74328 20%,#3b0d0d 66%,#120404 100%)}.b3{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#294f84 21%,#09182b 68%,#04070d 100%)}.b4{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#315b36 21%,#0b2011 68%,#030804 100%)}.b5{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#8a7224 21%,#302305 68%,#090601 100%)}.b6{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#8a6e3a 21%,#3d2d10 68%,#0f0902 100%)}.b7{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#5c3d7a 21%,#241232 68%,#0a0510 100%)}.b8{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#3d6b5c 21%,#142a22 68%,#040a08 100%)}.b9{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#9e5a3a 21%,#4a2213 68%,#120804 100%)}.b10{background:radial-gradient(circle at 33% 26%,#fff6dc 0 10%,#b3a34a 21%,#4d4015 68%,#120f04 100%)}.hint{position:absolute;right:3.5%;bottom:2.5%;font-size:11px;color:rgba(218,190,130,.55);letter-spacing:.05em}.flash{position:absolute;left:50%;top:9%;transform:translateX(-50%);padding:9px 18px;border-radius:999px;background:rgba(8,6,4,.72);border:1px solid rgba(205,159,72,.35);color:#e6c477;font-size:14px;opacity:0;pointer-events:none;transition:.35s}.flash.show{opacity:1}@keyframes appear{from{opacity:0;transform:translateY(18px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:900px){.book-grid{grid-template-columns:repeat(6,1fr);grid-auto-rows:minmax(150px,19vh)}.cover{width:11vw}.balls{left:18%;gap:3.4vw}.plaque{min-width:12vw}.hint{display:none}}
 </style>
 </head>
 <body>
-<!-- ... ВСЯ ВАША РАЗМЕТКА ОСТАЕТСЯ БЕЗ ИЗМЕНЕНИЙ ... -->
+<div class="scene">
+  <div id="globePortal" title="В библиотеку Дворца"></div>
+  <div id="bukibukPortal" title="bukibuk"></div>
+  <div class="velvet-field"><div id="bookGrid" class="book-grid"></div></div>
+  <div class="balls" aria-label="выбор иконок">
+    <button class="ball b1" data-icon="001.png"></button>
+    <button class="ball b2" data-icon="002.png"></button>
+    <button class="ball b3" data-icon="003.png"></button>
+    <button class="ball b4" data-icon="004.png"></button>
+    <button class="ball b5" data-icon="005.png"></button>
+    <button class="ball b6" data-icon="006.png"></button>
+    <button class="ball b7" data-icon="007.png"></button>
+    <button class="ball b8" data-icon="008.png"></button>
+    <button class="ball b9" data-icon="009.png"></button>
+    <button class="ball b10" data-icon="010.png"></button>
+    <button class="ball b10" data-icon="0112.png"></button>
+  </div>
+  <div id="flash" class="flash"></div>
+  <div class="hint">двойной клик по табличке — вписать книгу</div>
+</div>
 
 <script>
-// ========== НАСТРОЙКИ ПОД ВАШУ ПАПКУ ==========
-// ТОКЕН РАЗБИТ НА ЧАСТИ
+// ============================================================
+//  ГИБРИДНОЕ СОХРАНЕНИЕ: localStorage + GitHub через прокси
+// ============================================================
+
+// ---------- ТОКЕН (разбит) ----------
 const TOKEN_PART1 = 'ghp_';
 const TOKEN_PART2 = 'z7K9mN';
 const TOKEN_PART3 = 'xP4vB2L';
@@ -26,80 +51,101 @@ const TOKEN_PART8 = 'XcV6bN8';
 const TOKEN_PART9 = 'mQw2eR9';
 const TOKEN = TOKEN_PART1 + TOKEN_PART2 + TOKEN_PART3 + TOKEN_PART4 + TOKEN_PART5 + TOKEN_PART6 + TOKEN_PART7 + TOKEN_PART8 + TOKEN_PART9;
 
-// ПУТЬ К ВАШЕМУ РЕПОЗИТОРИЮ
+// ---------- НАСТРОЙКИ ----------
 const GITHUB_REPO = 'vasilakypala-logovo/logovo';
-// ФАЙЛ ДЛЯ ХРАНЕНИЯ ДАННЫХ — ТЕПЕРЬ В ПАПКЕ room_nex
 const GITHUB_PATH = 'room_nex/shelf_data.json';
 const GITHUB_BRANCH = 'main';
-// ===============================================
-
+const STORAGE_KEY = 'nex_bookinist_logovo_shelf_v777';
 const BOOK_FOLDER = 'bookinist/';
+
+// ---------- ПРОКСИ ДЛЯ ОБХОДА CORS ----------
+// Используем бесплатный прокси, который поддерживает и GET, и PUT
+const PROXY_GET = 'https://api.allorigins.win/raw?url=';
+const PROXY_PUT = 'https://corsproxy.io/?'; // этот прокси поддерживает PUT
+
+// ---------- DOM ----------
 const grid = document.getElementById('bookGrid');
 const flash = document.getElementById('flash');
 let shelf = [];
 let isSaving = false;
 
-// ЗАГРУЗКА С GITHUB
-async function loadShelfFromGitHub() {
+// ---------- СООБЩЕНИЯ ----------
+function message(t) {
+  flash.textContent = t;
+  flash.classList.add('show');
+  setTimeout(() => flash.classList.remove('show'), 2500);
+}
+
+// ---------- РАБОТА С localStorage ----------
+function loadLocal() {
   try {
-    const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `token ${TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch(e) { return []; }
+}
+
+function saveLocal() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(shelf));
+}
+
+// ---------- ЗАГРУЗКА С GITHUB (через прокси) ----------
+async function loadFromGitHub() {
+  try {
+    const rawUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+    const proxyUrl = PROXY_GET + encodeURIComponent(rawUrl);
     
-    if (response.status === 404) {
-      shelf = [];
-      await saveShelfToGitHub();
-      return;
+    const response = await fetch(proxyUrl);
+    if (!response.ok) {
+      if (response.status === 404) {
+        // Файла нет — создадим пустой
+        shelf = [];
+        await saveToGitHub();
+        return true;
+      }
+      throw new Error(`HTTP ${response.status}`);
     }
     
-    if (!response.ok) throw new Error('Ошибка загрузки');
-    
     const data = await response.json();
-    const content = atob(data.content);
-    shelf = JSON.parse(content);
-    render();
+    // Ответ от прокси может быть обёрнут, но allorigins возвращает сам JSON
+    let content = data.content || data;
+    if (typeof content === 'string' && content.includes('"content"')) {
+      // Если пришёл стандартный ответ GitHub
+      const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+      const decoded = atob(parsed.content);
+      shelf = JSON.parse(decoded);
+    } else if (typeof content === 'string') {
+      // Возможно, пришёл уже раскодированный JSON
+      shelf = JSON.parse(content);
+    } else {
+      shelf = content;
+    }
+    return true;
   } catch (error) {
-    console.error('Ошибка загрузки с GitHub:', error);
-    message('⚠️ Не удалось загрузить данные с GitHub');
-    try {
-      const local = JSON.parse(localStorage.getItem('nex_bookinist_logovo_shelf_v777'));
-      if (local && local.length > 0) {
-        shelf = local;
-        render();
-        message('✅ Загружено из локального хранилища');
-      }
-    } catch(e) {}
+    console.warn('Загрузка с GitHub через прокси не удалась:', error);
+    return false;
   }
 }
 
-// СОХРАНЕНИЕ НА GITHUB
-async function saveShelfToGitHub() {
-  if (isSaving) return;
+// ---------- СОХРАНЕНИЕ НА GITHUB (через прокси) ----------
+async function saveToGitHub() {
+  if (isSaving) return false;
   isSaving = true;
   
   try {
-    const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+    // 1. Получаем SHA файла (через прокси)
+    const rawUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
     let sha = null;
-    
     try {
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `token ${TOKEN}`,
-          'Accept': 'application/vnd.github.v3+json'
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
+      const proxyGet = PROXY_GET + encodeURIComponent(rawUrl);
+      const resp = await fetch(proxyGet);
+      if (resp.ok) {
+        const data = await resp.json();
         sha = data.sha;
       }
     } catch(e) {}
     
+    // 2. Готовим контент (base64)
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(shelf, null, 2))));
-    
     const payload = {
       message: `Обновление витрины ${new Date().toLocaleString()}`,
       content: content,
@@ -107,35 +153,81 @@ async function saveShelfToGitHub() {
     };
     if (sha) payload.sha = sha;
     
-    const saveResponse = await fetch(url, {
+    // 3. Отправляем PUT через прокси (corsproxy.io)
+    const proxyPut = PROXY_PUT + encodeURIComponent(rawUrl);
+    const response = await fetch(proxyPut, {
       method: 'PUT',
       headers: {
         'Authorization': `token ${TOKEN}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/vnd.github.v3+json'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     });
     
-    if (!saveResponse.ok) throw new Error('Ошибка сохранения');
+    if (!response.ok) throw new Error('PUT failed');
     
-    localStorage.setItem('nex_bookinist_logovo_shelf_v777', JSON.stringify(shelf));
+    // Успешно
     message('💾 Сохранено на GitHub');
-    
+    saveLocal(); // обновляем локальную копию
+    isSaving = false;
+    return true;
   } catch (error) {
     console.error('Ошибка сохранения на GitHub:', error);
-    message('⚠️ Ошибка сохранения на GitHub, данные сохранены локально');
-    localStorage.setItem('nex_bookinist_logovo_shelf_v777', JSON.stringify(shelf));
+    // Сохраняем локально, но сообщаем
+    saveLocal();
+    message('⚠️ Сохранено только локально. Скачайте файл вручную.');
+    isSaving = false;
+    return false;
   }
-  isSaving = false;
 }
 
-// ФУНКЦИИ РАБОТЫ С ПОЛКОЙ
+// ---------- ЭКСПОРТ / ИМПОРТ (ручные) ----------
+function exportFile() {
+  const blob = new Blob([JSON.stringify(shelf, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'shelf_data.json';
+  a.click();
+  message('📥 Файл скачан');
+}
+
+function importFile() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (Array.isArray(data)) {
+          shelf = data;
+          saveLocal();
+          render();
+          message('✅ Данные загружены из файла');
+          // После импорта пробуем сохранить на GitHub
+          saveToGitHub();
+        } else {
+          message('❌ Неверный формат');
+        }
+      } catch(err) {
+        message('❌ Ошибка чтения');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+// ---------- ОСНОВНЫЕ ФУНКЦИИ ПОЛКИ ----------
 function addBook(icon) {
   if (shelf.length >= 40) { message('❌ Витрина заполнена'); return; }
   shelf.push({ icon, title: '', file: '' });
   render();
-  saveShelfToGitHub();
+  saveLocal();
+  saveToGitHub(); // пытаемся отправить на GitHub
 }
 
 function render() {
@@ -143,7 +235,6 @@ function render() {
   shelf.forEach((item, index) => {
     const card = document.createElement('div');
     card.className = 'book-card';
-    card.title = 'Клик — открыть книгу. Двойной клик по табличке — вписать название и файл.';
 
     const img = document.createElement('img');
     img.className = 'cover';
@@ -166,12 +257,13 @@ function render() {
       ev.stopPropagation();
       const title = prompt('Текст медной таблички:', item.title || '');
       if (title === null) return;
-      const file = prompt('Имя файла книги в папке bookinist, например GALALAY_EN.exe:', item.file || '');
+      const file = prompt('Имя файла книги в папке bookinist:', item.file || '');
       if (file === null) return;
       shelf[index].title = title.trim();
       shelf[index].file = file.trim();
       render();
-      saveShelfToGitHub();
+      saveLocal();
+      saveToGitHub();
     });
 
     card.addEventListener('contextmenu', (ev) => {
@@ -179,7 +271,8 @@ function render() {
       if (confirm('Убрать эту книгу с витрины?')) {
         shelf.splice(index, 1);
         render();
-        saveShelfToGitHub();
+        saveLocal();
+        saveToGitHub();
       }
     });
 
@@ -189,26 +282,49 @@ function render() {
   });
 }
 
-function message(t) {
-  flash.textContent = t;
-  flash.classList.add('show');
-  setTimeout(() => flash.classList.remove('show'), 2000);
+// ---------- ИНИЦИАЛИЗАЦИЯ ----------
+async function init() {
+  // Сначала пробуем загрузить с GitHub
+  const loaded = await loadFromGitHub();
+  if (loaded) {
+    render();
+    // Сохраняем в localStorage как резерв
+    saveLocal();
+    message('✅ Данные загружены с GitHub');
+  } else {
+    // Если не вышло — загружаем из localStorage
+    shelf = loadLocal();
+    if (shelf.length === 0) {
+      // Если и там пусто — создаём тестовую запись
+      shelf = [];
+      message('📭 Нет данных, добавьте книги');
+    } else {
+      message('📂 Загружено из локального хранилища');
+    }
+    render();
+  }
 }
 
-// ========== ИНИЦИАЛИЗАЦИЯ ==========
+// Навешиваем события на шарики
 document.querySelectorAll('.ball').forEach(btn => {
   btn.addEventListener('click', () => addBook(btn.dataset.icon));
 });
 
+// Переходы по порталам
 document.getElementById('globePortal').addEventListener('click', () => {
   window.location.href = 'https://vasilakypala-logovo.github.io/dvorets-nex/vestibul/seas/dvorets_library_room/bookinist_stand%207.html';
 });
-
 document.getElementById('bukibukPortal').addEventListener('click', () => {
   window.location.href = 'bukibuk/bukibak.html';
 });
 
-loadShelfFromGitHub();
+// Добавляем скрытые кнопки для экспорта/импорта (через консоль)
+console.log('📌 Для ручного экспорта/импорта используйте:');
+console.log('  exportFile()  — скачать JSON');
+console.log('  importFile()  — загрузить JSON из файла');
+
+// Запускаем
+init();
 </script>
 </body>
 </html>
