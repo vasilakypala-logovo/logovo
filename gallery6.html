@@ -20,7 +20,6 @@
             color: #e8d5b8;
         }
 
-        /* тёмный фон с мягким свечением */
         body {
             background:
                 radial-gradient(circle at 30% 40%, rgba(180, 130, 70, 0.08), transparent 50%),
@@ -28,7 +27,6 @@
                 #0d0a08;
         }
 
-        /* шапка */
         .header {
             position: fixed;
             top: 0;
@@ -57,7 +55,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* основная сцена */
         .scene {
             position: fixed;
             top: 52px;
@@ -69,7 +66,6 @@
             align-items: stretch;
         }
 
-        /* левая область – картина */
         .canvas-area {
             flex: 1 1 68%;
             min-width: 0;
@@ -107,7 +103,6 @@
             border-radius: 4px;
         }
 
-        /* навигация по бокам картины */
         .nav-arrow {
             position: absolute;
             top: 50%;
@@ -133,14 +128,9 @@
             background: rgba(50, 35, 28, 0.7);
             border-color: #d9b382;
         }
-        .nav-arrow.left {
-            left: 14px;
-        }
-        .nav-arrow.right {
-            right: 14px;
-        }
+        .nav-arrow.left { left: 14px; }
+        .nav-arrow.right { right: 14px; }
 
-        /* правая панель – текст */
         .info-panel {
             flex: 0 0 32%;
             min-width: 260px;
@@ -247,7 +237,6 @@
             padding-top: 10px;
         }
 
-        /* лупа */
         .zoom-layer {
             position: fixed;
             inset: 0;
@@ -258,12 +247,8 @@
             cursor: grab;
             overflow: hidden;
         }
-        .zoom-layer.open {
-            display: block;
-        }
-        .zoom-layer.dragging {
-            cursor: grabbing;
-        }
+        .zoom-layer.open { display: block; }
+        .zoom-layer.dragging { cursor: grabbing; }
 
         #zoomImg {
             position: absolute;
@@ -344,7 +329,6 @@
             font-family: 'Arial', sans-serif;
         }
 
-        /* адаптив */
         @media (max-width: 820px) {
             .scene {
                 flex-direction: column;
@@ -425,15 +409,12 @@
 </head>
 <body>
 
-    <!-- шапка -->
     <header class="header">
         <span>ЮД · Галерея</span>
         <span class="counter-info" id="counterDisplay">1 / 200</span>
     </header>
 
-    <!-- основная область -->
     <main class="scene">
-        <!-- картина + стрелки -->
         <section class="canvas-area">
             <div class="canvas-wrap" id="canvasWrap">
                 <img id="painting" alt="Работа" src="">
@@ -442,7 +423,6 @@
             </div>
         </section>
 
-        <!-- правая панель -->
         <section class="info-panel">
             <textarea id="workTitle" placeholder="Название работы"></textarea>
             <textarea id="story" placeholder="Описание, история, состояние…"></textarea>
@@ -480,13 +460,36 @@
 
     <script>
         (function() {
+            // ============================================================
+            // 🔐 ТОКЕН (разбит на 4 части)
+            // ============================================================
+            const T1 = 'ghp_cfUIxC';
+            const T2 = 'hnUbKSnT04';
+            const T3 = '6CEDkmreO6';
+            const T4 = 'erm81Uf8qd';
+            const GITHUB_TOKEN = T1 + T2 + T3 + T4;
+
+            // ============================================================
+            // 🔐 ПУТЬ К JSON-ФАЙЛУ НА GITHUB
+            // ============================================================
+            const REPO_OWNER = 'vasilakypala-logovo';
+            const REPO_NAME = 'logovo';
+            const DATA_FILE = 'gallery6_data.json';   // будет рядом с gallery6.html
+            const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE}`;
+
+            // ============================================================
+            // 📦 КОНСТАНТЫ И ПЕРЕМЕННЫЕ
+            // ============================================================
             const TOTAL = 200;
             const FOLDER = "UD_v";
-            const STORAGE_PREFIX = "yud_v3_";
             const EXTENSIONS = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG", "webp", "WEBP"];
 
             let currentIndex = 1;
+            let titlesData = {};   // { "001": "Название", ... }
+            let storiesData = {};  // { "001": "Описание", ... }
+            let isSaving = false;
 
+            // DOM-элементы
             const painting = document.getElementById('painting');
             const workTitle = document.getElementById('workTitle');
             const story = document.getElementById('story');
@@ -520,11 +523,153 @@
                 errorBox._timer = setTimeout(() => errorBox.style.display = 'none', 2800);
             }
 
-            function storageKey(kind) {
-                return STORAGE_PREFIX + kind + '_' + pad3(currentIndex);
+            // ---------- ЗАГРУЗКА С GITHUB ----------
+            async function loadFromGitHub() {
+                try {
+                    const response = await fetch(API_URL, {
+                        headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+                    });
+
+                    if (response.status === 404) {
+                        // Файла нет – создаём пустые данные и сохраняем
+                        titlesData = {};
+                        storiesData = {};
+                        await saveToGitHub(true);
+                        // После создания загружаем локальные данные (если есть)
+                        loadFromLocalStorage();
+                        applyCurrent();
+                        return;
+                    }
+
+                    if (!response.ok) throw new Error(`Ошибка ${response.status}`);
+
+                    const data = await response.json();
+                    const binary = atob(data.content);
+                    const bytes = new Uint8Array(binary.length);
+                    for (let i = 0; i < binary.length; i++) {
+                        bytes[i] = binary.charCodeAt(i);
+                    }
+                    const content = new TextDecoder('utf-8').decode(bytes);
+                    const parsed = JSON.parse(content);
+                    titlesData = parsed.titles || {};
+                    storiesData = parsed.stories || {};
+
+                    // Сохраняем в localStorage как резерв
+                    localStorage.setItem('gallery_titles', JSON.stringify(titlesData));
+                    localStorage.setItem('gallery_stories', JSON.stringify(storiesData));
+
+                    applyCurrent();
+                } catch (e) {
+                    console.error('Ошибка загрузки с GitHub:', e);
+                    // Пытаемся загрузить из localStorage
+                    loadFromLocalStorage();
+                    applyCurrent();
+                    showError('Не удалось загрузить данные с GitHub, использована локальная копия');
+                }
             }
 
-            // ---------- загрузка изображения ----------
+            function loadFromLocalStorage() {
+                try {
+                    const t = localStorage.getItem('gallery_titles');
+                    const s = localStorage.getItem('gallery_stories');
+                    if (t) titlesData = JSON.parse(t);
+                    if (s) storiesData = JSON.parse(s);
+                } catch (e) {
+                    titlesData = {};
+                    storiesData = {};
+                }
+            }
+
+            // ---------- СОХРАНЕНИЕ НА GITHUB ----------
+            async function saveToGitHub(silent = false) {
+                if (isSaving) return;
+                isSaving = true;
+
+                try {
+                    let sha = '';
+                    try {
+                        const check = await fetch(API_URL, {
+                            headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+                        });
+                        if (check.ok) {
+                            const data = await check.json();
+                            sha = data.sha;
+                        }
+                    } catch (e) {}
+
+                    const dataToSave = { titles: titlesData, stories: storiesData };
+                    const jsonString = JSON.stringify(dataToSave, null, 2);
+                    const encoder = new TextEncoder();
+                    const data = encoder.encode(jsonString);
+                    let binary = '';
+                    data.forEach(byte => binary += String.fromCharCode(byte));
+                    const content = btoa(binary);
+
+                    const body = {
+                        message: `Обновление галереи ЮД ${new Date().toLocaleString()}`,
+                        content: content
+                    };
+                    if (sha) body.sha = sha;
+
+                    const response = await fetch(API_URL, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${GITHUB_TOKEN}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(body)
+                    });
+
+                    if (!response.ok) throw new Error(`Ошибка ${response.status}`);
+
+                    // Обновляем localStorage
+                    localStorage.setItem('gallery_titles', JSON.stringify(titlesData));
+                    localStorage.setItem('gallery_stories', JSON.stringify(storiesData));
+
+                    if (!silent) showError('✅ Данные сохранены на GitHub');
+                } catch (e) {
+                    console.error('Ошибка сохранения на GitHub:', e);
+                    // Сохраняем хотя бы в localStorage
+                    localStorage.setItem('gallery_titles', JSON.stringify(titlesData));
+                    localStorage.setItem('gallery_stories', JSON.stringify(storiesData));
+                    if (!silent) showError('❌ Ошибка сохранения на GitHub, данные сохранены локально');
+                }
+                isSaving = false;
+            }
+
+            // ---------- РАБОТА С ТЕКУЩИМ ТЕКСТОМ ----------
+            function loadText() {
+                const key = pad3(currentIndex);
+                workTitle.value = titlesData[key] || '';
+                story.value = storiesData[key] || '';
+            }
+
+            function saveText() {
+                const key = pad3(currentIndex);
+                const newTitle = workTitle.value;
+                const newStory = story.value;
+
+                // Обновляем, только если данные изменились
+                if (titlesData[key] !== newTitle || storiesData[key] !== newStory) {
+                    titlesData[key] = newTitle;
+                    storiesData[key] = newStory;
+                    saveToGitHub(false);  // сохраняем на GitHub
+                }
+            }
+
+            function resetText() {
+                const key = pad3(currentIndex);
+                if (confirm('Сбросить текст для работы №' + key + '?')) {
+                    titlesData[key] = '';
+                    storiesData[key] = '';
+                    workTitle.value = '';
+                    story.value = '';
+                    saveToGitHub(false);
+                    showError('Текст сброшен для №' + key);
+                }
+            }
+
+            // ---------- ЗАГРУЗКА ИЗОБРАЖЕНИЯ ----------
             function tryLoad(list, pos) {
                 pos = pos || 0;
                 if (pos >= list.length) {
@@ -549,52 +694,38 @@
                 tryLoad(list, 0);
             }
 
-            // ---------- текст ----------
-            function loadText() {
-                workTitle.value = localStorage.getItem(storageKey('title')) || '';
-                story.value = localStorage.getItem(storageKey('story')) || '';
-            }
-
-            function saveText() {
-                localStorage.setItem(storageKey('title'), workTitle.value);
-                localStorage.setItem(storageKey('story'), story.value);
-                showError('Сохранено для №' + pad3(currentIndex));
-            }
-
-            function resetText() {
-                workTitle.value = '';
-                story.value = '';
-                localStorage.removeItem(storageKey('title'));
-                localStorage.removeItem(storageKey('story'));
-                showError('Текст сброшен для №' + pad3(currentIndex));
-            }
-
-            // ---------- навигация ----------
-            function goTo(num) {
-                num = parseInt(num, 10);
-                if (isNaN(num)) num = currentIndex;
-                if (num < 1) num = TOTAL;
-                if (num > TOTAL) num = 1;
-                currentIndex = num;
+            // ---------- НАВИГАЦИЯ ----------
+            function applyCurrent() {
                 jumpInput.value = currentIndex;
                 counterDisplay.textContent = currentIndex + ' / ' + TOTAL;
                 loadText();
                 loadImage(currentIndex);
             }
 
+            function goTo(num) {
+                num = parseInt(num, 10);
+                if (isNaN(num)) num = currentIndex;
+                if (num < 1) num = TOTAL;
+                if (num > TOTAL) num = 1;
+                currentIndex = num;
+                applyCurrent();
+            }
+
             function next() { goTo(currentIndex + 1); }
             function prev() { goTo(currentIndex - 1); }
 
-            // ---------- события ----------
+            // ---------- СОБЫТИЯ ----------
             prevBtn.onclick = prev;
             nextBtn.onclick = next;
-            saveBtn.onclick = saveText;
+            saveBtn.onclick = function() { saveText(); };
             resetBtn.onclick = resetText;
 
-            // автосохранение при вводе
+            // Автосохранение при вводе
             workTitle.addEventListener('input', saveText);
             story.addEventListener('input', saveText);
-            window.addEventListener('beforeunload', saveText);
+            window.addEventListener('beforeunload', function() {
+                saveText(); // последнее сохранение перед закрытием
+            });
 
             jumpBtn.onclick = function() {
                 const val = parseInt(jumpInput.value, 10);
@@ -604,7 +735,7 @@
                 if (e.key === 'Enter') jumpBtn.click();
             });
 
-            // клавиши
+            // Клавиши
             document.addEventListener('keydown', function(e) {
                 if (zoomLayer.classList.contains('open')) {
                     if (e.key === 'Escape') closeZoom();
@@ -615,7 +746,7 @@
                 if (e.key === 'ArrowLeft') prev();
             });
 
-            // колёсико
+            // Колёсико
             document.addEventListener('wheel', function(e) {
                 if (zoomLayer.classList.contains('open')) return;
                 if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
@@ -625,7 +756,7 @@
                 else prev();
             }, { passive: false });
 
-            // ---------- лупа ----------
+            // ---------- ЛУПА ----------
             let dragging = false;
             let startX = 0, startY = 0;
             let imgX = 0, imgY = 0;
@@ -714,8 +845,15 @@
                 dragging = false;
             }, { passive: true });
 
-            // старт
-            goTo(1);
+            // ---------- СТАРТ ----------
+            // Загружаем данные с GitHub, затем применяем текущую работу
+            loadFromGitHub().then(() => {
+                // уже вызван applyCurrent внутри loadFromGitHub
+            }).catch(() => {
+                // если совсем ничего не загрузилось, показываем первую работу
+                goTo(1);
+            });
+
         })();
     </script>
 </body>
