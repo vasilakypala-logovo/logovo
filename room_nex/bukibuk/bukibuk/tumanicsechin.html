@@ -5,7 +5,7 @@
     <title>Tuman Archive</title>
 
     <style>
-        /* ===== ОСНОВНЫЕ СТИЛИ (без изменений) ===== */
+        /* ===== СТИЛИ (без изменений) ===== */
         * { box-sizing: border-box; }
         body {
             margin: 0;
@@ -181,7 +181,7 @@
             #reader { left:220px; }
         }
 
-        /* ===== КНОПКА «+» В ЛЕВОМ НИЖНЕМ УГЛУ (всегда видна) ===== */
+        /* Кнопка «+» */
         #loadMoreBtn {
             position: fixed;
             left: 16px;
@@ -221,7 +221,6 @@
             box-shadow: none;
         }
 
-        /* Стили скроллбара */
         #files::-webkit-scrollbar { width: 5px; }
         #files::-webkit-scrollbar-track { background: #101217; }
         #files::-webkit-scrollbar-thumb { background: #2f3a46; border-radius: 8px; }
@@ -239,13 +238,11 @@
         <span class="label-indicator"></span>
         <span class="label-text"></span>
     </div>
-
-    <!-- Кнопка «+» всегда видна, но активна только если есть скрытые файлы -->
     <button id="loadMoreBtn" title="Восстановить один скрытый файл">+</button>
 
     <script>
         // ============================================================
-        // 🔐 ТОКЕН (разбит)
+        // 🔐 ТОКЕН
         // ============================================================
         const T1 = 'ghp_cfUIxC';
         const T2 = 'hnUbKSnT04';
@@ -253,27 +250,20 @@
         const T4 = 'erm81Uf8qd';
         const GITHUB_TOKEN = T1 + T2 + T3 + T4;
 
-        // ============================================================
-        // ПУТЬ К ФАЙЛУ МЕТАДАННЫХ
-        // ============================================================
         const REPO_OWNER = 'vasilakypala-logovo';
         const REPO_NAME = 'logovo';
         const FILE_PATH = 'room_nex/bukibuk/bukibuk/tumanicsechin_data.json';
         const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
 
-        // ============================================================
-        // КОНСТАНТЫ
-        // ============================================================
         const PHYSICAL_FOLDERS = ['stih1', 'stih2', 'stih3', 'stih4', 'stih5', 'stih6', 'stih7'];
-        const FILES = Array.from({ length: 99 }, (_, i) => String(i + 1).padStart(2, '0')); // 01..99
+        const FILES = Array.from({ length: 99 }, (_, i) => String(i + 1).padStart(2, '0'));
 
         let currentFolder = null;
         let titles = {};
         let folderNames = {};
+        let hiddenPerFolder = {}; // { folder: Set('01','02',...) }
         let isSaving = false;
-
-        // Хранилище скрытых номеров для каждой папки (Set)
-        let hiddenPerFolder = {};
+        let saveTimeout = null;
 
         const foldersDiv = document.getElementById('folders');
         const filesDiv = document.getElementById('files');
@@ -281,11 +271,10 @@
         const folderLabel = document.getElementById('folderLabel');
         const labelText = document.querySelector('#folderLabel .label-text');
         const loadMoreBtn = document.getElementById('loadMoreBtn');
-
         let folderButtons = {};
 
         // ============================================================
-        // ЗАГРУЗКА С GITHUB
+        // ЗАГРУЗКА
         // ============================================================
         async function loadFromGitHub() {
             try {
@@ -296,6 +285,7 @@
                 if (response.status === 404) {
                     titles = {};
                     folderNames = {};
+                    hiddenPerFolder = {};
                     await saveToGitHub(true);
                     initUI();
                     return;
@@ -311,26 +301,57 @@
                 }
                 const content = new TextDecoder('utf-8').decode(bytes);
                 const parsed = JSON.parse(content);
+
                 titles = parsed.titles || {};
                 folderNames = parsed.folderNames || {};
+                // Восстанавливаем скрытые
+                hiddenPerFolder = {};
+                if (parsed.hidden) {
+                    for (const [folder, arr] of Object.entries(parsed.hidden)) {
+                        hiddenPerFolder[folder] = new Set(arr);
+                    }
+                }
+                // Для папок, которых нет в hidden, создаём пустой Set
+                PHYSICAL_FOLDERS.forEach(f => {
+                    if (!hiddenPerFolder[f]) hiddenPerFolder[f] = new Set();
+                });
+
                 initUI();
             } catch (e) {
                 console.error('Ошибка загрузки с GitHub:', e);
-                // fallback на localStorage
+                // Fallback: localStorage
                 try {
                     titles = JSON.parse(localStorage.getItem('tucha_titles') || '{}');
                     folderNames = JSON.parse(localStorage.getItem('tucha_folder_names') || '{}');
+                    const hiddenRaw = JSON.parse(localStorage.getItem('tucha_hidden') || '{}');
+                    hiddenPerFolder = {};
+                    for (const [folder, arr] of Object.entries(hiddenRaw)) {
+                        hiddenPerFolder[folder] = new Set(arr);
+                    }
+                    PHYSICAL_FOLDERS.forEach(f => {
+                        if (!hiddenPerFolder[f]) hiddenPerFolder[f] = new Set();
+                    });
                 } catch (e2) {
                     titles = {};
                     folderNames = {};
+                    hiddenPerFolder = {};
+                    PHYSICAL_FOLDERS.forEach(f => hiddenPerFolder[f] = new Set());
                 }
                 initUI();
             }
         }
 
         // ============================================================
-        // СОХРАНЕНИЕ НА GITHUB
+        // СОХРАНЕНИЕ (с дебаунсом)
         // ============================================================
+        function scheduleSave() {
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveToGitHub(false);
+                saveTimeout = null;
+            }, 300);
+        }
+
         async function saveToGitHub(silent = false) {
             if (isSaving) return;
             isSaving = true;
@@ -347,7 +368,13 @@
                     }
                 } catch (e) {}
 
-                const dataToSave = { titles, folderNames };
+                // Преобразуем Set в массивы для JSON
+                const hiddenObj = {};
+                for (const [folder, set] of Object.entries(hiddenPerFolder)) {
+                    hiddenObj[folder] = Array.from(set);
+                }
+
+                const dataToSave = { titles, folderNames, hidden: hiddenObj };
                 const jsonString = JSON.stringify(dataToSave, null, 2);
                 const encoder = new TextEncoder();
                 const data = encoder.encode(jsonString);
@@ -372,11 +399,24 @@
 
                 if (!response.ok) throw new Error(`Ошибка ${response.status}`);
 
+                // Сохраняем в localStorage
                 localStorage.setItem('tucha_titles', JSON.stringify(titles));
                 localStorage.setItem('tucha_folder_names', JSON.stringify(folderNames));
+                const hiddenObjLocal = {};
+                for (const [folder, set] of Object.entries(hiddenPerFolder)) {
+                    hiddenObjLocal[folder] = Array.from(set);
+                }
+                localStorage.setItem('tucha_hidden', JSON.stringify(hiddenObjLocal));
+
                 if (!silent) console.log('✅ Сохранено на GitHub');
             } catch (e) {
                 console.error('Ошибка сохранения на GitHub:', e);
+                // Всё равно сохраняем локально
+                const hiddenObjLocal = {};
+                for (const [folder, set] of Object.entries(hiddenPerFolder)) {
+                    hiddenObjLocal[folder] = Array.from(set);
+                }
+                localStorage.setItem('tucha_hidden', JSON.stringify(hiddenObjLocal));
                 localStorage.setItem('tucha_titles', JSON.stringify(titles));
                 localStorage.setItem('tucha_folder_names', JSON.stringify(folderNames));
             }
@@ -405,9 +445,8 @@
                     const t = prompt("Название папки:", folderNames[physical] || physical);
                     if (t === null) return;
                     folderNames[physical] = t;
-                    saveToGitHub();
+                    scheduleSave();
                     b.textContent = t || physical;
-                    // восстановить индикатор
                     const newIndicator = document.createElement('span');
                     newIndicator.className = 'indicator';
                     b.appendChild(newIndicator);
@@ -419,7 +458,6 @@
                 foldersDiv.appendChild(b);
             });
 
-            // Открыть первую папку
             openFolder(PHYSICAL_FOLDERS[0]);
         }
 
@@ -443,21 +481,18 @@
         }
 
         // ============================================================
-        // ОТОБРАЖЕНИЕ ФАЙЛОВ (все, кроме скрытых)
+        // ОТОБРАЖЕНИЕ ФАЙЛОВ
         // ============================================================
         function renderFiles(folder) {
             filesDiv.innerHTML = '';
 
             const hiddenSet = hiddenPerFolder[folder] || new Set();
-            // Все файлы, кроме тех, что в hiddenSet
             const visibleFiles = FILES.filter(num => !hiddenSet.has(num));
 
-            // Показываем все видимые файлы (без ограничений)
             for (const num of visibleFiles) {
                 const row = document.createElement('div');
                 row.className = 'fileRow';
 
-                // Номер – двойной клик скрывает файл
                 const n = document.createElement('div');
                 n.className = 'num';
                 n.textContent = num;
@@ -467,7 +502,6 @@
                     hideFile(folder, num);
                 };
 
-                // Название
                 const name = document.createElement('div');
                 name.className = 'name';
                 const fileName = titles[folder + num];
@@ -476,22 +510,19 @@
                 row.appendChild(n);
                 row.appendChild(name);
 
-                // Одинарный клик – открыть файл
                 row.onclick = () => openFile(folder, num);
-                // Двойной клик по строке – переименовать
                 row.ondblclick = () => {
                     const t = prompt("Название файла:", titles[folder + num] || '');
                     if (t === null) return;
                     titles[folder + num] = t;
-                    saveToGitHub();
+                    scheduleSave();
                     renderFiles(folder);
                 };
 
                 filesDiv.appendChild(row);
             }
 
-            // --- Управление кнопкой «+» ---
-            // Кнопка всегда видна, но активна только если есть скрытые файлы
+            // Кнопка «+»
             const hasHidden = hiddenSet.size > 0;
             loadMoreBtn.disabled = !hasHidden;
             if (hasHidden) {
@@ -499,30 +530,29 @@
             } else {
                 loadMoreBtn.onclick = null;
             }
-            // Подсказка
             loadMoreBtn.title = hasHidden ? 'Восстановить один скрытый файл' : 'Нет скрытых файлов';
         }
 
         // ============================================================
-        // СКРЫТЬ ФАЙЛ (двойной клик по номеру)
+        // СКРЫТЬ ФАЙЛ
         // ============================================================
         function hideFile(folder, num) {
             if (!hiddenPerFolder[folder]) hiddenPerFolder[folder] = new Set();
             hiddenPerFolder[folder].add(num);
-            renderFiles(folder); // перерисовываем, кнопка обновится
+            scheduleSave(); // сохраняем состояние
+            renderFiles(folder);
         }
 
         // ============================================================
-        // ВОССТАНОВИТЬ ОДИН СКРЫТЫЙ ФАЙЛ (кнопка «+»)
+        // ВОССТАНОВИТЬ ОДИН
         // ============================================================
         function restoreOneFile(folder) {
             const hiddenSet = hiddenPerFolder[folder];
             if (!hiddenSet || hiddenSet.size === 0) return;
-
-            // Находим наименьший скрытый номер (можно любой, но так предсказуемо)
             const hiddenArray = Array.from(hiddenSet);
             const minHidden = hiddenArray.reduce((a, b) => a < b ? a : b);
             hiddenSet.delete(minHidden);
+            scheduleSave();
             renderFiles(folder);
         }
 
@@ -547,9 +577,6 @@
             }
         }
 
-        // ============================================================
-        // ДЕКОДЕР
-        // ============================================================
         function decodeSmart(buffer) {
             const encodings = ['utf-8', 'windows-1251', 'koi8-r', 'ibm866', 'utf-16le', 'utf-16be'];
             let best = '';
@@ -568,9 +595,6 @@
             return best;
         }
 
-        // ============================================================
-        // НАЗВАНИЕ ПАПКИ С ЛАМПОЧКОЙ
-        // ============================================================
         function updateFolderLabel(folder) {
             const displayName = folderNames[folder] || folder;
             labelText.textContent = '📁 ' + displayName;
@@ -589,6 +613,7 @@
         loadFromGitHub();
 
         window.addEventListener('beforeunload', () => {
+            if (saveTimeout) clearTimeout(saveTimeout);
             saveToGitHub(true);
         });
     </script>
