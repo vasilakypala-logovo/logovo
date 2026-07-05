@@ -1,591 +1,654 @@
 ﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>Tuman Archive</title>
+    <meta charset="UTF-8">
+    <title>Tuman Archive</title>
 
-<style>
-/* ===== ВСЕ СТИЛИ (без изменений, кроме курсора у номера) ===== */
-body{
-    margin:0;
-    font-family: Arial, sans-serif;
-    background:#0b0c0f;
-    color:#ddd;
-    overflow:hidden;
-    height:100vh;
-}
+    <style>
+        /* ===== ОСНОВНЫЕ СТИЛИ ===== */
+        * {
+            box-sizing: border-box;
+        }
 
-#folders{
-    position:absolute;
-    left:0;
-    right:0;
-    top:0;
-    height:70px;
-    background:#15181d;
-    padding:10px 20px;
-    border-bottom:1px solid #222;
-    display:flex;
-    gap:10px;
-    overflow-x:auto;
-    align-items:center;
-    z-index:10;
-}
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0b0c0f;
+            color: #ddd;
+            overflow: hidden;
+            height: 100vh;
+        }
 
-.folderBtn{
-    padding:12px 30px;
-    background:#222831;
-    border:1px solid #333;
-    color:#ddd;
-    cursor:pointer;
-    text-align:center;
-    white-space:nowrap;
-    font-size:14px;
-    border-radius:4px;
-    flex-shrink:0;
-    position:relative;
-    transition: all 0.3s ease;
-}
-.folderBtn:hover{
-    background:#2f3a46;
-}
+        /* ===== ВЕРХНЯЯ ПАНЕЛЬ С ПАПКАМИ ===== */
+        #folders {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 70px;
+            background: #15181d;
+            padding: 10px 20px;
+            border-bottom: 1px solid #222;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            align-items: center;
+            z-index: 10;
+        }
 
-.folderBtn.active {
-    border-color: #4ade80;
-    box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
-}
+        .folderBtn {
+            padding: 12px 30px;
+            background: #222831;
+            border: 1px solid #333;
+            color: #ddd;
+            cursor: pointer;
+            text-align: center;
+            white-space: nowrap;
+            font-size: 14px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .folderBtn:hover {
+            background: #2f3a46;
+        }
 
-.folderBtn .indicator {
-    display: none;
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    width: 16px;
-    height: 16px;
-    background: #4ade80;
-    border-radius: 50%;
-    border: 2px solid #15181d;
-    box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
-    animation: pulse-green 1.5s ease-in-out infinite;
-}
+        .folderBtn.active {
+            border-color: #4ade80;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+        }
 
-.folderBtn.active .indicator {
-    display: block;
-}
+        .folderBtn .indicator {
+            display: none;
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 16px;
+            height: 16px;
+            background: #4ade80;
+            border-radius: 50%;
+            border: 2px solid #15181d;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
+            animation: pulse-green 1.5s ease-in-out infinite;
+        }
 
-@keyframes pulse-green {
-    0%, 100% {
-        box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
-        transform: scale(1);
-    }
-    50% {
-        box-shadow: 0 0 30px rgba(74, 222, 128, 0.9);
-        transform: scale(1.2);
-    }
-}
+        .folderBtn.active .indicator {
+            display: block;
+        }
 
-#folderLabel{
-    position:fixed;
-    bottom:30px;
-    right:30px;
-    font-size:48px;
-    font-weight:900;
-    color:rgba(0,0,0,0.35);
-    text-transform:uppercase;
-    letter-spacing:3px;
-    pointer-events:none;
-    user-select:none;
-    z-index:1000;
-    font-family:'Arial Black',sans-serif;
-    white-space:nowrap;
-    display:none;
-    text-shadow: 0 1px 2px rgba(255,255,255,0.3);
-    display:none;
-    align-items:center;
-    gap:20px;
-}
+        @keyframes pulse-green {
+            0%,
+            100% {
+                box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(74, 222, 128, 0.9);
+                transform: scale(1.2);
+            }
+        }
 
-#folderLabel .label-text {
-    display:inline-block;
-}
+        /* ===== БОКОВАЯ ПАНЕЛЬ СПИСКА ФАЙЛОВ ===== */
+        #files {
+            position: absolute;
+            left: 0;
+            top: 70px;
+            bottom: 0;
+            width: 280px;
+            background: #101217;
+            border-right: 1px solid #222;
+            overflow-y: auto;
+            padding: 10px 10px 60px 10px;
+            /* ↓ отступ снизу, чтобы кнопка не перекрывала последние строки */
+            z-index: 5;
+        }
 
-#folderLabel .label-indicator {
-    display:inline-block;
-    width:20px;
-    height:20px;
-    background:#4ade80;
-    border-radius:50%;
-    box-shadow: 0 0 25px rgba(74, 222, 128, 0.7);
-    animation: pulse-green 1.5s ease-in-out infinite;
-    flex-shrink:0;
-    margin-right:10px;
-}
+        .fileRow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px;
+            margin-bottom: 4px;
+            background: #1a1f27;
+            cursor: pointer;
+            border: 1px solid #222;
+            border-radius: 3px;
+            transition: background 0.15s;
+        }
+        .fileRow:hover {
+            background: #273040;
+        }
 
-@media (max-width:768px){
-    #folderLabel{
-        font-size:24px;
-        bottom:15px;
-        right:15px;
-        opacity:0.7;
-        gap:10px;
-    }
-    #folderLabel .label-indicator {
-        width:14px;
-        height:14px;
-        margin-right:5px;
-    }
-    .folderBtn .indicator {
-        width:12px;
-        height:12px;
-        top:-4px;
-        right:-4px;
-    }
-}
+        .num {
+            width: 30px;
+            font-weight: bold;
+            user-select: none;
+            color: #4ade80;
+            font-size: 13px;
+            text-align: center;
+        }
+        .num:hover {
+            color: #aaffbb;
+        }
 
-#files{
-    position:absolute;
-    left:0;
-    top:70px;
-    bottom:0;
-    width:280px;
-    background:#101217;
-    border-right:1px solid #222;
-    overflow-y:auto;
-    padding:10px;
-    z-index: 5;   /* поверх #reader */
-}
+        .name {
+            flex: 1;
+            margin-left: 8px;
+            font-size: 12px;
+            color: #aaa;
+            word-break: break-word;
+        }
 
-.fileRow{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:6px;
-    margin-bottom:4px;
-    background:#1a1f27;
-    cursor:pointer;
-    border:1px solid #222;
-}
-.fileRow:hover{
-    background:#273040;
-}
+        /* ===== ОБЛАСТЬ ЧТЕНИЯ ===== */
+        #reader {
+            position: absolute;
+            left: 280px;
+            top: 70px;
+            right: 0;
+            bottom: 0;
+            display: none;
+            background: #aeb5bb;
+            color: #000;
+            padding: 25px;
+            overflow: auto;
+            font-size: 22px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            z-index: 1;
+        }
 
-.num{
-    width:30px;
-    font-weight:bold;
-    user-select:none;
-    color:#4ade80;
-    /* убираем курсор pointer, т.к. одинарный клик не активен */
-}
-.num:hover{
-    color:#aaffbb;
-}
+        #closeReader {
+            position: fixed;
+            right: 20px;
+            top: 90px;
+            padding: 10px 14px;
+            background: #111;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            z-index: 20;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        #closeReader:hover {
+            background: #2a2a2a;
+        }
 
-.name{
-    flex:1;
-    margin-left:8px;
-    font-size:12px;
-    color:#aaa;
-}
+        /* ===== НАЗВАНИЕ ПАПКИ С ЛАМПОЧКОЙ (в правом нижнем углу) ===== */
+        #folderLabel {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            font-size: 48px;
+            font-weight: 900;
+            color: rgba(0, 0, 0, 0.35);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            pointer-events: none;
+            user-select: none;
+            z-index: 1000;
+            font-family: 'Arial Black', sans-serif;
+            white-space: nowrap;
+            display: none;
+            align-items: center;
+            gap: 20px;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+        }
 
-#reader{
-    position:absolute;
-    left:280px;
-    top:70px;
-    right:0;
-    bottom:0;
-    display:none;
-    background:#aeb5bb;
-    color:#000;
-    padding:25px;
-    overflow:auto;
-    font-size:22px;
-    line-height:1.6;
-    white-space:pre-wrap;
-    z-index: 1;   /* под #files */
-}
+        #folderLabel .label-text {
+            display: inline-block;
+        }
 
-#closeReader{
-    position:fixed;
-    right:20px;
-    top:90px;
-    padding:10px 14px;
-    background:#111;
-    color:#fff;
-    border:none;
-    cursor:pointer;
-    z-index:20;
-}
+        #folderLabel .label-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: #4ade80;
+            border-radius: 50%;
+            box-shadow: 0 0 25px rgba(74, 222, 128, 0.7);
+            animation: pulse-green 1.5s ease-in-out infinite;
+            flex-shrink: 0;
+            margin-right: 10px;
+        }
 
-/* ===== КНОПКА "+" (добавление одного файла) ===== */
-.loadMoreBtn {
-    display: block;
-    width: 100%;
-    padding: 14px 0;
-    margin-top: 8px;
-    background: #1f2a36;
-    border: 1px dashed #4ade80;
-    color: #4ade80;
-    font-size: 28px;
-    font-weight: bold;
-    text-align: center;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.2s;
-}
-.loadMoreBtn:hover {
-    background: #2a3a4a;
-    border-color: #6eff9e;
-    color: #6eff9e;
-}
-</style>
+        @media (max-width:768px) {
+            #folderLabel {
+                font-size: 24px;
+                bottom: 15px;
+                right: 15px;
+                opacity: 0.7;
+                gap: 10px;
+            }
+            #folderLabel .label-indicator {
+                width: 14px;
+                height: 14px;
+                margin-right: 5px;
+            }
+            .folderBtn .indicator {
+                width: 12px;
+                height: 12px;
+                top: -4px;
+                right: -4px;
+            }
+            #files {
+                width: 220px;
+            }
+            #reader {
+                left: 220px;
+            }
+        }
+
+        /* ===== КНОПКА «+» В ЛЕВОМ НИЖНЕМ УГЛУ ===== */
+        #loadMoreBtn {
+            position: fixed;
+            left: 16px;
+            bottom: 16px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #1f2a36;
+            border: 2px solid #4ade80;
+            color: #4ade80;
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            z-index: 100;
+            display: none;
+            /* скрыт по умолчанию, показывается JS */
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 12px rgba(74, 222, 128, 0.15);
+            user-select: none;
+            padding: 0;
+            text-align: center;
+        }
+        #loadMoreBtn:hover {
+            background: #2a3a4a;
+            border-color: #6eff9e;
+            color: #6eff9e;
+            box-shadow: 0 0 24px rgba(74, 222, 128, 0.35);
+            transform: scale(1.05);
+        }
+        #loadMoreBtn:active {
+            transform: scale(0.92);
+        }
+
+        /* ===== СКРОЛЛБАР ДЛЯ #files ===== */
+        #files::-webkit-scrollbar {
+            width: 5px;
+        }
+        #files::-webkit-scrollbar-track {
+            background: #101217;
+        }
+        #files::-webkit-scrollbar-thumb {
+            background: #2f3a46;
+            border-radius: 8px;
+        }
+        #files::-webkit-scrollbar-thumb:hover {
+            background: #4ade80;
+        }
+    </style>
 </head>
 
 <body>
 
-<div id="folders"></div>
-<div id="files"></div>
+    <!-- ВЕРХНЯЯ ПАНЕЛЬ ПАПОК -->
+    <div id="folders"></div>
 
-<div id="reader"></div>
-<button id="closeReader" onclick="closeReader()">Закрыть</button>
+    <!-- БОКОВАЯ ПАНЕЛЬ ФАЙЛОВ -->
+    <div id="files"></div>
 
-<!-- НАЗВАНИЕ ПАПКИ С ЛАМПОЧКОЙ -->
-<div id="folderLabel">
-    <span class="label-indicator"></span>
-    <span class="label-text"></span>
-</div>
+    <!-- ОБЛАСТЬ ПРОСМОТРА -->
+    <div id="reader"></div>
+    <button id="closeReader" onclick="closeReader()">✕ Закрыть</button>
 
-<script>
-// ============================================================
-// 🔐 ТОКЕН (разбит на части)
-// ============================================================
-const T1 = 'ghp_cfUIxC';
-const T2 = 'hnUbKSnT04';
-const T3 = '6CEDkmreO6';
-const T4 = 'erm81Uf8qd';
-const GITHUB_TOKEN = T1 + T2 + T3 + T4;
+    <!-- НАЗВАНИЕ ПАПКИ С ЛАМПОЧКОЙ -->
+    <div id="folderLabel">
+        <span class="label-indicator"></span>
+        <span class="label-text"></span>
+    </div>
 
-// ============================================================
-// 🔐 ПУТЬ К ХРАНИЛИЩУ
-// ============================================================
-const REPO_OWNER = 'vasilakypala-logovo';
-const REPO_NAME = 'logovo';
-const FILE_PATH = 'room_nex/bukibuk/bukibuk/tumanicsechin_data.json';
-const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+    <!-- КНОПКА «+» В ЛЕВОМ НИЖНЕМ УГЛУ -->
+    <button id="loadMoreBtn" title="Показать ещё один файл">+</button>
 
-// ============================================================
-// 📦 ПЕРЕМЕННЫЕ
-// ============================================================
-const PHYSICAL_FOLDERS = ['stih1', 'stih2', 'stih3', 'stih4', 'stih5', 'stih6', 'stih7'];
-const FILES = Array.from({length:99}, (_,i)=>String(i+1).padStart(2,'0'));
+    <script>
+        // ============================================================
+        // 🔐 ТОКЕН (разбит на части)
+        // ============================================================
+        const T1 = 'ghp_cfUIxC';
+        const T2 = 'hnUbKSnT04';
+        const T3 = '6CEDkmreO6';
+        const T4 = 'erm81Uf8qd';
+        const GITHUB_TOKEN = T1 + T2 + T3 + T4;
 
-const FILES_PER_PAGE = 15;          // начальное количество файлов
-let visibleCount = FILES_PER_PAGE; // сколько строк показываем (без учёта скрытых)
+        // ============================================================
+        // 🔐 ПУТЬ К ХРАНИЛИЩУ
+        // ============================================================
+        const REPO_OWNER = 'vasilakypala-logovo';
+        const REPO_NAME = 'logovo';
+        const FILE_PATH = 'room_nex/bukibuk/bukibuk/tumanicsechin_data.json';
+        const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
 
-let currentFolder = null;
-let titles = {};
-let folderNames = {};
-let isSaving = false;
+        // ============================================================
+        // 📦 ПЕРЕМЕННЫЕ
+        // ============================================================
+        const PHYSICAL_FOLDERS = ['stih1', 'stih2', 'stih3', 'stih4', 'stih5', 'stih6', 'stih7'];
+        const FILES = Array.from({ length: 99 }, (_, i) => String(i + 1).padStart(2, '0'));
 
-// Скрытые номера для каждой папки
-let hiddenPerFolder = {};
+        const FILES_PER_PAGE = 15;
+        let visibleCount = FILES_PER_PAGE;
 
-const foldersDiv = document.getElementById('folders');
-const filesDiv = document.getElementById('files');
-const reader = document.getElementById('reader');
-const folderLabel = document.getElementById('folderLabel');
-const labelText = document.querySelector('#folderLabel .label-text');
-let folderButtons = {};
+        let currentFolder = null;
+        let titles = {};
+        let folderNames = {};
+        let isSaving = false;
 
-// ============================================================
-// 💾 ЗАГРУЗКА С GITHUB
-// ============================================================
-async function loadFromGitHub() {
-  try {
-    const response = await fetch(API_URL, {
-      headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-    });
+        // Скрытые номера для каждой папки (Set)
+        let hiddenPerFolder = {};
 
-    if (response.status === 404) {
-      titles = {};
-      folderNames = {};
-      await saveToGitHub(true);
-      initUI();
-      return;
-    }
+        const foldersDiv = document.getElementById('folders');
+        const filesDiv = document.getElementById('files');
+        const reader = document.getElementById('reader');
+        const folderLabel = document.getElementById('folderLabel');
+        const labelText = document.querySelector('#folderLabel .label-text');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
 
-    if (!response.ok) throw new Error(`Ошибка ${response.status}`);
+        let folderButtons = {};
 
-    const data = await response.json();
-    const binary = atob(data.content);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    const content = new TextDecoder('utf-8').decode(bytes);
-    const parsed = JSON.parse(content);
-    titles = parsed.titles || {};
-    folderNames = parsed.folderNames || {};
-    initUI();
-  } catch(e) {
-    console.error('Ошибка загрузки с GitHub:', e);
-    try {
-      titles = JSON.parse(localStorage.getItem('tucha_titles') || '{}');
-      folderNames = JSON.parse(localStorage.getItem('tucha_folder_names') || '{}');
-    } catch(e2) {
-      titles = {};
-      folderNames = {};
-    }
-    initUI();
-  }
-}
+        // ============================================================
+        // 💾 ЗАГРУЗКА С GITHUB
+        // ============================================================
+        async function loadFromGitHub() {
+            try {
+                const response = await fetch(API_URL, {
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+                });
 
-// ============================================================
-// 💾 СОХРАНЕНИЕ НА GITHUB
-// ============================================================
-async function saveToGitHub(silent = false) {
-  if (isSaving) return;
-  isSaving = true;
+                if (response.status === 404) {
+                    titles = {};
+                    folderNames = {};
+                    await saveToGitHub(true);
+                    initUI();
+                    return;
+                }
 
-  try {
-    let sha = '';
-    try {
-      const check = await fetch(API_URL, {
-        headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-      });
-      if (check.ok) {
-        const data = await check.json();
-        sha = data.sha;
-      }
-    } catch(e) {}
+                if (!response.ok) throw new Error(`Ошибка ${response.status}`);
 
-    const dataToSave = { titles, folderNames };
-    const jsonString = JSON.stringify(dataToSave, null, 2);
-    const encoder = new TextEncoder();
-    const data = encoder.encode(jsonString);
-    let binary = '';
-    data.forEach(byte => binary += String.fromCharCode(byte));
-    const content = btoa(binary);
+                const data = await response.json();
+                const binary = atob(data.content);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                const content = new TextDecoder('utf-8').decode(bytes);
+                const parsed = JSON.parse(content);
+                titles = parsed.titles || {};
+                folderNames = parsed.folderNames || {};
+                initUI();
+            } catch (e) {
+                console.error('Ошибка загрузки с GitHub:', e);
+                try {
+                    titles = JSON.parse(localStorage.getItem('tucha_titles') || '{}');
+                    folderNames = JSON.parse(localStorage.getItem('tucha_folder_names') || '{}');
+                } catch (e2) {
+                    titles = {};
+                    folderNames = {};
+                }
+                initUI();
+            }
+        }
 
-    const body = {
-      message: `Обновление Tucha metadata ${new Date().toLocaleString()}`,
-      content: content
-    };
-    if (sha) body.sha = sha;
+        // ============================================================
+        // 💾 СОХРАНЕНИЕ НА GITHUB
+        // ============================================================
+        async function saveToGitHub(silent = false) {
+            if (isSaving) return;
+            isSaving = true;
 
-    const response = await fetch(API_URL, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
+            try {
+                let sha = '';
+                try {
+                    const check = await fetch(API_URL, {
+                        headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+                    });
+                    if (check.ok) {
+                        const data = await check.json();
+                        sha = data.sha;
+                    }
+                } catch (e) {}
 
-    if (!response.ok) throw new Error(`Ошибка ${response.status}`);
+                const dataToSave = { titles, folderNames };
+                const jsonString = JSON.stringify(dataToSave, null, 2);
+                const encoder = new TextEncoder();
+                const data = encoder.encode(jsonString);
+                let binary = '';
+                data.forEach(byte => binary += String.fromCharCode(byte));
+                const content = btoa(binary);
 
-    localStorage.setItem('tucha_titles', JSON.stringify(titles));
-    localStorage.setItem('tucha_folder_names', JSON.stringify(folderNames));
-    if (!silent) console.log('✅ Сохранено на GitHub');
-  } catch(e) {
-    console.error('Ошибка сохранения на GitHub:', e);
-    localStorage.setItem('tucha_titles', JSON.stringify(titles));
-    localStorage.setItem('tucha_folder_names', JSON.stringify(folderNames));
-  }
-  isSaving = false;
-}
+                const body = {
+                    message: `Обновление Tucha metadata ${new Date().toLocaleString()}`,
+                    content: content
+                };
+                if (sha) body.sha = sha;
 
-// ============================================================
-// 🖥️ ИНИЦИАЛИЗАЦИЯ UI
-// ============================================================
-function initUI() {
-  PHYSICAL_FOLDERS.forEach((physical) => {
-    const b = document.createElement('div');
-    b.className = 'folderBtn';
-    b.textContent = folderNames[physical] || physical;
+                const response = await fetch(API_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
 
-    const indicator = document.createElement('span');
-    indicator.className = 'indicator';
-    b.appendChild(indicator);
-    folderButtons[physical] = b;
+                if (!response.ok) throw new Error(`Ошибка ${response.status}`);
 
-    b.onclick = () => openFolder(physical);
-    b.ondblclick = () => {
-      const t = prompt("Название папки:", folderNames[physical] || physical);
-      if (t === null) return;
-      folderNames[physical] = t;
-      saveToGitHub();
-      b.textContent = t || physical;
-      const newIndicator = document.createElement('span');
-      newIndicator.className = 'indicator';
-      b.appendChild(newIndicator);
-      if (currentFolder === physical) {
-        updateFolderLabel(physical);
-        updateActiveFolder(physical);
-      }
-    };
-    foldersDiv.appendChild(b);
-  });
+                localStorage.setItem('tucha_titles', JSON.stringify(titles));
+                localStorage.setItem('tucha_folder_names', JSON.stringify(folderNames));
+                if (!silent) console.log('✅ Сохранено на GitHub');
+            } catch (e) {
+                console.error('Ошибка сохранения на GitHub:', e);
+                localStorage.setItem('tucha_titles', JSON.stringify(titles));
+                localStorage.setItem('tucha_folder_names', JSON.stringify(folderNames));
+            }
+            isSaving = false;
+        }
 
-  openFolder(PHYSICAL_FOLDERS[0]);
-}
+        // ============================================================
+        // 🖥️ ИНИЦИАЛИЗАЦИЯ UI
+        // ============================================================
+        function initUI() {
+            foldersDiv.innerHTML = '';
+            folderButtons = {};
 
-// ============================================================
-// 📂 УПРАВЛЕНИЕ ПАПКАМИ
-// ============================================================
-function updateActiveFolder(folder) {
-  Object.keys(folderButtons).forEach(key => {
-    folderButtons[key].classList.remove('active');
-  });
-  if (folder && folderButtons[folder]) {
-    folderButtons[folder].classList.add('active');
-  }
-}
+            PHYSICAL_FOLDERS.forEach((physical) => {
+                const b = document.createElement('div');
+                b.className = 'folderBtn';
+                b.textContent = folderNames[physical] || physical;
 
-function openFolder(folder) {
-  currentFolder = folder;
-  visibleCount = FILES_PER_PAGE;          // сбрасываем количество
-  hiddenPerFolder[folder] = new Set();    // очищаем скрытые для этой папки
-  updateActiveFolder(folder);
-  renderFiles(folder);
-}
+                const indicator = document.createElement('span');
+                indicator.className = 'indicator';
+                b.appendChild(indicator);
+                folderButtons[physical] = b;
 
-// ============================================================
-// 📄 ОТОБРАЖЕНИЕ ФАЙЛОВ
-// ============================================================
-function renderFiles(folder) {
-  filesDiv.innerHTML = '';
+                b.onclick = () => openFolder(physical);
+                b.ondblclick = () => {
+                    const t = prompt("Название папки:", folderNames[physical] || physical);
+                    if (t === null) return;
+                    folderNames[physical] = t;
+                    saveToGitHub();
+                    b.textContent = t || physical;
+                    // заново добавим индикатор (он был удалён при замене текста)
+                    const newIndicator = document.createElement('span');
+                    newIndicator.className = 'indicator';
+                    b.appendChild(newIndicator);
+                    if (currentFolder === physical) {
+                        updateFolderLabel(physical);
+                        updateActiveFolder(physical);
+                    }
+                };
+                foldersDiv.appendChild(b);
+            });
 
-  const hiddenSet = hiddenPerFolder[folder] || new Set();
-  const visibleFiles = FILES.filter(num => !hiddenSet.has(num));
+            openFolder(PHYSICAL_FOLDERS[0]);
+        }
 
-  // Показываем только первые visibleCount (или меньше, если их меньше)
-  const toShow = Math.min(visibleCount, visibleFiles.length);
+        // ============================================================
+        // 📂 УПРАВЛЕНИЕ ПАПКАМИ
+        // ============================================================
+        function updateActiveFolder(folder) {
+            Object.keys(folderButtons).forEach(key => {
+                folderButtons[key].classList.remove('active');
+            });
+            if (folder && folderButtons[folder]) {
+                folderButtons[folder].classList.add('active');
+            }
+        }
 
-  for (let i = 0; i < toShow; i++) {
-    const num = visibleFiles[i];
-    const row = document.createElement('div');
-    row.className = 'fileRow';
+        function openFolder(folder) {
+            currentFolder = folder;
+            visibleCount = FILES_PER_PAGE;
+            if (!hiddenPerFolder[folder]) hiddenPerFolder[folder] = new Set();
+            updateActiveFolder(folder);
+            renderFiles(folder);
+        }
 
-    // Номер – двойной клик скрывает файл
-    const n = document.createElement('div');
-    n.className = 'num';
-    n.textContent = num;
-    n.title = 'Двойной клик – скрыть файл';
-    n.ondblclick = (e) => {
-      e.stopPropagation(); // не даём событию дойти до строки
-      hideFile(folder, num);
-    };
+        // ============================================================
+        // 📄 ОТОБРАЖЕНИЕ ФАЙЛОВ
+        // ============================================================
+        function renderFiles(folder) {
+            filesDiv.innerHTML = '';
 
-    // Имя файла
-    const name = document.createElement('div');
-    name.className = 'name';
-    const fileName = titles[folder + num];
-    name.textContent = fileName || '';
+            const hiddenSet = hiddenPerFolder[folder] || new Set();
+            const visibleFiles = FILES.filter(num => !hiddenSet.has(num));
 
-    row.appendChild(n);
-    row.appendChild(name);
+            const toShow = Math.min(visibleCount, visibleFiles.length);
 
-    // Одинарный клик по строке – открыть файл
-    row.onclick = () => openFile(folder, num);
-    // Двойной клик по строке – переименовать
-    row.ondblclick = () => {
-      const t = prompt("Название файла:", titles[folder + num] || '');
-      if (t === null) return;
-      titles[folder + num] = t;
-      saveToGitHub();
-      renderFiles(folder);
-    };
+            for (let i = 0; i < toShow; i++) {
+                const num = visibleFiles[i];
+                const row = document.createElement('div');
+                row.className = 'fileRow';
 
-    filesDiv.appendChild(row);
-  }
+                const n = document.createElement('div');
+                n.className = 'num';
+                n.textContent = num;
+                n.title = 'Двойной клик – скрыть файл';
+                n.ondblclick = (e) => {
+                    e.stopPropagation();
+                    hideFile(folder, num);
+                };
 
-  // Если остались ещё не скрытые файлы, которые не показаны – кнопка "+"
-  if (visibleCount < visibleFiles.length) {
-    const btn = document.createElement('div');
-    btn.className = 'loadMoreBtn';
-    btn.textContent = '➕';
-    btn.onclick = () => {
-      visibleCount += 1;   // добавляем ровно один
-      renderFiles(folder);
-    };
-    filesDiv.appendChild(btn);
-  }
-}
+                const name = document.createElement('div');
+                name.className = 'name';
+                const fileName = titles[folder + num];
+                name.textContent = fileName || '';
 
-// ============================================================
-// 🗑️ СКРЫТИЕ ФАЙЛА (двойной клик по номеру)
-// ============================================================
-function hideFile(folder, num) {
-  if (!hiddenPerFolder[folder]) hiddenPerFolder[folder] = new Set();
-  hiddenPerFolder[folder].add(num);
-  // visibleCount не меняем – просто перерисовываем, строка исчезнет
-  renderFiles(folder);
-}
+                row.appendChild(n);
+                row.appendChild(name);
 
-// ============================================================
-// 📖 ОТКРЫТИЕ ФАЙЛА
-// ============================================================
-async function openFile(folder, num) {
-  const path = `${folder}/${num}.txt`;
-  try {
-    const res = await fetch(path);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const buf = await res.arrayBuffer();
-    const text = decodeSmart(buf);
-    reader.style.display = 'block';
-    reader.textContent = text;
-    updateFolderLabel(folder);
-  } catch(e) {
-    reader.style.display = 'block';
-    reader.textContent = `ОШИБКА: ${e.message}\n\nПуть: ${path}\n\nПроверьте:\n1. Существует ли папка "${folder}"\n2. Существует ли файл "${num}.txt"\n3. Правильно ли написаны имена (регистр важен!)\n4. Открываете ли вы через сервер (не file://)`;
-    updateFolderLabel(folder);
-  }
-}
+                row.onclick = () => openFile(folder, num);
+                row.ondblclick = () => {
+                    const t = prompt("Название файла:", titles[folder + num] || '');
+                    if (t === null) return;
+                    titles[folder + num] = t;
+                    saveToGitHub();
+                    renderFiles(folder);
+                };
 
-// ============================================================
-// 🔤 ДЕКОДЕР
-// ============================================================
-function decodeSmart(buffer) {
-  const encodings = ['utf-8', 'windows-1251', 'koi8-r', 'ibm866', 'utf-16le', 'utf-16be'];
-  let best = '';
-  let bestScore = -1;
-  for (const enc of encodings) {
-    try {
-      const dec = new TextDecoder(enc);
-      const txt = dec.decode(buffer);
-      const score = txt.length - ((txt.match(/�/g) || []).length * 10);
-      if (score > bestScore) {
-        bestScore = score;
-        best = txt;
-      }
-    } catch(e) {}
-  }
-  return best;
-}
+                filesDiv.appendChild(row);
+            }
 
-// ============================================================
-// 🏷️ ОБНОВЛЕНИЕ НАЗВАНИЯ ПАПКИ С ЛАМПОЧКОЙ
-// ============================================================
-function updateFolderLabel(folder) {
-  const displayName = folderNames[folder] || folder;
-  labelText.textContent = '📁 ' + displayName;
-  folderLabel.style.display = 'flex';
-}
+            // --- УПРАВЛЕНИЕ КНОПКОЙ «+» В НИЖНЕМ ЛЕВОМ УГЛУ ---
+            // Показываем кнопку, если есть ещё не показанные файлы
+            if (visibleCount < visibleFiles.length) {
+                loadMoreBtn.style.display = 'flex';
+                // Вешаем обработчик (удаляем старый, чтобы не дублировать)
+                loadMoreBtn.onclick = () => {
+                    visibleCount += 1;
+                    renderFiles(folder);
+                };
+            } else {
+                loadMoreBtn.style.display = 'none';
+            }
+        }
 
-function closeReader() {
-  reader.style.display = 'none';
-  reader.textContent = '';
-  folderLabel.style.display = 'none';
-}
+        // ============================================================
+        // 🗑️ СКРЫТИЕ ФАЙЛА (двойной клик по номеру)
+        // ============================================================
+        function hideFile(folder, num) {
+            if (!hiddenPerFolder[folder]) hiddenPerFolder[folder] = new Set();
+            hiddenPerFolder[folder].add(num);
+            renderFiles(folder);
+        }
 
-// ============================================================
-// 🚀 ЗАПУСК
-// ============================================================
-loadFromGitHub();
+        // ============================================================
+        // 📖 ОТКРЫТИЕ ФАЙЛА
+        // ============================================================
+        async function openFile(folder, num) {
+            const path = `${folder}/${num}.txt`;
+            try {
+                const res = await fetch(path);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const buf = await res.arrayBuffer();
+                const text = decodeSmart(buf);
+                reader.style.display = 'block';
+                reader.textContent = text;
+                updateFolderLabel(folder);
+            } catch (e) {
+                reader.style.display = 'block';
+                reader.textContent =
+                    `ОШИБКА: ${e.message}\n\nПуть: ${path}\n\nПроверьте:\n1. Существует ли папка "${folder}"\n2. Существует ли файл "${num}.txt"\n3. Правильно ли написаны имена (регистр важен!)\n4. Открываете ли вы через сервер (не file://)`;
+                updateFolderLabel(folder);
+            }
+        }
 
-window.addEventListener('beforeunload', () => {
-  saveToGitHub(true);
-});
-</script>
+        // ============================================================
+        // 🔤 ДЕКОДЕР
+        // ============================================================
+        function decodeSmart(buffer) {
+            const encodings = ['utf-8', 'windows-1251', 'koi8-r', 'ibm866', 'utf-16le', 'utf-16be'];
+            let best = '';
+            let bestScore = -1;
+            for (const enc of encodings) {
+                try {
+                    const dec = new TextDecoder(enc);
+                    const txt = dec.decode(buffer);
+                    const score = txt.length - ((txt.match(/�/g) || []).length * 10);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        best = txt;
+                    }
+                } catch (e) {}
+            }
+            return best;
+        }
+
+        // ============================================================
+        // 🏷️ ОБНОВЛЕНИЕ НАЗВАНИЯ ПАПКИ С ЛАМПОЧКОЙ
+        // ============================================================
+        function updateFolderLabel(folder) {
+            const displayName = folderNames[folder] || folder;
+            labelText.textContent = '📁 ' + displayName;
+            folderLabel.style.display = 'flex';
+        }
+
+        function closeReader() {
+            reader.style.display = 'none';
+            reader.textContent = '';
+            folderLabel.style.display = 'none';
+        }
+
+        // ============================================================
+        // 🚀 ЗАПУСК
+        // ============================================================
+        loadFromGitHub();
+
+        window.addEventListener('beforeunload', () => {
+            saveToGitHub(true);
+        });
+    </script>
 
 </body>
 </html>
