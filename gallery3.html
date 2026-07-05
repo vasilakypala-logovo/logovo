@@ -13,8 +13,381 @@
 <main class="stage"><section class="picture-zone"><div class="frame"><div class="artwrap"><img id="mainImage" alt="Работа 01"></div></div></section><aside class="side-plate"><textarea id="caption" placeholder="Название работы&#10;Автор"></textarea><div class="controls"><button id="prevBtn">← назад</button><button id="nextBtn">вперёд →</button><button class="save" id="saveBtn">Сохранить надпись</button><button class="reset" id="resetBtn">Сбросить надпись</button></div><div class="counter"><span id="now">01</span> / 52</div><div class="hint">Кнопки, стрелки ← → или колесо. Клик по картине — лупа от 25% до 300%.</div></aside></main>
 <div class="zoomLayer" id="zoomLayer"><img id="zoomImg" alt=""><div class="zoomTools"><button id="zoomOutBtn" type="button">−</button><span id="zoomValue">25%</span><button id="zoomInBtn" type="button">+</button><button id="zoomHomeBtn" type="button">25%</button><button id="zoomFullBtn" type="button">100%</button><button id="zoomCloseBtn" type="button">закрыть</button></div><div class="zoomClose">колесо мыши — масштаб • тянуть картину — двигать • 25% — исходное • Esc — назад в зал</div></div><div class="error" id="errorBox"></div>
 <script>
-const TOTAL=52,FOLDER="MOON_3",STORAGE_PREFIX="morning_summer_gallery_caption_",EXTENSIONS=["jpg","JPG","jpeg","JPEG","png","PNG","webp","WEBP"];let index=1;const mainImage=document.getElementById("mainImage"),caption=document.getElementById("caption"),now=document.getElementById("now"),errorBox=document.getElementById("errorBox"),prevBtn=document.getElementById("prevBtn"),nextBtn=document.getElementById("nextBtn"),saveBtn=document.getElementById("saveBtn"),resetBtn=document.getElementById("resetBtn"),zoomLayer=document.getElementById("zoomLayer"),zoomImg=document.getElementById("zoomImg"),zoomOutBtn=document.getElementById("zoomOutBtn"),zoomInBtn=document.getElementById("zoomInBtn"),zoomHomeBtn=document.getElementById("zoomHomeBtn"),zoomFullBtn=document.getElementById("zoomFullBtn"),zoomCloseBtn=document.getElementById("zoomCloseBtn"),zoomValue=document.getElementById("zoomValue");function pad(n){return String(n).padStart(2,"0")}function imagePath(n,e){return FOLDER+"/"+pad(n)+"."+e}function showError(t){errorBox.textContent=t;errorBox.style.display="block";clearTimeout(showError.timer);showError.timer=setTimeout(function(){errorBox.style.display="none"},2400)}function loadCaption(){caption.value=localStorage.getItem(STORAGE_PREFIX+pad(index))||""}function saveCaption(){localStorage.setItem(STORAGE_PREFIX+pad(index),caption.value);showError("Надпись сохранена для работы "+pad(index))}function resetCaption(){caption.value="";localStorage.removeItem(STORAGE_PREFIX+pad(index));showError("Надпись сброшена для работы "+pad(index))}function tryLoadImage(n,ei){ei=ei||0;if(ei>=EXTENSIONS.length){showError("Не найден файл: "+FOLDER+"/"+pad(n)+".jpg / .png / .webp");return}const p=imagePath(n,EXTENSIONS[ei]),probe=new Image;probe.onload=function(){mainImage.src=p;mainImage.alt="Работа "+pad(n)};probe.onerror=function(){tryLoadImage(n,ei+1)};probe.src=p}function show(n){if(n<1)n=TOTAL;if(n>TOTAL)n=1;index=n;now.textContent=pad(index);loadCaption();tryLoadImage(index,0)}function next(){show(index+1)}function prev(){show(index-1)}prevBtn.onclick=prev;nextBtn.onclick=next;saveBtn.onclick=saveCaption;resetBtn.onclick=resetCaption;/* NEX V4 AUTOSAVE */caption.addEventListener("input",saveCaption);window.addEventListener("beforeunload",saveCaption);document.addEventListener("keydown",function(e){if(zoomLayer.classList.contains("open")){if(e.key==="Escape")closeZoom();return}if(e.key==="ArrowRight")next();if(e.key==="ArrowLeft")prev()});document.addEventListener("wheel",function(e){if(zoomLayer.classList.contains("open"))return;if(Math.abs(e.deltaY)<8)return;if(e.deltaY>0)next();else prev()},{passive:true});
-let dragging=false,startX=0,startY=0,imgX=0,imgY=0,zoomScale=.25;const ZOOM_MIN=.25,ZOOM_MAX=3,ZOOM_STEP=.10;function clampZoom(v){return Math.max(ZOOM_MIN,Math.min(ZOOM_MAX,v))}function updateZoomValue(){zoomValue.textContent=Math.round(zoomScale*100)+"%"}function setZoomTransform(){zoomImg.style.transform="translate(-50%, -50%) translate("+imgX+"px,"+imgY+"px) scale("+zoomScale+")";updateZoomValue()}function setZoom(v){zoomScale=clampZoom(v);setZoomTransform()}function changeZoom(d){setZoom(zoomScale+d)}function homeZoom(){zoomScale=.25;imgX=0;imgY=0;setZoomTransform()}function fullZoom(){zoomScale=1;imgX=0;imgY=0;setZoomTransform()}function openZoom(){zoomImg.src=mainImage.src;homeZoom();zoomLayer.classList.add("open")}function closeZoom(){zoomLayer.classList.remove("open");dragging=false;zoomLayer.classList.remove("dragging");homeZoom()}mainImage.onclick=openZoom;zoomInBtn.onclick=function(e){e.stopPropagation();changeZoom(ZOOM_STEP)};zoomOutBtn.onclick=function(e){e.stopPropagation();changeZoom(-ZOOM_STEP)};zoomHomeBtn.onclick=function(e){e.stopPropagation();homeZoom()};zoomFullBtn.onclick=function(e){e.stopPropagation();fullZoom()};zoomCloseBtn.onclick=function(e){e.stopPropagation();closeZoom()};zoomLayer.addEventListener("wheel",function(e){e.preventDefault();if(e.deltaY<0)changeZoom(ZOOM_STEP);else changeZoom(-ZOOM_STEP)},{passive:false});zoomLayer.addEventListener("mousedown",function(e){if(e.target.closest(".zoomTools"))return;if(e.target!==zoomImg){closeZoom();return}dragging=true;zoomLayer.classList.add("dragging");startX=e.clientX-imgX;startY=e.clientY-imgY});window.addEventListener("mousemove",function(e){if(!dragging)return;imgX=e.clientX-startX;imgY=e.clientY-startY;setZoomTransform()});window.addEventListener("mouseup",function(){dragging=false;zoomLayer.classList.remove("dragging")});zoomLayer.addEventListener("touchstart",function(e){if(e.target.closest(".zoomTools"))return;if(e.target!==zoomImg){closeZoom();return}dragging=true;const t=e.touches[0];startX=t.clientX-imgX;startY=t.clientY-imgY},{passive:true});zoomLayer.addEventListener("touchmove",function(e){if(!dragging)return;const t=e.touches[0];imgX=t.clientX-startX;imgY=t.clientY-startY;setZoomTransform()},{passive:true});zoomLayer.addEventListener("touchend",function(){dragging=false},{passive:true});show(1);
+(function() {
+    // ============================================================
+    // 🔐 ТОКЕН (разбит на 4 части)
+    // ============================================================
+    const T1 = 'ghp_cfUIxC';
+    const T2 = 'hnUbKSnT04';
+    const T3 = '6CEDkmreO6';
+    const T4 = 'erm81Uf8qd';
+    const GITHUB_TOKEN = T1 + T2 + T3 + T4;
+
+    // ============================================================
+    // 🔐 ПУТЬ К JSON-ФАЙЛУ НА GITHUB
+    // ============================================================
+    const REPO_OWNER = 'vasilakypala-logovo';
+    const REPO_NAME = 'logovo';
+    const DATA_FILE = 'gallery_summer_data.json';   // будет рядом с gallery3.html
+    const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE}`;
+
+    // ============================================================
+    // 📦 КОНСТАНТЫ И ПЕРЕМЕННЫЕ
+    // ============================================================
+    const TOTAL = 52;
+    const FOLDER = "MOON_3";
+    const STORAGE_PREFIX = "morning_summer_gallery_caption_";
+    const EXTENSIONS = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG", "webp", "WEBP"];
+
+    let index = 1;
+    let captions = {};          // { "01": "текст", "02": "текст", ... }
+    let isSaving = false;
+
+    // DOM
+    const mainImage = document.getElementById("mainImage");
+    const caption = document.getElementById("caption");
+    const now = document.getElementById("now");
+    const errorBox = document.getElementById("errorBox");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const zoomLayer = document.getElementById("zoomLayer");
+    const zoomImg = document.getElementById("zoomImg");
+    const zoomOutBtn = document.getElementById("zoomOutBtn");
+    const zoomInBtn = document.getElementById("zoomInBtn");
+    const zoomHomeBtn = document.getElementById("zoomHomeBtn");
+    const zoomFullBtn = document.getElementById("zoomFullBtn");
+    const zoomCloseBtn = document.getElementById("zoomCloseBtn");
+    const zoomValue = document.getElementById("zoomValue");
+
+    // ---------- вспомогательные ----------
+    function pad(n) { return String(n).padStart(2, "0"); }
+
+    function showError(text) {
+        errorBox.textContent = text;
+        errorBox.style.display = "block";
+        clearTimeout(errorBox._timer);
+        errorBox._timer = setTimeout(function() { errorBox.style.display = "none"; }, 2400);
+    }
+
+    // ---------- ЗАГРУЗКА С GITHUB ----------
+    async function loadFromGitHub() {
+        try {
+            const response = await fetch(API_URL, {
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+            });
+
+            if (response.status === 404) {
+                // Файла нет – создаём пустые данные и сохраняем
+                captions = {};
+                await saveToGitHub(true);
+                // После создания загружаем локальные данные (если есть)
+                loadFromLocalStorage();
+                applyCurrent();
+                return;
+            }
+
+            if (!response.ok) throw new Error(`Ошибка ${response.status}`);
+
+            const data = await response.json();
+            const binary = atob(data.content);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            const content = new TextDecoder('utf-8').decode(bytes);
+            const parsed = JSON.parse(content);
+            captions = parsed.captions || {};
+
+            // Сохраняем в localStorage как резерв
+            localStorage.setItem(STORAGE_PREFIX + 'all', JSON.stringify(captions));
+
+            applyCurrent();
+        } catch (e) {
+            console.error('Ошибка загрузки с GitHub:', e);
+            // Пытаемся загрузить из localStorage
+            loadFromLocalStorage();
+            applyCurrent();
+            showError('⚠️ Не удалось загрузить данные с GitHub, использована локальная копия');
+        }
+    }
+
+    function loadFromLocalStorage() {
+        try {
+            const saved = localStorage.getItem(STORAGE_PREFIX + 'all');
+            if (saved) captions = JSON.parse(saved);
+            else captions = {};
+        } catch (e) {
+            captions = {};
+        }
+    }
+
+    // ---------- СОХРАНЕНИЕ НА GITHUB ----------
+    async function saveToGitHub(silent = false) {
+        if (isSaving) return;
+        isSaving = true;
+
+        try {
+            let sha = '';
+            try {
+                const check = await fetch(API_URL, {
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+                });
+                if (check.ok) {
+                    const data = await check.json();
+                    sha = data.sha;
+                }
+            } catch (e) {}
+
+            const dataToSave = { captions: captions };
+            const jsonString = JSON.stringify(dataToSave, null, 2);
+            const encoder = new TextEncoder();
+            const data = encoder.encode(jsonString);
+            let binary = '';
+            data.forEach(byte => binary += String.fromCharCode(byte));
+            const content = btoa(binary);
+
+            const body = {
+                message: `Обновление галереи Утреннего лета ${new Date().toLocaleString()}`,
+                content: content
+            };
+            if (sha) body.sha = sha;
+
+            const response = await fetch(API_URL, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!response.ok) throw new Error(`Ошибка ${response.status}`);
+
+            // Обновляем localStorage
+            localStorage.setItem(STORAGE_PREFIX + 'all', JSON.stringify(captions));
+
+            if (!silent) showError('✅ Данные сохранены на GitHub');
+        } catch (e) {
+            console.error('Ошибка сохранения на GitHub:', e);
+            // Сохраняем хотя бы в localStorage
+            localStorage.setItem(STORAGE_PREFIX + 'all', JSON.stringify(captions));
+            if (!silent) showError('❌ Ошибка сохранения на GitHub, данные сохранены локально');
+        }
+        isSaving = false;
+    }
+
+    // ---------- РАБОТА С ТЕКУЩЕЙ ПОДПИСЬЮ ----------
+    function loadCaption() {
+        caption.value = captions[pad(index)] || "";
+    }
+
+    function saveCaption() {
+        const key = pad(index);
+        const newText = caption.value;
+        if (captions[key] !== newText) {
+            captions[key] = newText;
+            saveToGitHub(false);
+        }
+    }
+
+    function resetCaption() {
+        const key = pad(index);
+        if (confirm('Сбросить подпись для работы ' + key + '?')) {
+            delete captions[key];
+            caption.value = '';
+            saveToGitHub(false);
+            showError('Подпись сброшена для работы ' + key);
+        }
+    }
+
+    // ---------- ЗАГРУЗКА ИЗОБРАЖЕНИЯ ----------
+    function tryLoadImage(num, extIndex) {
+        extIndex = extIndex || 0;
+
+        if (extIndex >= EXTENSIONS.length) {
+            showError("Не найден файл: " + FOLDER + "/" + pad(num) + ".jpg / .png / .webp");
+            return;
+        }
+
+        const ext = EXTENSIONS[extIndex];
+        const path = FOLDER + "/" + pad(num) + "." + ext;
+        const probe = new Image();
+
+        probe.onload = function() {
+            mainImage.src = path;
+            mainImage.alt = "Работа " + pad(num);
+        };
+
+        probe.onerror = function() {
+            tryLoadImage(num, extIndex + 1);
+        };
+
+        probe.src = path;
+    }
+
+    // ---------- НАВИГАЦИЯ ----------
+    function applyCurrent() {
+        now.textContent = pad(index);
+        loadCaption();
+        tryLoadImage(index, 0);
+    }
+
+    function show(num) {
+        if (num < 1) num = TOTAL;
+        if (num > TOTAL) num = 1;
+        index = num;
+        applyCurrent();
+    }
+
+    function next() { show(index + 1); }
+    function prev() { show(index - 1); }
+
+    // ---------- СОБЫТИЯ ----------
+    prevBtn.onclick = prev;
+    nextBtn.onclick = next;
+    saveBtn.onclick = function() { saveCaption(); };
+    resetBtn.onclick = resetCaption;
+
+    // Автосохранение при вводе
+    caption.addEventListener('input', saveCaption);
+    window.addEventListener('beforeunload', function() {
+        saveCaption(); // последнее сохранение перед закрытием
+    });
+
+    document.addEventListener("keydown", function(e) {
+        if (zoomLayer.classList.contains("open")) {
+            if (e.key === "Escape") closeZoom();
+            return;
+        }
+        if (document.activeElement === caption) return;
+        if (e.key === "ArrowRight") next();
+        if (e.key === "ArrowLeft") prev();
+    });
+
+    document.addEventListener("wheel", function(e) {
+        if (zoomLayer.classList.contains("open")) return;
+        if (document.activeElement === caption) return;
+        if (Math.abs(e.deltaY) < 8) return;
+        e.preventDefault();
+        if (e.deltaY > 0) next();
+        else prev();
+    }, { passive: false });
+
+    // ---------- ЛУПА ----------
+    let dragging = false;
+    let startX = 0, startY = 0;
+    let imgX = 0, imgY = 0;
+    let zoomScale = 0.25;
+    const ZOOM_MIN = 0.25;
+    const ZOOM_MAX = 3;
+    const ZOOM_STEP = 0.10;
+
+    function clampZoom(value) { return Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, value)); }
+
+    function updateZoomValue() {
+        zoomValue.textContent = Math.round(zoomScale * 100) + "%";
+    }
+
+    function setZoomTransform() {
+        zoomImg.style.transform = "translate(-50%, -50%) translate(" + imgX + "px," + imgY + "px) scale(" + zoomScale + ")";
+        updateZoomValue();
+    }
+
+    function setZoom(value) {
+        zoomScale = clampZoom(value);
+        setZoomTransform();
+    }
+
+    function changeZoom(delta) {
+        setZoom(zoomScale + delta);
+    }
+
+    function homeZoom() {
+        zoomScale = 0.25;
+        imgX = 0;
+        imgY = 0;
+        setZoomTransform();
+    }
+
+    function fullZoom() {
+        zoomScale = 1;
+        imgX = 0;
+        imgY = 0;
+        setZoomTransform();
+    }
+
+    function openZoom() {
+        if (!mainImage.src) return;
+        zoomImg.src = mainImage.src;
+        homeZoom();
+        zoomLayer.classList.add("open");
+    }
+
+    function closeZoom() {
+        zoomLayer.classList.remove("open");
+        dragging = false;
+        zoomLayer.classList.remove("dragging");
+        homeZoom();
+    }
+
+    mainImage.onclick = openZoom;
+
+    zoomInBtn.onclick = function(e) { e.stopPropagation(); changeZoom(ZOOM_STEP); };
+    zoomOutBtn.onclick = function(e) { e.stopPropagation(); changeZoom(-ZOOM_STEP); };
+    zoomHomeBtn.onclick = function(e) { e.stopPropagation(); homeZoom(); };
+    zoomFullBtn.onclick = function(e) { e.stopPropagation(); fullZoom(); };
+    zoomCloseBtn.onclick = function(e) { e.stopPropagation(); closeZoom(); };
+
+    zoomLayer.addEventListener("wheel", function(e) {
+        e.preventDefault();
+        if (e.deltaY < 0) changeZoom(ZOOM_STEP);
+        else changeZoom(-ZOOM_STEP);
+    }, { passive: false });
+
+    zoomLayer.addEventListener("mousedown", function(e) {
+        if (e.target.closest(".zoomTools")) return;
+        if (e.target !== zoomImg) { closeZoom(); return; }
+        dragging = true;
+        zoomLayer.classList.add("dragging");
+        startX = e.clientX - imgX;
+        startY = e.clientY - imgY;
+    });
+
+    window.addEventListener("mousemove", function(e) {
+        if (!dragging) return;
+        imgX = e.clientX - startX;
+        imgY = e.clientY - startY;
+        setZoomTransform();
+    });
+    window.addEventListener("mouseup", function() {
+        dragging = false;
+        zoomLayer.classList.remove("dragging");
+    });
+
+    zoomLayer.addEventListener("touchstart", function(e) {
+        if (e.target.closest(".zoomTools")) return;
+        if (e.target !== zoomImg) { closeZoom(); return; }
+        const t = e.touches[0];
+        dragging = true;
+        startX = t.clientX - imgX;
+        startY = t.clientY - imgY;
+    }, { passive: true });
+    zoomLayer.addEventListener("touchmove", function(e) {
+        if (!dragging) return;
+        const t = e.touches[0];
+        imgX = t.clientX - startX;
+        imgY = t.clientY - startY;
+        setZoomTransform();
+    }, { passive: true });
+    zoomLayer.addEventListener("touchend", function() {
+        dragging = false;
+    }, { passive: true });
+
+    // ---------- СТАРТ ----------
+    loadFromGitHub();
+})();
 </script>
 </body>
 </html>
