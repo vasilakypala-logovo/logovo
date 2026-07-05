@@ -5,7 +5,7 @@
 <title>Tucha Archive</title>
 
 <style>
-/* ===== ВСЕ ТВОИ СТИЛИ (БЕЗ ИЗМЕНЕНИЙ) ===== */
+/* ===== ВСЕ СТИЛИ (без изменений, кроме курсора у номера) ===== */
 body{
     margin:0;
     font-family: Arial, sans-serif;
@@ -170,6 +170,12 @@ body{
 .num{
     width:30px;
     font-weight:bold;
+    user-select:none;
+    color:#4ade80;
+    /* убираем курсор pointer, т.к. одинарный клик не активен */
+}
+.num:hover{
+    color:#aaffbb;
 }
 
 .name{
@@ -206,6 +212,28 @@ body{
     cursor:pointer;
     z-index:20;
 }
+
+/* ===== КНОПКА "+" (добавление одного файла) ===== */
+.loadMoreBtn {
+    display: block;
+    width: 100%;
+    padding: 14px 0;
+    margin-top: 8px;
+    background: #1f2a36;
+    border: 1px dashed #4ade80;
+    color: #4ade80;
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+.loadMoreBtn:hover {
+    background: #2a3a4a;
+    border-color: #6eff9e;
+    color: #6eff9e;
+}
 </style>
 </head>
 
@@ -225,7 +253,7 @@ body{
 
 <script>
 // ============================================================
-// 🔐 ТОКЕН (разбит на части, как в твоих рабочих файлах)
+// 🔐 ТОКЕН (разбит на части)
 // ============================================================
 const T1 = 'ghp_cfUIxC';
 const T2 = 'hnUbKSnT04';
@@ -234,23 +262,29 @@ const T4 = 'erm81Uf8qd';
 const GITHUB_TOKEN = T1 + T2 + T3 + T4;
 
 // ============================================================
-// 🔐 ПУТЬ К ХРАНИЛИЩУ (рядом с этим файлом)
+// 🔐 ПУТЬ К ХРАНИЛИЩУ
 // ============================================================
 const REPO_OWNER = 'vasilakypala-logovo';
 const REPO_NAME = 'logovo';
-const FILE_PATH = 'room_nex/bukibuk/bukibuk/tumanicsechin_data.json';   // ты создашь его вручную
+const FILE_PATH = 'room_nex/bukibuk/bukibuk/tumanicsechin_data.json';
 const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
 
 // ============================================================
-// 📦 ПЕРЕМЕННЫЕ (без изменений)
+// 📦 ПЕРЕМЕННЫЕ
 // ============================================================
 const PHYSICAL_FOLDERS = ['stih1', 'stih2', 'stih3', 'stih4', 'stih5', 'stih6', 'stih7'];
 const FILES = Array.from({length:99}, (_,i)=>String(i+1).padStart(2,'0'));
+
+const FILES_PER_PAGE = 15;          // начальное количество файлов
+let visibleCount = FILES_PER_PAGE; // сколько строк показываем (без учёта скрытых)
 
 let currentFolder = null;
 let titles = {};
 let folderNames = {};
 let isSaving = false;
+
+// Скрытые номера для каждой папки
+let hiddenPerFolder = {};
 
 const foldersDiv = document.getElementById('folders');
 const filesDiv = document.getElementById('files');
@@ -269,7 +303,6 @@ async function loadFromGitHub() {
     });
 
     if (response.status === 404) {
-      // Файла нет – создаём пустые данные
       titles = {};
       folderNames = {};
       await saveToGitHub(true);
@@ -292,7 +325,6 @@ async function loadFromGitHub() {
     initUI();
   } catch(e) {
     console.error('Ошибка загрузки с GitHub:', e);
-    // Пытаемся загрузить из localStorage
     try {
       titles = JSON.parse(localStorage.getItem('tucha_titles') || '{}');
       folderNames = JSON.parse(localStorage.getItem('tucha_folder_names') || '{}');
@@ -380,7 +412,6 @@ function initUI() {
       folderNames[physical] = t;
       saveToGitHub();
       b.textContent = t || physical;
-      // Восстанавливаем индикатор
       const newIndicator = document.createElement('span');
       newIndicator.className = 'indicator';
       b.appendChild(newIndicator);
@@ -409,6 +440,8 @@ function updateActiveFolder(folder) {
 
 function openFolder(folder) {
   currentFolder = folder;
+  visibleCount = FILES_PER_PAGE;          // сбрасываем количество
+  hiddenPerFolder[folder] = new Set();    // очищаем скрытые для этой папки
   updateActiveFolder(folder);
   renderFiles(folder);
 }
@@ -418,14 +451,29 @@ function openFolder(folder) {
 // ============================================================
 function renderFiles(folder) {
   filesDiv.innerHTML = '';
-  FILES.forEach((num) => {
+
+  const hiddenSet = hiddenPerFolder[folder] || new Set();
+  const visibleFiles = FILES.filter(num => !hiddenSet.has(num));
+
+  // Показываем только первые visibleCount (или меньше, если их меньше)
+  const toShow = Math.min(visibleCount, visibleFiles.length);
+
+  for (let i = 0; i < toShow; i++) {
+    const num = visibleFiles[i];
     const row = document.createElement('div');
     row.className = 'fileRow';
 
+    // Номер – двойной клик скрывает файл
     const n = document.createElement('div');
     n.className = 'num';
     n.textContent = num;
+    n.title = 'Двойной клик – скрыть файл';
+    n.ondblclick = (e) => {
+      e.stopPropagation(); // не даём событию дойти до строки
+      hideFile(folder, num);
+    };
 
+    // Имя файла
     const name = document.createElement('div');
     name.className = 'name';
     const fileName = titles[folder + num];
@@ -434,7 +482,9 @@ function renderFiles(folder) {
     row.appendChild(n);
     row.appendChild(name);
 
+    // Одинарный клик по строке – открыть файл
     row.onclick = () => openFile(folder, num);
+    // Двойной клик по строке – переименовать
     row.ondblclick = () => {
       const t = prompt("Название файла:", titles[folder + num] || '');
       if (t === null) return;
@@ -444,7 +494,29 @@ function renderFiles(folder) {
     };
 
     filesDiv.appendChild(row);
-  });
+  }
+
+  // Если остались ещё не скрытые файлы, которые не показаны – кнопка "+"
+  if (visibleCount < visibleFiles.length) {
+    const btn = document.createElement('div');
+    btn.className = 'loadMoreBtn';
+    btn.textContent = '➕';
+    btn.onclick = () => {
+      visibleCount += 1;   // добавляем ровно один
+      renderFiles(folder);
+    };
+    filesDiv.appendChild(btn);
+  }
+}
+
+// ============================================================
+// 🗑️ СКРЫТИЕ ФАЙЛА (двойной клик по номеру)
+// ============================================================
+function hideFile(folder, num) {
+  if (!hiddenPerFolder[folder]) hiddenPerFolder[folder] = new Set();
+  hiddenPerFolder[folder].add(num);
+  // visibleCount не меняем – просто перерисовываем, строка исчезнет
+  renderFiles(folder);
 }
 
 // ============================================================
@@ -508,7 +580,6 @@ function closeReader() {
 // ============================================================
 loadFromGitHub();
 
-// Автосохранение при закрытии
 window.addEventListener('beforeunload', () => {
   saveToGitHub(true);
 });
