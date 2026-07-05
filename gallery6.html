@@ -1,858 +1,722 @@
 ﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ЮД v2 — МУЗЕЙНЫЙ УЗЕЛ</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ЮД · Галерея</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<style>
-:root{
-    --gold:#d4a15f;
-    --gold-soft:#f0c988;
-    --copper-dark:#4a2411;
-    --copper-mid:#7d4722;
-    --copper-light:#b9793e;
-    --wood-1:#2f1d12;
-    --wood-2:#4a2d1b;
-    --wood-3:#160d08;
-    --ink:#120907;
-}
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #0d0a08;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            color: #e8d5b8;
+        }
 
-*{box-sizing:border-box;}
+        /* тёмный фон с мягким свечением */
+        body {
+            background:
+                radial-gradient(circle at 30% 40%, rgba(180, 130, 70, 0.08), transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(160, 110, 60, 0.06), transparent 45%),
+                #0d0a08;
+        }
 
-html,body{
-    margin:0;
-    padding:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#000;
-    font-family:Georgia,"Times New Roman",serif;
-    color:var(--gold-soft);
-}
+        /* шапка */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            background: rgba(20, 15, 12, 0.6);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(200, 160, 120, 0.15);
+            pointer-events: none;
+        }
+        .header span {
+            font-size: 18px;
+            letter-spacing: 2px;
+            color: #d9b382;
+            text-shadow: 0 0 12px rgba(200, 150, 80, 0.15);
+        }
+        .header .counter-info {
+            font-size: 14px;
+            color: #b89878;
+            letter-spacing: 0.5px;
+        }
 
-body{
-    background:
-        radial-gradient(circle at 50% 36%, rgba(180,115,55,.18), rgba(0,0,0,0) 34%),
-        radial-gradient(circle at 14% 78%, rgba(120,55,25,.20), rgba(0,0,0,0) 30%),
-        linear-gradient(135deg,#090504,#21120b 48%,#060302);
-}
+        /* основная сцена */
+        .scene {
+            position: fixed;
+            top: 52px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            gap: 0;
+            align-items: stretch;
+        }
 
-body:before{
-    content:"";
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    background:
-        linear-gradient(to bottom, rgba(255,190,100,.05), rgba(0,0,0,.40)),
-        radial-gradient(circle at center, rgba(0,0,0,0.02) 18%, rgba(0,0,0,.72) 100%);
-    z-index:1;
-}
+        /* левая область – картина */
+        .canvas-area {
+            flex: 1 1 68%;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 12px 16px 16px;
+            position: relative;
+        }
 
-body:after{
-    content:"";
-    position:fixed;
-    inset:-8%;
-    pointer-events:none;
-    background:
-        radial-gradient(circle at 30% 48%, rgba(245,190,110,.07), rgba(0,0,0,0) 23%),
-        radial-gradient(circle at 76% 44%, rgba(245,170,90,.05), rgba(0,0,0,0) 26%),
-        repeating-linear-gradient(90deg, rgba(255,210,140,.025) 0 1px, transparent 1px 88px);
-    filter:blur(8px);
-    opacity:.85;
-    animation:breath 16s ease-in-out infinite alternate;
-    z-index:1;
-}
+        .canvas-wrap {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(20, 16, 14, 0.35);
+            border-radius: 8px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(200,160,120,0.08);
+            position: relative;
+            overflow: hidden;
+        }
 
-@keyframes breath{
-    from{transform:translate(-1%,-.6%) scale(1);}
-    to{transform:translate(1%,.8%) scale(1.025);}
-}
+        #painting {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            user-select: none;
+            -webkit-user-drag: none;
+            cursor: zoom-in;
+            transition: filter 0.2s;
+            border-radius: 4px;
+        }
 
-.yud{
-    position:fixed;
-    top:2.2vh;
-    left:2.2vw;
-    z-index:10;
-    font-size:clamp(28px,3.2vw,58px);
-    color:var(--gold);
-    letter-spacing:.10em;
-    text-shadow:0 0 14px rgba(255,180,100,.22), 0 6px 18px rgba(0,0,0,.55);
-    pointer-events:none;
-}
+        /* навигация по бокам картины */
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 5;
+            background: rgba(30, 22, 18, 0.5);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(200, 160, 120, 0.2);
+            color: #d9b382;
+            font-size: 28px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .nav-arrow:hover {
+            background: rgba(50, 35, 28, 0.7);
+            border-color: #d9b382;
+        }
+        .nav-arrow.left {
+            left: 14px;
+        }
+        .nav-arrow.right {
+            right: 14px;
+        }
 
-.title{
-    position:fixed;
-    top:3vh;
-    width:100%;
-    z-index:9;
-    text-align:center;
-    font-size:clamp(20px,2.4vw,38px);
-    letter-spacing:clamp(3px,.58vw,8px);
-    color:rgba(242,198,122,.82);
-    text-shadow:0 0 14px rgba(255,190,100,.13), 0 5px 22px rgba(0,0,0,.70);
-    pointer-events:none;
-}
+        /* правая панель – текст */
+        .info-panel {
+            flex: 0 0 32%;
+            min-width: 260px;
+            padding: 20px 24px 20px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: rgba(18, 14, 12, 0.5);
+            backdrop-filter: blur(6px);
+            border-left: 1px solid rgba(200, 160, 120, 0.10);
+            overflow-y: auto;
+        }
 
-.scene{
-  position:absolute;
-  z-index:4;
-  inset:8vh 3.5vw 5vh 3.5vw;
-  display:flex;
-  gap:2vw;
-  align-items:center;
-  justify-content:center;
-}
+        .info-panel textarea {
+            width: 100%;
+            background: rgba(40, 30, 24, 0.3);
+            border: 1px solid rgba(200, 160, 120, 0.15);
+            border-radius: 6px;
+            padding: 10px 12px;
+            color: #e8d5b8;
+            font-family: 'Georgia', serif;
+            font-size: 16px;
+            resize: vertical;
+            outline: none;
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+        .info-panel textarea:focus {
+            border-color: rgba(200, 160, 120, 0.5);
+            box-shadow: 0 0 0 3px rgba(200, 160, 120, 0.08);
+        }
+        #workTitle {
+            font-size: 20px;
+            min-height: 52px;
+            line-height: 1.3;
+        }
+        #story {
+            flex: 1;
+            min-height: 120px;
+            font-size: 15px;
+            line-height: 1.5;
+        }
 
-/* Левая музейная зона — теперь главная */
-.frame-zone{
-  width:62%;
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-width:0;
-}
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-top: 4px;
+        }
+        .controls button {
+            background: rgba(50, 38, 30, 0.5);
+            border: 1px solid rgba(200, 160, 120, 0.2);
+            border-radius: 6px;
+            padding: 8px 14px;
+            color: #d9b382;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+            backdrop-filter: blur(4px);
+            flex: 0 0 auto;
+        }
+        .controls button:hover {
+            background: rgba(70, 55, 45, 0.6);
+            border-color: #d9b382;
+        }
+        .controls button:active {
+            transform: scale(0.97);
+        }
 
-/* Правая табличка — уже и не давит раму */
-.plaque-zone{
-  width:34%;
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-width:260px;
-}
+        .jump-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: auto;
+        }
+        .jump-group input {
+            width: 52px;
+            padding: 6px 4px;
+            background: rgba(40, 30, 24, 0.4);
+            border: 1px solid rgba(200, 160, 120, 0.2);
+            border-radius: 4px;
+            color: #e8d5b8;
+            font-size: 15px;
+            text-align: center;
+            font-family: inherit;
+            outline: none;
+        }
+        .jump-group input:focus {
+            border-color: rgba(200, 160, 120, 0.5);
+        }
+        .jump-group span {
+            font-size: 14px;
+            color: #b89878;
+        }
 
-.frame{
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+        .hint {
+            font-size: 12px;
+            color: #8a7a6a;
+            margin-top: 8px;
+            text-align: center;
+            line-height: 1.5;
+            border-top: 1px solid rgba(200, 160, 120, 0.06);
+            padding-top: 10px;
+        }
 
-  width:100%;
-  height:82vh;
-  max-width:100%;
+        /* лупа */
+        .zoom-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: none;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(6px);
+            cursor: grab;
+            overflow: hidden;
+        }
+        .zoom-layer.open {
+            display: block;
+        }
+        .zoom-layer.dragging {
+            cursor: grabbing;
+        }
 
-  padding:18px;
-  box-sizing:border-box;
-  overflow:hidden;
+        #zoomImg {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform-origin: center center;
+            user-select: none;
+            -webkit-user-drag: none;
+            max-width: none;
+            max-height: none;
+        }
 
-  background:
-    linear-gradient(135deg,var(--wood-2),var(--wood-1) 35%,#684027 55%,var(--wood-3)),
-    repeating-linear-gradient(45deg, rgba(255,210,140,.06) 0 3px, rgba(0,0,0,.12) 3px 9px);
+        .zoom-tools {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 110;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            padding: 10px 16px;
+            background: rgba(20, 16, 14, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            border: 1px solid rgba(200, 160, 120, 0.15);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        }
+        .zoom-tools button {
+            background: transparent;
+            border: 1px solid rgba(200, 160, 120, 0.2);
+            color: #d9b382;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.15s;
+            font-family: 'Arial', sans-serif;
+        }
+        .zoom-tools button:hover {
+            background: rgba(200, 160, 120, 0.15);
+        }
+        #zoomValue {
+            min-width: 48px;
+            text-align: center;
+            color: #e8d5b8;
+            font-size: 14px;
+            font-family: 'Arial', sans-serif;
+        }
+        .zoom-close-hint {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 105;
+            color: rgba(200, 180, 160, 0.3);
+            font-size: 13px;
+            font-family: 'Arial', sans-serif;
+            letter-spacing: 0.5px;
+            pointer-events: none;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        }
 
-  border:3px solid #1c100a;
+        .error {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 200;
+            padding: 8px 18px;
+            border-radius: 40px;
+            background: rgba(100, 60, 30, 0.9);
+            color: #f2e0c0;
+            font-size: 14px;
+            display: none;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(200, 160, 120, 0.2);
+            font-family: 'Arial', sans-serif;
+        }
 
-  box-shadow:
-    0 0 0 2px #5b3823 inset,
-    0 0 0 7px #23150e inset,
-    0 20px 54px rgba(0,0,0,.62),
-    0 0 34px rgba(205,130,62,.08);
-}
+        /* адаптив */
+        @media (max-width: 820px) {
+            .scene {
+                flex-direction: column;
+                top: 52px;
+            }
+            .canvas-area {
+                flex: 0 0 55vh;
+                padding: 10px;
+            }
+            .canvas-wrap {
+                border-radius: 6px;
+            }
+            .nav-arrow {
+                width: 36px;
+                height: 36px;
+                font-size: 22px;
+            }
+            .info-panel {
+                flex: 1;
+                min-width: unset;
+                border-left: none;
+                border-top: 1px solid rgba(200, 160, 120, 0.10);
+                padding: 14px 16px;
+            }
+            #workTitle {
+                min-height: 40px;
+                font-size: 18px;
+            }
+            #story {
+                min-height: 80px;
+                font-size: 14px;
+            }
+            .controls {
+                flex-wrap: wrap;
+            }
+            .jump-group {
+                margin-left: 0;
+                width: 100%;
+                justify-content: flex-end;
+            }
+            .zoom-tools {
+                bottom: 16px;
+                padding: 8px 12px;
+                flex-wrap: wrap;
+                justify-content: center;
+                border-radius: 30px;
+                max-width: 90%;
+            }
+            .zoom-close-hint {
+                display: none;
+            }
+        }
 
-.frame:before{
-  content:"";
-  position:absolute;
-  inset:9px;
-  border:2px groove rgba(155,92,44,.62);
-  pointer-events:none;
-}
-
-.frame:after{
-  content:"";
-  position:absolute;
-  inset:17px;
-  border:1px solid rgba(255,202,126,.10);
-  pointer-events:none;
-}
-
-.painting-wrap{
-  position:relative;
-  z-index:1;
-
-  width:100%;
-  height:100%;
-
-  background:#0e0a08;
-  border:2px solid rgba(60,35,20,.85);
-  box-shadow:inset 0 0 18px rgba(0,0,0,.72);
-  box-sizing:border-box;
-  overflow:hidden;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-#painting{
-  display:block;
-
-  max-width:100%;
-  max-height:100%;
-
-  width:auto;
-  height:auto;
-
-  object-fit:contain;
-
-  user-select:none;
-  -webkit-user-drag:none;
-  cursor:zoom-in;
-}
-/* Правая медная пластина */
-.plaque{
-  position:relative;
-  width:100%;
-  max-width:430px;
-  max-height:82vh;
-  padding:1.4rem 1.4rem 1.1rem;
-  box-sizing:border-box;
-  color:#f2c67a;
-
-  background:
-    linear-gradient(145deg, rgba(64,34,15,.96), rgba(123,68,31,.93) 45%, rgba(84,45,21,.96)),
-    radial-gradient(circle at 18% 16%, rgba(255,190,110,.10), rgba(0,0,0,0));
-
-  border:2px solid rgba(189,126,70,.45);
-
-  box-shadow:
-    0 0 0 1px rgba(255,190,120,.12) inset,
-    0 18px 44px rgba(0,0,0,.38),
-    inset 0 0 34px rgba(255,180,95,.05);
-}
-
-.screw{
-  position:absolute;
-  width:13px;
-  height:13px;
-  border-radius:50%;
-  background:radial-gradient(circle at 35% 35%, #ba824c, #593015 70%);
-  border:1px solid rgba(255,200,120,.20);
-  box-shadow:inset 0 0 3px rgba(0,0,0,.48);
-}
-
-.s1{top:13px;left:13px;}
-.s2{top:13px;right:13px;}
-.s3{bottom:13px;left:13px;}
-.s4{bottom:13px;right:13px;}
-
-#workTitle{
-  width:100%;
-  min-height:48px;
-  resize:vertical;
-  border:1px solid rgba(255,200,130,.18);
-  border-radius:4px;
-  padding:9px;
-  box-sizing:border-box;
-  background:rgba(38,18,8,.34);
-  color:#f3cd89;
-  font-family:Georgia,"Times New Roman",serif;
-  font-size:clamp(18px,1.45vw,28px);
-  text-align:center;
-  outline:none;
-  line-height:1.1;
-}
-
-#story{
-  margin-top:12px;
-  width:100%;
-  height:26vh;
-  min-height:120px;
-  resize:vertical;
-  border:1px solid rgba(255,200,130,.18);
-  border-radius:4px;
-  padding:12px;
-  box-sizing:border-box;
-  background:rgba(38,18,8,.30);
-  color:#e6ba76;
-  font-family:Georgia,"Times New Roman",serif;
-  font-size:clamp(15px,1vw,20px);
-  line-height:1.35;
-  outline:none;
-}
-
-.controls{
-  margin-top:12px;
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:8px;
-}
-
-button{
-  border:1px solid rgba(218,155,88,.36);
-  border-radius:4px;
-  padding:9px 8px;
-  cursor:pointer;
-  font-family:Georgia,"Times New Roman",serif;
-  color:#f0c37f;
-  background:linear-gradient(145deg, rgba(69,38,18,.96), rgba(122,70,34,.92), rgba(61,34,17,.96));
-  box-shadow:0 6px 18px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,220,160,.08);
-
-  outline:none;
-}
-
-button:focus{
-  outline:none;
-  box-shadow:none;
-}
-button:hover{filter:brightness(1.12);}
-button:active{transform:translateY(1px);}
-
-.save{grid-column:auto;font-weight:bold;}
-.reset{grid-column:auto;}
-
-.counter{
-  margin-top:12px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  color:#f0c988;
-  font-size:16px;
-  letter-spacing:1px;
-}
-
-.counter input{
-  width:64px;
-  text-align:center;
-  padding:6px;
-  border-radius:4px;
-  border:1px solid rgba(255,200,130,.22);
-  background:rgba(38,18,8,.34);
-  color:#f3cd89;
-  font-family:Georgia,"Times New Roman",serif;
-  font-size:16px;
-}
-
-.hint{
-  margin-top:10px;
-  text-align:center;
-  color:rgba(240,201,136,.56);
-  font-size:11px;
-  line-height:1.35;
-}
-
-@media(max-width:980px){
-  html,body{overflow:auto;}
-
-  .scene{
-    position:relative;
-    inset:auto;
-    min-height:100vh;
-    padding:10vh 4vw 6vh;
-    flex-direction:column;
-    align-items:center;
-  }
-
-  .frame-zone,.plaque-zone{
-    width:100%;
-    min-width:0;
-  }
-
-  .frame{
-    width:92vw;
-    max-height:58vh;
-  }
-
-  .plaque{
-    max-width:92vw;
-    max-height:none;
-  }
-
-  .controls{
-    grid-template-columns:1fr 1fr;
-  }
-}
-
-/* ЛУПА */
-.zoomLayer{
-    position:fixed;
-    inset:0;
-    display:none;
-    z-index:100;
-    overflow:hidden;
-    cursor:grab;
-    background:
-        radial-gradient(circle at 50% 34%, rgba(160,95,45,.20), transparent 34%),
-        rgba(4,2,1,.95);
-}
-.zoomLayer.open{display:block;}
-.zoomLayer.dragging{cursor:grabbing;}
-
-#zoomImg{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform-origin:center center;
-    user-select:none;
-    -webkit-user-drag:none;
-    max-width:none;
-    max-height:none;
-}
-
-.zoomTools{
-    position:fixed;
-    right:24px;
-    top:20px;
-    z-index:115;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    padding:8px;
-    border-radius:6px;
-    background:rgba(35,18,9,.78);
-    border:1px solid rgba(218,155,88,.30);
-    box-shadow:0 10px 30px rgba(0,0,0,.45);
-}
-
-.zoomTools button{
-    min-width:42px;
-    padding:8px 10px;
-    border-radius:4px;
-    font-family:Arial,sans-serif;
-}
-
-#zoomValue{
-    min-width:58px;
-    color:#f3cd89;
-    text-align:center;
-    font-family:Arial,sans-serif;
-    font-size:14px;
-    font-weight:bold;
-}
-
-.zoomClose{
-    position:fixed;
-    left:50%;
-    bottom:22px;
-    transform:translateX(-50%);
-    z-index:110;
-    color:rgba(240,201,136,.72);
-    background:rgba(35,18,9,.60);
-    border:1px solid rgba(218,155,88,.22);
-    border-radius:999px;
-    padding:10px 16px;
-    font-family:Arial,sans-serif;
-    font-size:14px;
-    pointer-events:none;
-}
-
-.error{
-    position:fixed;
-    left:50%;
-    bottom:3vh;
-    transform:translateX(-50%);
-    z-index:200;
-    padding:10px 16px;
-    border-radius:999px;
-    background:rgba(120,65,30,.90);
-    color:#fff2dc;
-    font-family:Arial,sans-serif;
-    font-size:13px;
-    display:none;
-}
-
-@media(max-width:980px){
-    html,body{overflow:auto;}
-    .scene{
-        position:relative;
-        inset:auto;
-        min-height:100vh;
-        padding:10vh 4vw 6vh;
-        flex-direction:column;
-        align-items:center;
-    }
-    .frame-zone,.plaque-zone{
-        width:100%;
-    }
-    #painting{
-        max-width:calc(92vw - 56px);
-        max-height:58vh;
-    }
-    .plaque{
-        max-height:none;
-    }
-    .controls{
-        grid-template-columns:1fr 1fr;
-    }
-    .save,.reset{
-        grid-column:1/3;
-    }
-}
-</style>
+        @media (max-width: 480px) {
+            .header span {
+                font-size: 14px;
+            }
+            .canvas-area {
+                flex: 0 0 40vh;
+                padding: 6px;
+            }
+            .nav-arrow {
+                width: 30px;
+                height: 30px;
+                font-size: 18px;
+            }
+            .nav-arrow.left { left: 6px; }
+            .nav-arrow.right { right: 6px; }
+            .info-panel {
+                padding: 10px 12px;
+            }
+            .controls button {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-<div class="yud"></div>
-<div class="title">Юдов Василий Михайлович КАТАЛОГ</div>
 
-<main class="scene">
-    <section class="frame-zone">
-        <div class="frame" id="frame">
-            <div class="painting-wrap">
-                <img id="painting" alt="Работа 001">
+    <!-- шапка -->
+    <header class="header">
+        <span>ЮД · Галерея</span>
+        <span class="counter-info" id="counterDisplay">1 / 200</span>
+    </header>
+
+    <!-- основная область -->
+    <main class="scene">
+        <!-- картина + стрелки -->
+        <section class="canvas-area">
+            <div class="canvas-wrap" id="canvasWrap">
+                <img id="painting" alt="Работа" src="">
+                <div class="nav-arrow left" id="prevBtn">◀</div>
+                <div class="nav-arrow right" id="nextBtn">▶</div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="plaque-zone">
-        <div class="plaque">
-            <div class="screw s1"></div>
-            <div class="screw s2"></div>
-            <div class="screw s3"></div>
-            <div class="screw s4"></div>
-
+        <!-- правая панель -->
+        <section class="info-panel">
             <textarea id="workTitle" placeholder="Название работы"></textarea>
-            <textarea id="story" placeholder="История создания, состояние, автор, заметки..."></textarea>
+            <textarea id="story" placeholder="Описание, история, состояние…"></textarea>
 
             <div class="controls">
-                <button id="prevBtn">← назад</button>
-                <button id="nextBtn">дальше →</button>
-                <button id="saveBtn" class="save">Сохранить текст</button>
-                <button id="resetBtn" class="reset">Сбросить текст</button>
+                <button id="saveBtn">💾 Сохранить</button>
+                <button id="resetBtn">↺ Сбросить</button>
+                <div class="jump-group">
+                    <span>№</span>
+                    <input id="jumpInput" type="number" min="1" max="200" value="1">
+                    <button id="jumpBtn">Перейти</button>
+                </div>
             </div>
-
-            <div class="counter">
-                <span>№</span>
-                <input id="jumpInput" type="number" min="1" max="200" value="1">
-                <button id="jumpBtn" type="button">перейти</button>
-                <span>/ 200</span>
-            </div>
-
             <div class="hint">
-                Папка: <b>UD_v</b>. Файлы ищутся как 001, 01 и 1 с расширениями jpg/png/webp.<br>
-                Клик по работе — лупа 25–300%. Текст сохраняется отдельно для каждой работы.
+                ← → или колёсико мыши · клик по картине — лупа · текст сохраняется автоматически
             </div>
+        </section>
+    </main>
+
+    <!-- лупа -->
+    <div class="zoom-layer" id="zoomLayer">
+        <img id="zoomImg" alt="">
+        <div class="zoom-tools">
+            <button id="zoomOutBtn">−</button>
+            <span id="zoomValue">25%</span>
+            <button id="zoomInBtn">+</button>
+            <button id="zoomHomeBtn">25%</button>
+            <button id="zoomFullBtn">100%</button>
+            <button id="zoomCloseBtn">✕</button>
         </div>
-    </section>
-</main>
-
-<div class="zoomLayer" id="zoomLayer">
-    <img id="zoomImg" alt="">
-    <div class="zoomTools">
-        <button id="zoomOutBtn" type="button">−</button>
-        <span id="zoomValue">25%</span>
-        <button id="zoomInBtn" type="button">+</button>
-        <button id="zoomHomeBtn" type="button">25%</button>
-        <button id="zoomFullBtn" type="button">100%</button>
-        <button id="zoomCloseBtn" type="button">закрыть</button>
+        <div class="zoom-close-hint">колесо — масштаб · тяни — двигай · Esc — закрыть</div>
     </div>
-    <div class="zoomClose">колесо мыши — масштаб • тянуть картину — двигать • 25% — исходное • Esc — назад</div>
-</div>
 
-<div class="error" id="errorBox"></div>
+    <div class="error" id="errorBox"></div>
 
-<script>
-const TOTAL = 200;
-const FOLDER = "UD_v";
-const STORAGE_PREFIX = "yud_v2_museum_node_";
-const EXTENSIONS = ["jpg","JPG","jpeg","JPEG","png","PNG","webp","WEBP"];
+    <script>
+        (function() {
+            const TOTAL = 200;
+            const FOLDER = "UD_v";
+            const STORAGE_PREFIX = "yud_v3_";
+            const EXTENSIONS = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG", "webp", "WEBP"];
 
-let index = 1;
+            let currentIndex = 1;
 
-const painting = document.getElementById("painting");
-const frameEl = document.getElementById("frame");
-const workTitle = document.getElementById("workTitle");
-const story = document.getElementById("story");
-const errorBox = document.getElementById("errorBox");
+            const painting = document.getElementById('painting');
+            const workTitle = document.getElementById('workTitle');
+            const story = document.getElementById('story');
+            const errorBox = document.getElementById('errorBox');
+            const counterDisplay = document.getElementById('counterDisplay');
 
-const prevBtn = document.getElementById("prevBtn");
-const nextBtn = document.getElementById("nextBtn");
-const saveBtn = document.getElementById("saveBtn");
-const resetBtn = document.getElementById("resetBtn");
-const jumpInput = document.getElementById("jumpInput");
-const jumpBtn = document.getElementById("jumpBtn");
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const jumpInput = document.getElementById('jumpInput');
+            const jumpBtn = document.getElementById('jumpBtn');
 
-const zoomLayer = document.getElementById("zoomLayer");
-const zoomImg = document.getElementById("zoomImg");
-const zoomOutBtn = document.getElementById("zoomOutBtn");
-const zoomInBtn = document.getElementById("zoomInBtn");
-const zoomHomeBtn = document.getElementById("zoomHomeBtn");
-const zoomFullBtn = document.getElementById("zoomFullBtn");
-const zoomCloseBtn = document.getElementById("zoomCloseBtn");
-const zoomValue = document.getElementById("zoomValue");
+            // лупа
+            const zoomLayer = document.getElementById('zoomLayer');
+            const zoomImg = document.getElementById('zoomImg');
+            const zoomOutBtn = document.getElementById('zoomOutBtn');
+            const zoomInBtn = document.getElementById('zoomInBtn');
+            const zoomHomeBtn = document.getElementById('zoomHomeBtn');
+            const zoomFullBtn = document.getElementById('zoomFullBtn');
+            const zoomCloseBtn = document.getElementById('zoomCloseBtn');
+            const zoomValue = document.getElementById('zoomValue');
 
-function pad2(n){ return String(n).padStart(2,"0"); }
-function pad3(n){ return String(n).padStart(3,"0"); }
+            // ---------- вспомогательные ----------
+            function pad3(n) { return String(n).padStart(3, '0'); }
 
-function candidates(num){
-    const list = [];
-    const name = pad3(num);
+            function showError(msg) {
+                errorBox.textContent = msg;
+                errorBox.style.display = 'block';
+                clearTimeout(errorBox._timer);
+                errorBox._timer = setTimeout(() => errorBox.style.display = 'none', 2800);
+            }
 
-    EXTENSIONS.forEach(function(ext){
-        list.push(FOLDER + "/" + name + "." + ext);
-    });
+            function storageKey(kind) {
+                return STORAGE_PREFIX + kind + '_' + pad3(currentIndex);
+            }
 
-    return list;
-}
+            // ---------- загрузка изображения ----------
+            function tryLoad(list, pos) {
+                pos = pos || 0;
+                if (pos >= list.length) {
+                    painting.removeAttribute('src');
+                    showError('Файл не найден для №' + pad3(currentIndex));
+                    return;
+                }
+                const path = list[pos];
+                const img = new Image();
+                img.onload = function() {
+                    painting.src = path;
+                    painting.alt = 'Работа ' + pad3(currentIndex);
+                };
+                img.onerror = function() {
+                    tryLoad(list, pos + 1);
+                };
+                img.src = path;
+            }
 
-function showError(text){
-    errorBox.textContent = text;
-    errorBox.style.display = "block";
-    clearTimeout(showError.timer);
-    showError.timer = setTimeout(function(){ errorBox.style.display = "none"; }, 3000);
-}
+            function loadImage(num) {
+                const list = EXTENSIONS.map(ext => FOLDER + '/' + pad3(num) + '.' + ext);
+                tryLoad(list, 0);
+            }
 
-function storageKey(kind){
-    return STORAGE_PREFIX + kind + "_" + pad3(index);
-}
+            // ---------- текст ----------
+            function loadText() {
+                workTitle.value = localStorage.getItem(storageKey('title')) || '';
+                story.value = localStorage.getItem(storageKey('story')) || '';
+            }
 
-function loadText(){
-    workTitle.value = localStorage.getItem(storageKey("title")) || "";
-    story.value = localStorage.getItem(storageKey("story")) || "";
-}
+            function saveText() {
+                localStorage.setItem(storageKey('title'), workTitle.value);
+                localStorage.setItem(storageKey('story'), story.value);
+                showError('Сохранено для №' + pad3(currentIndex));
+            }
 
-function saveText(){
-    localStorage.setItem(storageKey("title"), workTitle.value);
-    localStorage.setItem(storageKey("story"), story.value);
-    showError("Текст сохранён для работы " + pad3(index));
-}
+            function resetText() {
+                workTitle.value = '';
+                story.value = '';
+                localStorage.removeItem(storageKey('title'));
+                localStorage.removeItem(storageKey('story'));
+                showError('Текст сброшен для №' + pad3(currentIndex));
+            }
 
-function resetText(){
-    workTitle.value = "";
-    story.value = "";
-    localStorage.removeItem(storageKey("title"));
-    localStorage.removeItem(storageKey("story"));
-    showError("Текст сброшен для работы " + pad3(index));
-}
+            // ---------- навигация ----------
+            function goTo(num) {
+                num = parseInt(num, 10);
+                if (isNaN(num)) num = currentIndex;
+                if (num < 1) num = TOTAL;
+                if (num > TOTAL) num = 1;
+                currentIndex = num;
+                jumpInput.value = currentIndex;
+                counterDisplay.textContent = currentIndex + ' / ' + TOTAL;
+                loadText();
+                loadImage(currentIndex);
+            }
 
-function setFrameByRatio(){
-  frameEl.style.aspectRatio = "";
-}
+            function next() { goTo(currentIndex + 1); }
+            function prev() { goTo(currentIndex - 1); }
 
-function tryLoad(list, pos){
-    pos = pos || 0;
+            // ---------- события ----------
+            prevBtn.onclick = prev;
+            nextBtn.onclick = next;
+            saveBtn.onclick = saveText;
+            resetBtn.onclick = resetText;
 
-    if(pos >= list.length){
-        painting.removeAttribute("src");
-        showError("Не найден файл для работы " + pad3(index) + " в папке " + FOLDER);
-        return;
-    }
+            // автосохранение при вводе
+            workTitle.addEventListener('input', saveText);
+            story.addEventListener('input', saveText);
+            window.addEventListener('beforeunload', saveText);
 
-    const path = list[pos];
-    const probe = new Image();
+            jumpBtn.onclick = function() {
+                const val = parseInt(jumpInput.value, 10);
+                if (!isNaN(val)) goTo(val);
+            };
+            jumpInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') jumpBtn.click();
+            });
 
-    probe.onload = function(){
-        painting.src = path;
-        painting.alt = "Работа " + pad3(index);
-        painting.onload = setFrameByRatio;
-    };
+            // клавиши
+            document.addEventListener('keydown', function(e) {
+                if (zoomLayer.classList.contains('open')) {
+                    if (e.key === 'Escape') closeZoom();
+                    return;
+                }
+                if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+                if (e.key === 'ArrowRight') next();
+                if (e.key === 'ArrowLeft') prev();
+            });
 
-    probe.onerror = function(){
-        tryLoad(list, pos + 1);
-    };
+            // колёсико
+            document.addEventListener('wheel', function(e) {
+                if (zoomLayer.classList.contains('open')) return;
+                if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+                if (Math.abs(e.deltaY) < 8) return;
+                e.preventDefault();
+                if (e.deltaY > 0) next();
+                else prev();
+            }, { passive: false });
 
-    probe.src = path;
-}
+            // ---------- лупа ----------
+            let dragging = false;
+            let startX = 0, startY = 0;
+            let imgX = 0, imgY = 0;
+            let zoomScale = 0.25;
+            const ZOOM_MIN = 0.25, ZOOM_MAX = 3, ZOOM_STEP = 0.10;
 
-function show(num){
-    num = parseInt(num,10);
-    if(isNaN(num)) num = index;
+            function clampZoom(v) { return Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, v)); }
 
-    if(num < 1) num = TOTAL;
-    if(num > TOTAL) num = 1;
+            function setZoomTransform() {
+                zoomImg.style.transform = 'translate(-50%, -50%) translate(' + imgX + 'px,' + imgY + 'px) scale(' + zoomScale + ')';
+                zoomValue.textContent = Math.round(zoomScale * 100) + '%';
+            }
 
-    index = num;
-    jumpInput.value = index;
-    loadText();
-    tryLoad(candidates(index),0);
-}
+            function setZoom(v) {
+                zoomScale = clampZoom(v);
+                setZoomTransform();
+            }
 
-function next(){ show(index + 1); }
-function prev(){ show(index - 1); }
+            function changeZoom(delta) { setZoom(zoomScale + delta); }
+            function homeZoom() { zoomScale = 0.25; imgX = 0; imgY = 0; setZoomTransform(); }
+            function fullZoom() { zoomScale = 1; imgX = 0; imgY = 0; setZoomTransform(); }
 
-function jump(){
-    let n = parseInt(jumpInput.value,10);
-    if(isNaN(n)) n = index;
-    if(n < 1) n = 1;
-    if(n > TOTAL) n = TOTAL;
-    show(n);
-}
+            function openZoom() {
+                if (!painting.src) return;
+                zoomImg.src = painting.src;
+                zoomLayer.classList.add('open');
+                homeZoom();
+            }
 
-prevBtn.onclick = prev;
-nextBtn.onclick = next;
-saveBtn.onclick = saveText;
-resetBtn.onclick = resetText;
-/* NEX V4 AUTOSAVE */
-workTitle.addEventListener("input", saveText);
-story.addEventListener("input", saveText);
-window.addEventListener("beforeunload", saveText);
-jumpBtn.onclick = jump;
+            function closeZoom() {
+                zoomLayer.classList.remove('open');
+                dragging = false;
+                zoomLayer.classList.remove('dragging');
+                homeZoom();
+            }
 
-jumpInput.addEventListener("keydown", function(e){
-    if(e.key === "Enter") jump();
-});
+            painting.onclick = openZoom;
 
-document.addEventListener("keydown", function(e){
-    if(zoomLayer.classList.contains("open")){
-        if(e.key === "Escape") closeZoom();
-        return;
-    }
+            zoomInBtn.onclick = function(e) { e.stopPropagation(); changeZoom(ZOOM_STEP); };
+            zoomOutBtn.onclick = function(e) { e.stopPropagation(); changeZoom(-ZOOM_STEP); };
+            zoomHomeBtn.onclick = function(e) { e.stopPropagation(); homeZoom(); };
+            zoomFullBtn.onclick = function(e) { e.stopPropagation(); fullZoom(); };
+            zoomCloseBtn.onclick = function(e) { e.stopPropagation(); closeZoom(); };
 
-    if(document.activeElement === workTitle || document.activeElement === story || document.activeElement === jumpInput) return;
+            zoomLayer.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                changeZoom(e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP);
+            }, { passive: false });
 
-    if(e.key === "ArrowRight") next();
-    if(e.key === "ArrowLeft") prev();
-});
+            zoomLayer.addEventListener('mousedown', function(e) {
+                if (e.target.closest('.zoom-tools')) return;
+                if (e.target !== zoomImg) { closeZoom(); return; }
+                dragging = true;
+                zoomLayer.classList.add('dragging');
+                startX = e.clientX - imgX;
+                startY = e.clientY - imgY;
+            });
 
-document.addEventListener("wheel", function(e){
-    if(zoomLayer.classList.contains("open")) return;
-    if(document.activeElement === workTitle || document.activeElement === story || document.activeElement === jumpInput) return;
-    if(Math.abs(e.deltaY) < 8) return;
+            window.addEventListener('mousemove', function(e) {
+                if (!dragging) return;
+                imgX = e.clientX - startX;
+                imgY = e.clientY - startY;
+                setZoomTransform();
+            });
+            window.addEventListener('mouseup', function() {
+                dragging = false;
+                zoomLayer.classList.remove('dragging');
+            });
 
-    if(e.deltaY > 0) next();
-    else prev();
-}, {passive:true});
+            zoomLayer.addEventListener('touchstart', function(e) {
+                if (e.target.closest('.zoom-tools')) return;
+                if (e.target !== zoomImg) { closeZoom(); return; }
+                const t = e.touches[0];
+                dragging = true;
+                startX = t.clientX - imgX;
+                startY = t.clientY - imgY;
+            }, { passive: true });
+            zoomLayer.addEventListener('touchmove', function(e) {
+                if (!dragging) return;
+                const t = e.touches[0];
+                imgX = t.clientX - startX;
+                imgY = t.clientY - startY;
+                setZoomTransform();
+            }, { passive: true });
+            zoomLayer.addEventListener('touchend', function() {
+                dragging = false;
+            }, { passive: true });
 
-/* ЛУПА */
-let dragging = false;
-let startX = 0;
-let startY = 0;
-let imgX = 0;
-let imgY = 0;
-let zoomScale = 0.25;
-
-const ZOOM_MIN = 0.25;
-const ZOOM_MAX = 3;
-const ZOOM_STEP = 0.10;
-
-function clampZoom(value){
-    return Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, value));
-}
-
-function updateZoomValue(){
-    zoomValue.textContent = Math.round(zoomScale * 100) + "%";
-}
-
-function setZoomTransform(){
-    zoomImg.style.transform = "translate(-50%, -50%) translate(" + imgX + "px," + imgY + "px) scale(" + zoomScale + ")";
-    updateZoomValue();
-}
-
-function setZoom(value){
-    zoomScale = clampZoom(value);
-    setZoomTransform();
-}
-
-function changeZoom(delta){
-    setZoom(zoomScale + delta);
-}
-
-function homeZoom(){
-    zoomScale = 0.25;
-    imgX = 0;
-    imgY = 0;
-    setZoomTransform();
-}
-
-function fullZoom(){
-    zoomScale = 1;
-    imgX = 0;
-    imgY = 0;
-    setZoomTransform();
-}
-
-function openZoom(){
-    if(!painting.src) return;
-    zoomImg.src = painting.src;
-    zoomLayer.classList.add("open");
-    homeZoom();
-}
-
-function closeZoom(){
-    zoomLayer.classList.remove("open");
-    dragging = false;
-    zoomLayer.classList.remove("dragging");
-    homeZoom();
-}
-
-painting.onclick = openZoom;
-
-zoomInBtn.onclick = function(e){
-    e.stopPropagation();
-    changeZoom(ZOOM_STEP);
-};
-
-zoomOutBtn.onclick = function(e){
-    e.stopPropagation();
-    changeZoom(-ZOOM_STEP);
-};
-
-zoomHomeBtn.onclick = function(e){
-    e.stopPropagation();
-    homeZoom();
-};
-
-zoomFullBtn.onclick = function(e){
-    e.stopPropagation();
-    fullZoom();
-};
-
-zoomCloseBtn.onclick = function(e){
-    e.stopPropagation();
-    closeZoom();
-};
-
-zoomLayer.addEventListener("wheel", function(e){
-    e.preventDefault();
-    if(e.deltaY < 0) changeZoom(ZOOM_STEP);
-    else changeZoom(-ZOOM_STEP);
-}, {passive:false});
-
-zoomLayer.addEventListener("mousedown", function(e){
-    if(e.target.closest(".zoomTools")) return;
-
-    if(e.target !== zoomImg){
-        closeZoom();
-        return;
-    }
-
-    dragging = true;
-    zoomLayer.classList.add("dragging");
-    startX = e.clientX - imgX;
-    startY = e.clientY - imgY;
-});
-
-window.addEventListener("mousemove", function(e){
-    if(!dragging) return;
-    imgX = e.clientX - startX;
-    imgY = e.clientY - startY;
-    setZoomTransform();
-});
-
-window.addEventListener("mouseup", function(){
-    dragging = false;
-    zoomLayer.classList.remove("dragging");
-});
-
-zoomLayer.addEventListener("touchstart", function(e){
-    if(e.target.closest(".zoomTools")) return;
-
-    if(e.target !== zoomImg){
-        closeZoom();
-        return;
-    }
-
-    dragging = true;
-    const t = e.touches[0];
-    startX = t.clientX - imgX;
-    startY = t.clientY - imgY;
-}, {passive:true});
-
-zoomLayer.addEventListener("touchmove", function(e){
-    if(!dragging) return;
-    const t = e.touches[0];
-    imgX = t.clientX - startX;
-    imgY = t.clientY - startY;
-    setZoomTransform();
-}, {passive:true});
-
-zoomLayer.addEventListener("touchend", function(){
-    dragging = false;
-}, {passive:true});
-
-show(1);
-</script>
+            // старт
+            goTo(1);
+        })();
+    </script>
 </body>
 </html>
