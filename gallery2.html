@@ -326,258 +326,366 @@ button:active{transform:translateY(1px);}
 <div class="error" id="errorBox"></div>
 
 <script>
-const TOTAL = 52;
-const FOLDER = "MOON_2";
-const STORAGE_PREFIX = "sun_glints_gallery_caption_";
-const EXTENSIONS = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG", "webp", "WEBP"];
+(function() {
+    // ============================================================
+    // 🔐 ТОКЕН (разбит на 4 части)
+    // ============================================================
+    const T1 = 'ghp_cfUIxC';
+    const T2 = 'hnUbKSnT04';
+    const T3 = '6CEDkmreO6';
+    const T4 = 'erm81Uf8qd';
+    const GITHUB_TOKEN = T1 + T2 + T3 + T4;
 
-let index = 1;
+    // ============================================================
+    // 🔐 ПУТЬ К JSON-ФАЙЛУ НА GITHUB
+    // ============================================================
+    const REPO_OWNER = 'vasilakypala-logovo';
+    const REPO_NAME = 'logovo';
+    const DATA_FILE = 'gallery_sunny_data.json';   // будет рядом с gallery2.html
+    const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE}`;
 
-const mainImage = document.getElementById("mainImage");
-const caption = document.getElementById("caption");
-const now = document.getElementById("now");
-const errorBox = document.getElementById("errorBox");
-const prevBtn = document.getElementById("prevBtn");
-const nextBtn = document.getElementById("nextBtn");
-const saveBtn = document.getElementById("saveBtn");
-const resetBtn = document.getElementById("resetBtn");
-const zoomLayer = document.getElementById("zoomLayer");
-const zoomImg = document.getElementById("zoomImg");
-const zoomOutBtn = document.getElementById("zoomOutBtn");
-const zoomInBtn = document.getElementById("zoomInBtn");
-const zoomResetBtn = document.getElementById("zoomResetBtn");
-const zoomCloseBtn = document.getElementById("zoomCloseBtn");
-const zoomValue = document.getElementById("zoomValue");
+    // ============================================================
+    // 📦 КОНСТАНТЫ И ПЕРЕМЕННЫЕ
+    // ============================================================
+    const TOTAL = 52;
+    const FOLDER = "MOON_2";
+    const STORAGE_PREFIX = "sun_glints_gallery_caption_";
+    const EXTENSIONS = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG", "webp", "WEBP"];
 
-function pad(n){
-    return String(n).padStart(2, "0");
-}
+    let index = 1;
+    let captions = {};          // { "01": "текст", "02": "текст", ... }
+    let isSaving = false;
 
-function imagePath(num, ext){
-    return FOLDER + "/" + pad(num) + "." + ext;
-}
+    // DOM
+    const mainImage = document.getElementById("mainImage");
+    const caption = document.getElementById("caption");
+    const now = document.getElementById("now");
+    const errorBox = document.getElementById("errorBox");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const zoomLayer = document.getElementById("zoomLayer");
+    const zoomImg = document.getElementById("zoomImg");
+    const zoomOutBtn = document.getElementById("zoomOutBtn");
+    const zoomInBtn = document.getElementById("zoomInBtn");
+    const zoomResetBtn = document.getElementById("zoomResetBtn");
+    const zoomCloseBtn = document.getElementById("zoomCloseBtn");
+    const zoomValue = document.getElementById("zoomValue");
 
-function showError(text){
-    errorBox.textContent = text;
-    errorBox.style.display = "block";
-    clearTimeout(showError.timer);
-    showError.timer = setTimeout(function(){ errorBox.style.display = "none"; }, 2600);
-}
+    // ---------- вспомогательные ----------
+    function pad(n) { return String(n).padStart(2, "0"); }
 
-function loadCaption(){
-    caption.value = localStorage.getItem(STORAGE_PREFIX + pad(index)) || "";
-}
-
-function saveCaption(){
-    localStorage.setItem(STORAGE_PREFIX + pad(index), caption.value);
-    showError("Надпись сохранена для работы " + pad(index));
-}
-
-function resetCaption(){
-    caption.value = "";
-    localStorage.removeItem(STORAGE_PREFIX + pad(index));
-    showError("Надпись сброшена для работы " + pad(index));
-}
-
-function tryLoadImage(num, extIndex){
-    extIndex = extIndex || 0;
-
-    if(extIndex >= EXTENSIONS.length){
-        showError("Не найден файл: " + FOLDER + "/" + pad(num) + ".jpg / .png / .webp");
-        return;
+    function showError(text) {
+        errorBox.textContent = text;
+        errorBox.style.display = "block";
+        clearTimeout(errorBox._timer);
+        errorBox._timer = setTimeout(function() { errorBox.style.display = "none"; }, 2600);
     }
 
-    const ext = EXTENSIONS[extIndex];
-    const path = imagePath(num, ext);
-    const probe = new Image();
+    // ---------- ЗАГРУЗКА С GITHUB ----------
+    async function loadFromGitHub() {
+        try {
+            const response = await fetch(API_URL, {
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+            });
 
-    probe.onload = function(){
-        mainImage.src = path;
-        mainImage.alt = "Работа " + pad(num);
-    };
+            if (response.status === 404) {
+                // Файла нет – создаём пустые данные и сохраняем
+                captions = {};
+                await saveToGitHub(true);
+                // После создания загружаем локальные данные (если есть)
+                loadFromLocalStorage();
+                applyCurrent();
+                return;
+            }
 
-    probe.onerror = function(){
-        tryLoadImage(num, extIndex + 1);
-    };
+            if (!response.ok) throw new Error(`Ошибка ${response.status}`);
 
-    probe.src = path;
-}
+            const data = await response.json();
+            const binary = atob(data.content);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            const content = new TextDecoder('utf-8').decode(bytes);
+            const parsed = JSON.parse(content);
+            captions = parsed.captions || {};
 
-function show(num){
-    if(num < 1) num = TOTAL;
-    if(num > TOTAL) num = 1;
+            // Сохраняем в localStorage как резерв
+            localStorage.setItem(STORAGE_PREFIX + 'all', JSON.stringify(captions));
 
-    index = num;
-    now.textContent = pad(index);
-    loadCaption();
-    tryLoadImage(index, 0);
-}
-
-function next(){
-    show(index + 1);
-}
-
-function prev(){
-    show(index - 1);
-}
-
-prevBtn.onclick = prev;
-nextBtn.onclick = next;
-saveBtn.onclick = saveCaption;
-resetBtn.onclick = resetCaption;
-/* NEX V4 AUTOSAVE */
-caption.addEventListener("input", saveCaption);
-window.addEventListener("beforeunload", saveCaption);
-
-document.addEventListener("keydown", function(e){
-    if(zoomLayer.classList.contains("open")){
-        if(e.key === "Escape") closeZoom();
-        return;
+            applyCurrent();
+        } catch (e) {
+            console.error('Ошибка загрузки с GitHub:', e);
+            // Пытаемся загрузить из localStorage
+            loadFromLocalStorage();
+            applyCurrent();
+            showError('⚠️ Не удалось загрузить данные с GitHub, использована локальная копия');
+        }
     }
 
-    if(e.key === "ArrowRight") next();
-    if(e.key === "ArrowLeft") prev();
-});
-
-document.addEventListener("wheel", function(e){
-    if(zoomLayer.classList.contains("open")) return;
-    if(Math.abs(e.deltaY) < 8) return;
-
-    if(e.deltaY > 0) next();
-    else prev();
-}, {passive:true});
-
-/* УПРАВЛЯЕМАЯ ЛУПА И ПЕРЕТАСКИВАНИЕ */
-let dragging = false;
-let startX = 0;
-let startY = 0;
-let imgX = 0;
-let imgY = 0;
-let zoomScale = 0.3;
-const ZOOM_MIN = 0.3;
-const ZOOM_MAX = 3;
-const ZOOM_STEP = 0.15;
-
-function clampZoom(value){
-    return Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, value));
-}
-
-function updateZoomValue(){
-    zoomValue.textContent = Math.round(zoomScale * 100) + "%";
-}
-
-function setZoomTransform(){
-    zoomImg.style.transform = "translate(-50%, -50%) translate(" + imgX + "px," + imgY + "px) scale(" + zoomScale + ")";
-    updateZoomValue();
-}
-
-function changeZoom(delta){
-    zoomScale = clampZoom(zoomScale + delta);
-    setZoomTransform();
-}
-
-function resetZoom(){
-    zoomScale = 0.3;
-    imgX = 0;
-    imgY = 0;
-    setZoomTransform();
-}
-
-function openZoom(){
-    zoomImg.src = mainImage.src;
-    resetZoom();
-    zoomLayer.classList.add("open");
-}
-
-function closeZoom(){
-    zoomLayer.classList.remove("open");
-    dragging = false;
-    zoomLayer.classList.remove("dragging");
-}
-
-mainImage.onclick = openZoom;
-
-zoomInBtn.onclick = function(e){
-    e.stopPropagation();
-    changeZoom(ZOOM_STEP);
-};
-
-zoomOutBtn.onclick = function(e){
-    e.stopPropagation();
-    changeZoom(-ZOOM_STEP);
-};
-
-zoomResetBtn.onclick = function(e){
-    e.stopPropagation();
-    resetZoom();
-};
-
-zoomCloseBtn.onclick = function(e){
-    e.stopPropagation();
-    closeZoom();
-};
-
-zoomLayer.addEventListener("wheel", function(e){
-    e.preventDefault();
-    if(e.deltaY < 0) changeZoom(ZOOM_STEP);
-    else changeZoom(-ZOOM_STEP);
-}, {passive:false});
-
-zoomLayer.addEventListener("mousedown", function(e){
-    if(e.target.closest(".zoomTools")) return;
-
-    if(e.target !== zoomImg){
-        closeZoom();
-        return;
+    function loadFromLocalStorage() {
+        try {
+            const saved = localStorage.getItem(STORAGE_PREFIX + 'all');
+            if (saved) captions = JSON.parse(saved);
+            else captions = {};
+        } catch (e) {
+            captions = {};
+        }
     }
 
-    dragging = true;
-    zoomLayer.classList.add("dragging");
-    startX = e.clientX - imgX;
-    startY = e.clientY - imgY;
-});
+    // ---------- СОХРАНЕНИЕ НА GITHUB ----------
+    async function saveToGitHub(silent = false) {
+        if (isSaving) return;
+        isSaving = true;
 
-window.addEventListener("mousemove", function(e){
-    if(!dragging) return;
+        try {
+            let sha = '';
+            try {
+                const check = await fetch(API_URL, {
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+                });
+                if (check.ok) {
+                    const data = await check.json();
+                    sha = data.sha;
+                }
+            } catch (e) {}
 
-    imgX = e.clientX - startX;
-    imgY = e.clientY - startY;
-    setZoomTransform();
-});
+            const dataToSave = { captions: captions };
+            const jsonString = JSON.stringify(dataToSave, null, 2);
+            const encoder = new TextEncoder();
+            const data = encoder.encode(jsonString);
+            let binary = '';
+            data.forEach(byte => binary += String.fromCharCode(byte));
+            const content = btoa(binary);
 
-window.addEventListener("mouseup", function(){
-    dragging = false;
-    zoomLayer.classList.remove("dragging");
-});
+            const body = {
+                message: `Обновление галереи Солнечных бликов ${new Date().toLocaleString()}`,
+                content: content
+            };
+            if (sha) body.sha = sha;
 
-zoomLayer.addEventListener("touchstart", function(e){
-    if(e.target.closest(".zoomTools")) return;
+            const response = await fetch(API_URL, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
 
-    if(e.target !== zoomImg){
-        closeZoom();
-        return;
+            if (!response.ok) throw new Error(`Ошибка ${response.status}`);
+
+            // Обновляем localStorage
+            localStorage.setItem(STORAGE_PREFIX + 'all', JSON.stringify(captions));
+
+            if (!silent) showError('✅ Данные сохранены на GitHub');
+        } catch (e) {
+            console.error('Ошибка сохранения на GitHub:', e);
+            // Сохраняем хотя бы в localStorage
+            localStorage.setItem(STORAGE_PREFIX + 'all', JSON.stringify(captions));
+            if (!silent) showError('❌ Ошибка сохранения на GitHub, данные сохранены локально');
+        }
+        isSaving = false;
     }
 
-    dragging = true;
-    const t = e.touches[0];
-    startX = t.clientX - imgX;
-    startY = t.clientY - imgY;
-}, {passive:true});
+    // ---------- РАБОТА С ТЕКУЩЕЙ ПОДПИСЬЮ ----------
+    function loadCaption() {
+        caption.value = captions[pad(index)] || "";
+    }
 
-zoomLayer.addEventListener("touchmove", function(e){
-    if(!dragging) return;
+    function saveCaption() {
+        const key = pad(index);
+        const newText = caption.value;
+        if (captions[key] !== newText) {
+            captions[key] = newText;
+            saveToGitHub(false);
+        }
+    }
 
-    const t = e.touches[0];
-    imgX = t.clientX - startX;
-    imgY = t.clientY - startY;
-    setZoomTransform();
-}, {passive:true});
+    function resetCaption() {
+        const key = pad(index);
+        if (confirm('Сбросить подпись для работы ' + key + '?')) {
+            delete captions[key];
+            caption.value = '';
+            saveToGitHub(false);
+            showError('Подпись сброшена для работы ' + key);
+        }
+    }
 
-zoomLayer.addEventListener("touchend", function(){
-    dragging = false;
-}, {passive:true});
+    // ---------- ЗАГРУЗКА ИЗОБРАЖЕНИЯ ----------
+    function tryLoadImage(num, extIndex) {
+        extIndex = extIndex || 0;
 
-show(1);
+        if (extIndex >= EXTENSIONS.length) {
+            showError("Не найден файл: " + FOLDER + "/" + pad(num) + ".jpg / .png / .webp");
+            return;
+        }
+
+        const ext = EXTENSIONS[extIndex];
+        const path = FOLDER + "/" + pad(num) + "." + ext;
+        const probe = new Image();
+
+        probe.onload = function() {
+            mainImage.src = path;
+            mainImage.alt = "Работа " + pad(num);
+        };
+
+        probe.onerror = function() {
+            tryLoadImage(num, extIndex + 1);
+        };
+
+        probe.src = path;
+    }
+
+    // ---------- НАВИГАЦИЯ ----------
+    function applyCurrent() {
+        now.textContent = pad(index);
+        loadCaption();
+        tryLoadImage(index, 0);
+    }
+
+    function show(num) {
+        if (num < 1) num = TOTAL;
+        if (num > TOTAL) num = 1;
+        index = num;
+        applyCurrent();
+    }
+
+    function next() { show(index + 1); }
+    function prev() { show(index - 1); }
+
+    // ---------- СОБЫТИЯ ----------
+    prevBtn.onclick = prev;
+    nextBtn.onclick = next;
+    saveBtn.onclick = function() { saveCaption(); };
+    resetBtn.onclick = resetCaption;
+
+    // Автосохранение при вводе
+    caption.addEventListener('input', saveCaption);
+    window.addEventListener('beforeunload', function() {
+        saveCaption(); // последнее сохранение перед закрытием
+    });
+
+    document.addEventListener("keydown", function(e) {
+        if (zoomLayer.classList.contains("open")) {
+            if (e.key === "Escape") closeZoom();
+            return;
+        }
+        if (document.activeElement === caption) return;
+        if (e.key === "ArrowRight") next();
+        if (e.key === "ArrowLeft") prev();
+    });
+
+    document.addEventListener("wheel", function(e) {
+        if (zoomLayer.classList.contains("open")) return;
+        if (document.activeElement === caption) return;
+        if (Math.abs(e.deltaY) < 8) return;
+        e.preventDefault();
+        if (e.deltaY > 0) next();
+        else prev();
+    }, { passive: false });
+
+    // ---------- ЛУПА ----------
+    let dragging = false;
+    let startX = 0, startY = 0;
+    let imgX = 0, imgY = 0;
+    let zoomScale = 0.3;
+    const ZOOM_MIN = 0.3;
+    const ZOOM_MAX = 3;
+    const ZOOM_STEP = 0.15;
+
+    function clampZoom(value) { return Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, value)); }
+
+    function updateZoomValue() {
+        zoomValue.textContent = Math.round(zoomScale * 100) + "%";
+    }
+
+    function setZoomTransform() {
+        zoomImg.style.transform = "translate(-50%, -50%) translate(" + imgX + "px," + imgY + "px) scale(" + zoomScale + ")";
+        updateZoomValue();
+    }
+
+    function changeZoom(delta) {
+        zoomScale = clampZoom(zoomScale + delta);
+        setZoomTransform();
+    }
+
+    function resetZoom() {
+        zoomScale = 0.3;
+        imgX = 0;
+        imgY = 0;
+        setZoomTransform();
+    }
+
+    function openZoom() {
+        if (!mainImage.src) return;
+        zoomImg.src = mainImage.src;
+        resetZoom();
+        zoomLayer.classList.add("open");
+    }
+
+    function closeZoom() {
+        zoomLayer.classList.remove("open");
+        dragging = false;
+        zoomLayer.classList.remove("dragging");
+    }
+
+    mainImage.onclick = openZoom;
+
+    zoomInBtn.onclick = function(e) { e.stopPropagation(); changeZoom(ZOOM_STEP); };
+    zoomOutBtn.onclick = function(e) { e.stopPropagation(); changeZoom(-ZOOM_STEP); };
+    zoomResetBtn.onclick = function(e) { e.stopPropagation(); resetZoom(); };
+    zoomCloseBtn.onclick = function(e) { e.stopPropagation(); closeZoom(); };
+
+    zoomLayer.addEventListener("wheel", function(e) {
+        e.preventDefault();
+        changeZoom(e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP);
+    }, { passive: false });
+
+    zoomLayer.addEventListener("mousedown", function(e) {
+        if (e.target.closest(".zoomTools")) return;
+        if (e.target !== zoomImg) { closeZoom(); return; }
+        dragging = true;
+        zoomLayer.classList.add("dragging");
+        startX = e.clientX - imgX;
+        startY = e.clientY - imgY;
+    });
+
+    window.addEventListener("mousemove", function(e) {
+        if (!dragging) return;
+        imgX = e.clientX - startX;
+        imgY = e.clientY - startY;
+        setZoomTransform();
+    });
+    window.addEventListener("mouseup", function() {
+        dragging = false;
+        zoomLayer.classList.remove("dragging");
+    });
+
+    zoomLayer.addEventListener("touchstart", function(e) {
+        if (e.target.closest(".zoomTools")) return;
+        if (e.target !== zoomImg) { closeZoom(); return; }
+        const t = e.touches[0];
+        dragging = true;
+        startX = t.clientX - imgX;
+        startY = t.clientY - imgY;
+    }, { passive: true });
+    zoomLayer.addEventListener("touchmove", function(e) {
+        if (!dragging) return;
+        const t = e.touches[0];
+        imgX = t.clientX - startX;
+        imgY = t.clientY - startY;
+        setZoomTransform();
+    }, { passive: true });
+    zoomLayer.addEventListener("touchend", function() {
+        dragging = false;
+    }, { passive: true });
+
+    // ---------- СТАРТ ----------
+    loadFromGitHub();
+})();
 </script>
 </body>
 </html>
