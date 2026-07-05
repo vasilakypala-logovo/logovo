@@ -5,11 +5,8 @@
     <title>Tuman Archive</title>
 
     <style>
-        /* ===== ОСНОВНЫЕ СТИЛИ ===== */
-        * {
-            box-sizing: border-box;
-        }
-
+        /* ===== ОСНОВНЫЕ СТИЛИ (без изменений) ===== */
+        * { box-sizing: border-box; }
         body {
             margin: 0;
             font-family: Arial, sans-serif;
@@ -19,7 +16,6 @@
             height: 100vh;
         }
 
-        /* ===== ВЕРХНЯЯ ПАНЕЛЬ С ПАПКАМИ ===== */
         #folders {
             position: absolute;
             left: 0;
@@ -35,7 +31,6 @@
             align-items: center;
             z-index: 10;
         }
-
         .folderBtn {
             padding: 12px 30px;
             background: #222831;
@@ -50,15 +45,11 @@
             position: relative;
             transition: all 0.3s ease;
         }
-        .folderBtn:hover {
-            background: #2f3a46;
-        }
-
+        .folderBtn:hover { background: #2f3a46; }
         .folderBtn.active {
             border-color: #4ade80;
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
         }
-
         .folderBtn .indicator {
             display: none;
             position: absolute;
@@ -72,24 +63,12 @@
             box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
             animation: pulse-green 1.5s ease-in-out infinite;
         }
-
-        .folderBtn.active .indicator {
-            display: block;
-        }
-
+        .folderBtn.active .indicator { display: block; }
         @keyframes pulse-green {
-            0%,
-            100% {
-                box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
-                transform: scale(1);
-            }
-            50% {
-                box-shadow: 0 0 30px rgba(74, 222, 128, 0.9);
-                transform: scale(1.2);
-            }
+            0%, 100% { box-shadow: 0 0 15px rgba(74,222,128,0.6); transform: scale(1); }
+            50% { box-shadow: 0 0 30px rgba(74,222,128,0.9); transform: scale(1.2); }
         }
 
-        /* ===== БОКОВАЯ ПАНЕЛЬ СПИСКА ФАЙЛОВ ===== */
         #files {
             position: absolute;
             left: 0;
@@ -99,11 +78,9 @@
             background: #101217;
             border-right: 1px solid #222;
             overflow-y: auto;
-            padding: 10px 10px 60px 10px;
-            /* ↓ отступ снизу, чтобы кнопка не перекрывала последние строки */
+            padding: 10px 10px 70px 10px;
             z-index: 5;
         }
-
         .fileRow {
             display: flex;
             justify-content: space-between;
@@ -116,10 +93,7 @@
             border-radius: 3px;
             transition: background 0.15s;
         }
-        .fileRow:hover {
-            background: #273040;
-        }
-
+        .fileRow:hover { background: #273040; }
         .num {
             width: 30px;
             font-weight: bold;
@@ -128,10 +102,7 @@
             font-size: 13px;
             text-align: center;
         }
-        .num:hover {
-            color: #aaffbb;
-        }
-
+        .num:hover { color: #aaffbb; }
         .name {
             flex: 1;
             margin-left: 8px;
@@ -140,7 +111,6 @@
             word-break: break-word;
         }
 
-        /* ===== ОБЛАСТЬ ЧТЕНИЯ ===== */
         #reader {
             position: absolute;
             left: 280px;
@@ -157,7 +127,6 @@
             white-space: pre-wrap;
             z-index: 1;
         }
-
         #closeReader {
             position: fixed;
             right: 20px;
@@ -171,18 +140,15 @@
             border-radius: 4px;
             font-size: 14px;
         }
-        #closeReader:hover {
-            background: #2a2a2a;
-        }
+        #closeReader:hover { background: #2a2a2a; }
 
-        /* ===== НАЗВАНИЕ ПАПКИ С ЛАМПОЧКОЙ (в правом нижнем углу) ===== */
         #folderLabel {
             position: fixed;
             bottom: 30px;
             right: 30px;
             font-size: 48px;
             font-weight: 900;
-            color: rgba(0, 0, 0, 0.35);
+            color: rgba(0,0,0,0.35);
             text-transform: uppercase;
             letter-spacing: 3px;
             pointer-events: none;
@@ -193,130 +159,93 @@
             display: none;
             align-items: center;
             gap: 20px;
-            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+            text-shadow: 0 1px 2px rgba(255,255,255,0.3);
         }
-
-        #folderLabel .label-text {
-            display: inline-block;
-        }
-
+        #folderLabel .label-text { display: inline-block; }
         #folderLabel .label-indicator {
             display: inline-block;
             width: 20px;
             height: 20px;
             background: #4ade80;
             border-radius: 50%;
-            box-shadow: 0 0 25px rgba(74, 222, 128, 0.7);
+            box-shadow: 0 0 25px rgba(74,222,128,0.7);
             animation: pulse-green 1.5s ease-in-out infinite;
             flex-shrink: 0;
             margin-right: 10px;
         }
-
         @media (max-width:768px) {
-            #folderLabel {
-                font-size: 24px;
-                bottom: 15px;
-                right: 15px;
-                opacity: 0.7;
-                gap: 10px;
-            }
-            #folderLabel .label-indicator {
-                width: 14px;
-                height: 14px;
-                margin-right: 5px;
-            }
-            .folderBtn .indicator {
-                width: 12px;
-                height: 12px;
-                top: -4px;
-                right: -4px;
-            }
-            #files {
-                width: 220px;
-            }
-            #reader {
-                left: 220px;
-            }
+            #folderLabel { font-size: 24px; bottom:15px; right:15px; opacity:0.7; gap:10px; }
+            #folderLabel .label-indicator { width:14px; height:14px; margin-right:5px; }
+            .folderBtn .indicator { width:12px; height:12px; top:-4px; right:-4px; }
+            #files { width:220px; }
+            #reader { left:220px; }
         }
 
-        /* ===== КНОПКА «+» В ЛЕВОМ НИЖНЕМ УГЛУ ===== */
+        /* ===== КНОПКА «+» В ЛЕВОМ НИЖНЕМ УГЛУ (всегда видна) ===== */
         #loadMoreBtn {
             position: fixed;
             left: 16px;
             bottom: 16px;
-            width: 38px;
-            height: 38px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: #1f2a36;
             border: 2px solid #4ade80;
             color: #4ade80;
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 700;
             line-height: 1;
             cursor: pointer;
             z-index: 100;
-            display: none;
-            /* скрыт по умолчанию, показывается JS */
+            display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
-            box-shadow: 0 0 12px rgba(74, 222, 128, 0.15);
+            box-shadow: 0 0 12px rgba(74,222,128,0.15);
             user-select: none;
             padding: 0;
-            text-align: center;
         }
-        #loadMoreBtn:hover {
+        #loadMoreBtn:hover:not(:disabled) {
             background: #2a3a4a;
             border-color: #6eff9e;
             color: #6eff9e;
-            box-shadow: 0 0 24px rgba(74, 222, 128, 0.35);
+            box-shadow: 0 0 24px rgba(74,222,128,0.35);
             transform: scale(1.05);
         }
-        #loadMoreBtn:active {
-            transform: scale(0.92);
+        #loadMoreBtn:active:not(:disabled) { transform: scale(0.92); }
+        #loadMoreBtn:disabled {
+            opacity: 0.3;
+            cursor: default;
+            border-color: #555;
+            color: #555;
+            box-shadow: none;
         }
 
-        /* ===== СКРОЛЛБАР ДЛЯ #files ===== */
-        #files::-webkit-scrollbar {
-            width: 5px;
-        }
-        #files::-webkit-scrollbar-track {
-            background: #101217;
-        }
-        #files::-webkit-scrollbar-thumb {
-            background: #2f3a46;
-            border-radius: 8px;
-        }
-        #files::-webkit-scrollbar-thumb:hover {
-            background: #4ade80;
-        }
+        /* Стили скроллбара */
+        #files::-webkit-scrollbar { width: 5px; }
+        #files::-webkit-scrollbar-track { background: #101217; }
+        #files::-webkit-scrollbar-thumb { background: #2f3a46; border-radius: 8px; }
+        #files::-webkit-scrollbar-thumb:hover { background: #4ade80; }
     </style>
 </head>
 
 <body>
 
-    <!-- ВЕРХНЯЯ ПАНЕЛЬ ПАПОК -->
     <div id="folders"></div>
-
-    <!-- БОКОВАЯ ПАНЕЛЬ ФАЙЛОВ -->
     <div id="files"></div>
-
-    <!-- ОБЛАСТЬ ПРОСМОТРА -->
     <div id="reader"></div>
     <button id="closeReader" onclick="closeReader()">✕ Закрыть</button>
-
-    <!-- НАЗВАНИЕ ПАПКИ С ЛАМПОЧКОЙ -->
     <div id="folderLabel">
         <span class="label-indicator"></span>
         <span class="label-text"></span>
     </div>
 
-    <!-- КНОПКА «+» В ЛЕВОМ НИЖНЕМ УГЛУ -->
-    <button id="loadMoreBtn" title="Показать ещё один файл">+</button>
+    <!-- Кнопка «+» всегда видна, но активна только если есть скрытые файлы -->
+    <button id="loadMoreBtn" title="Восстановить один скрытый файл">+</button>
 
     <script>
         // ============================================================
-        // 🔐 ТОКЕН (разбит на части)
+        // 🔐 ТОКЕН (разбит)
         // ============================================================
         const T1 = 'ghp_cfUIxC';
         const T2 = 'hnUbKSnT04';
@@ -325,7 +254,7 @@
         const GITHUB_TOKEN = T1 + T2 + T3 + T4;
 
         // ============================================================
-        // 🔐 ПУТЬ К ХРАНИЛИЩУ
+        // ПУТЬ К ФАЙЛУ МЕТАДАННЫХ
         // ============================================================
         const REPO_OWNER = 'vasilakypala-logovo';
         const REPO_NAME = 'logovo';
@@ -333,20 +262,17 @@
         const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
 
         // ============================================================
-        // 📦 ПЕРЕМЕННЫЕ
+        // КОНСТАНТЫ
         // ============================================================
         const PHYSICAL_FOLDERS = ['stih1', 'stih2', 'stih3', 'stih4', 'stih5', 'stih6', 'stih7'];
-        const FILES = Array.from({ length: 99 }, (_, i) => String(i + 1).padStart(2, '0'));
-
-        const FILES_PER_PAGE = 99;
-        let visibleCount = FILES_PER_PAGE;
+        const FILES = Array.from({ length: 99 }, (_, i) => String(i + 1).padStart(2, '0')); // 01..99
 
         let currentFolder = null;
         let titles = {};
         let folderNames = {};
         let isSaving = false;
 
-        // Скрытые номера для каждой папки (Set)
+        // Хранилище скрытых номеров для каждой папки (Set)
         let hiddenPerFolder = {};
 
         const foldersDiv = document.getElementById('folders');
@@ -359,7 +285,7 @@
         let folderButtons = {};
 
         // ============================================================
-        // 💾 ЗАГРУЗКА С GITHUB
+        // ЗАГРУЗКА С GITHUB
         // ============================================================
         async function loadFromGitHub() {
             try {
@@ -390,6 +316,7 @@
                 initUI();
             } catch (e) {
                 console.error('Ошибка загрузки с GitHub:', e);
+                // fallback на localStorage
                 try {
                     titles = JSON.parse(localStorage.getItem('tucha_titles') || '{}');
                     folderNames = JSON.parse(localStorage.getItem('tucha_folder_names') || '{}');
@@ -402,7 +329,7 @@
         }
 
         // ============================================================
-        // 💾 СОХРАНЕНИЕ НА GITHUB
+        // СОХРАНЕНИЕ НА GITHUB
         // ============================================================
         async function saveToGitHub(silent = false) {
             if (isSaving) return;
@@ -457,7 +384,7 @@
         }
 
         // ============================================================
-        // 🖥️ ИНИЦИАЛИЗАЦИЯ UI
+        // ИНИЦИАЛИЗАЦИЯ UI
         // ============================================================
         function initUI() {
             foldersDiv.innerHTML = '';
@@ -480,7 +407,7 @@
                     folderNames[physical] = t;
                     saveToGitHub();
                     b.textContent = t || physical;
-                    // заново добавим индикатор (он был удалён при замене текста)
+                    // восстановить индикатор
                     const newIndicator = document.createElement('span');
                     newIndicator.className = 'indicator';
                     b.appendChild(newIndicator);
@@ -492,11 +419,12 @@
                 foldersDiv.appendChild(b);
             });
 
+            // Открыть первую папку
             openFolder(PHYSICAL_FOLDERS[0]);
         }
 
         // ============================================================
-        // 📂 УПРАВЛЕНИЕ ПАПКАМИ
+        // УПРАВЛЕНИЕ ПАПКАМИ
         // ============================================================
         function updateActiveFolder(folder) {
             Object.keys(folderButtons).forEach(key => {
@@ -509,28 +437,27 @@
 
         function openFolder(folder) {
             currentFolder = folder;
-            visibleCount = FILES_PER_PAGE;
             if (!hiddenPerFolder[folder]) hiddenPerFolder[folder] = new Set();
             updateActiveFolder(folder);
             renderFiles(folder);
         }
 
         // ============================================================
-        // 📄 ОТОБРАЖЕНИЕ ФАЙЛОВ
+        // ОТОБРАЖЕНИЕ ФАЙЛОВ (все, кроме скрытых)
         // ============================================================
         function renderFiles(folder) {
             filesDiv.innerHTML = '';
 
             const hiddenSet = hiddenPerFolder[folder] || new Set();
+            // Все файлы, кроме тех, что в hiddenSet
             const visibleFiles = FILES.filter(num => !hiddenSet.has(num));
 
-            const toShow = Math.min(visibleCount, visibleFiles.length);
-
-            for (let i = 0; i < toShow; i++) {
-                const num = visibleFiles[i];
+            // Показываем все видимые файлы (без ограничений)
+            for (const num of visibleFiles) {
                 const row = document.createElement('div');
                 row.className = 'fileRow';
 
+                // Номер – двойной клик скрывает файл
                 const n = document.createElement('div');
                 n.className = 'num';
                 n.textContent = num;
@@ -540,6 +467,7 @@
                     hideFile(folder, num);
                 };
 
+                // Название
                 const name = document.createElement('div');
                 name.className = 'name';
                 const fileName = titles[folder + num];
@@ -548,7 +476,9 @@
                 row.appendChild(n);
                 row.appendChild(name);
 
+                // Одинарный клик – открыть файл
                 row.onclick = () => openFile(folder, num);
+                // Двойной клик по строке – переименовать
                 row.ondblclick = () => {
                     const t = prompt("Название файла:", titles[folder + num] || '');
                     if (t === null) return;
@@ -560,31 +490,44 @@
                 filesDiv.appendChild(row);
             }
 
-            // --- УПРАВЛЕНИЕ КНОПКОЙ «+» В НИЖНЕМ ЛЕВОМ УГЛУ ---
-            // Показываем кнопку, если есть ещё не показанные файлы
-            if (visibleCount < visibleFiles.length) {
-                loadMoreBtn.style.display = 'flex';
-                // Вешаем обработчик (удаляем старый, чтобы не дублировать)
-                loadMoreBtn.onclick = () => {
-                    visibleCount += 1;
-                    renderFiles(folder);
-                };
+            // --- Управление кнопкой «+» ---
+            // Кнопка всегда видна, но активна только если есть скрытые файлы
+            const hasHidden = hiddenSet.size > 0;
+            loadMoreBtn.disabled = !hasHidden;
+            if (hasHidden) {
+                loadMoreBtn.onclick = () => restoreOneFile(folder);
             } else {
-                loadMoreBtn.style.display = 'none';
+                loadMoreBtn.onclick = null;
             }
+            // Подсказка
+            loadMoreBtn.title = hasHidden ? 'Восстановить один скрытый файл' : 'Нет скрытых файлов';
         }
 
         // ============================================================
-        // 🗑️ СКРЫТИЕ ФАЙЛА (двойной клик по номеру)
+        // СКРЫТЬ ФАЙЛ (двойной клик по номеру)
         // ============================================================
         function hideFile(folder, num) {
             if (!hiddenPerFolder[folder]) hiddenPerFolder[folder] = new Set();
             hiddenPerFolder[folder].add(num);
+            renderFiles(folder); // перерисовываем, кнопка обновится
+        }
+
+        // ============================================================
+        // ВОССТАНОВИТЬ ОДИН СКРЫТЫЙ ФАЙЛ (кнопка «+»)
+        // ============================================================
+        function restoreOneFile(folder) {
+            const hiddenSet = hiddenPerFolder[folder];
+            if (!hiddenSet || hiddenSet.size === 0) return;
+
+            // Находим наименьший скрытый номер (можно любой, но так предсказуемо)
+            const hiddenArray = Array.from(hiddenSet);
+            const minHidden = hiddenArray.reduce((a, b) => a < b ? a : b);
+            hiddenSet.delete(minHidden);
             renderFiles(folder);
         }
 
         // ============================================================
-        // 📖 ОТКРЫТИЕ ФАЙЛА
+        // ОТКРЫТИЕ ФАЙЛА
         // ============================================================
         async function openFile(folder, num) {
             const path = `${folder}/${num}.txt`;
@@ -605,7 +548,7 @@
         }
 
         // ============================================================
-        // 🔤 ДЕКОДЕР
+        // ДЕКОДЕР
         // ============================================================
         function decodeSmart(buffer) {
             const encodings = ['utf-8', 'windows-1251', 'koi8-r', 'ibm866', 'utf-16le', 'utf-16be'];
@@ -626,7 +569,7 @@
         }
 
         // ============================================================
-        // 🏷️ ОБНОВЛЕНИЕ НАЗВАНИЯ ПАПКИ С ЛАМПОЧКОЙ
+        // НАЗВАНИЕ ПАПКИ С ЛАМПОЧКОЙ
         // ============================================================
         function updateFolderLabel(folder) {
             const displayName = folderNames[folder] || folder;
@@ -641,7 +584,7 @@
         }
 
         // ============================================================
-        // 🚀 ЗАПУСК
+        // ЗАПУСК
         // ============================================================
         loadFromGitHub();
 
