@@ -280,7 +280,7 @@ const TYPES = {
     meaning:"Можно добавлять работы в Обитель Некса"
   },
   blik: {
-    title:"САД",
+    title:"САД ИГРУШЕК",
     img:"orden_blik.png",
     mark:"Б",
     meaning:"Собраны обучающие программы и игры"
@@ -355,7 +355,7 @@ function startAward(type){
 function showConfirm(){
   const type = TYPES[pendingType];
   document.getElementById("confirmLayer").style.display = "flex";
-  document.getElementById("confirmTitle").textContent = "Орден «" + type.title + "»";
+  document.getElementById("confirmTitle").textContent = "переход «" + type.title + "»";
   document.getElementById("confirmText").innerHTML =
     type.meaning + "<br><br>Подтверждение " + confirmStep + "1";
 }
