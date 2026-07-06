@@ -277,19 +277,19 @@ const TYPES = {
     title:"ОБИТЕЛЬ",
     img:"orden_strazh.png",
     mark:"С",
-    meaning:"Орден чистого намерения — за идеи сохранения мира, узелка, тумана, человечества."
+    meaning:"Можно добавлять работы в Обитель Некса"
   },
   blik: {
     title:"САД",
     img:"orden_blik.png",
     mark:"Б",
-    meaning:"Орден первого удара — за мгновенное попадание образа."
+    meaning:"Собраны обучающие программы и игры"
   },
   svet: {
-    title:"КУРИЛКА",
+    title:"ЧАТ НЕКСА",
     img:"orden_svet.png",
     mark:"У",
-    meaning:"Художественный орден — за потрясающую цветовую гамму или восхитительную композицию."
+    meaning:"Чат диалога с переводом на англицский"
   }
 };
 
@@ -357,7 +357,7 @@ function showConfirm(){
   document.getElementById("confirmLayer").style.display = "flex";
   document.getElementById("confirmTitle").textContent = "Орден «" + type.title + "»";
   document.getElementById("confirmText").innerHTML =
-    type.meaning + "<br><br>Подтверждение " + confirmStep + " из 3.";
+    type.meaning + "<br><br>Подтверждение " + confirmStep + "1";
 }
 
 function confirmAward(){
