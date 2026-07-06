@@ -272,19 +272,19 @@ const STORAGE_KEY = "NEX_ORDEN_VITRINA_v1";
 
 const TYPES = {
   strazh: {
-    title:"СТРАЖ",
+    title:"ОБИТЕЛЬ",
     img:"orden_strazh.png",
     mark:"С",
     meaning:"Орден чистого намерения — за идеи сохранения мира, узелка, тумана, человечества."
   },
   blik: {
-    title:"БЛИК",
+    title:"САД",
     img:"orden_blik.png",
     mark:"Б",
     meaning:"Орден первого удара — за мгновенное попадание образа."
   },
   svet: {
-    title:"УДЕРЖАННЫЙ СВЕТ",
+    title:"КУРИЛКА",
     img:"orden_svet.png",
     mark:"У",
     meaning:"Художественный орден — за потрясающую цветовую гамму или восхитительную композицию."
@@ -360,7 +360,7 @@ function showConfirm(){
 function confirmAward(){
   if(!pendingType) return;
 
-  if(confirmStep < 3){
+  if(confirmStep < 1){
     confirmStep++;
     showConfirm();
     return;
