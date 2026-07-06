@@ -250,6 +250,7 @@ body{
   </div>
 
   <div class="controls">
+    <!-- КНОПКИ БЕЗ ИЗМЕНЕНИЙ -->
     <button class="ordenBtn btn-strazh" onclick="startAward('strazh')">СТРАЖ 1</button>
     <button class="ordenBtn btn-blik" onclick="startAward('blik')">БЛИК 2</button>
     <button class="ordenBtn btn-svet" onclick="startAward('svet')">СВЕТ 3</button>
@@ -257,6 +258,7 @@ body{
 
   <div class="flash" id="flash"></div>
 
+  <!-- СТАНДАРТНЫЙ ДИАЛОГ ПОДТВЕРЖДЕНИЯ (без изменений) -->
   <div class="confirmLayer" id="confirmLayer">
     <div class="confirmBox">
       <div class="confirmTitle" id="confirmTitle">Подтверждение</div>
@@ -343,6 +345,7 @@ function render(){
   document.getElementById("counterPanel").textContent = "Всего: " + orders.length;
 }
 
+// ===== startAward – теперь без специального условия =====
 function startAward(type){
   pendingType = type;
   confirmStep = 1;
@@ -366,21 +369,33 @@ function confirmAward(){
     return;
   }
 
+  // Добавляем орден
   orders.push({
     type: pendingType,
     time: new Date().toISOString()
   });
 
   saveOrders();
+  const currentType = pendingType; // запоминаем, т.к. потом обнулим
   pendingType = null;
   confirmStep = 0;
   document.getElementById("confirmLayer").style.display = "none";
   render();
 
+  // Вспышка
   const flash = document.getElementById("flash");
   flash.classList.remove("run");
   void flash.offsetWidth;
   flash.classList.add("run");
+
+  // Открываем переходы в зависимости от типа ордена
+  if (currentType === 'strazh') {
+    window.open('https://vasilakypala-logovo.github.io/dvorets-nex/bashnya_nex/index.html', '_blank');
+  } else if (currentType === 'blik') {
+    window.open('https://vasilakypala-logovo.github.io/dvorets-nex/bashnya_1/plan.html', '_blank');
+  } else if (currentType === 'svet') {
+    window.open('https://vasilakypala-logovo.github.io/kyrilka/', '_blank');
+  }
 }
 
 function cancelAward(){
