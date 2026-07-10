@@ -1,0 +1,388 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Сканировщик + OCR (загрузка файла)</title>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background: #0e0f12;
+            color: #d6d6d6;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 30px 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h2 { margin-bottom: 10px; font-weight: 400; letter-spacing: 1px; color: #eee; }
+        #status {
+            margin: 10px auto 20px;
+            padding: 8px 20px;
+            display: inline-block;
+            border-radius: 20px;
+            background: #1a1c22;
+            font-size: 14px;
+            border: 1px solid #2a2c32;
+            color: #aaa;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        button {
+            width: 160px;
+            height: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        button:hover:not(:disabled) { transform: scale(1.03); filter: brightness(1.1); }
+        button:active:not(:disabled) { transform: scale(0.97); }
+        button:disabled { opacity: 0.35; cursor: not-allowed; transform: none; filter: none; box-shadow: none; }
+        #scan { background: #2d6cdf; }
+        #uploadBtn { background: #27ae60; }   /* новая зелёная */
+        #savePng { background: #22a06b; }
+        #saveJpg { background: #d97a2b; }
+        #ocrBtn { background: #9b59b6; }
+
+        .quality-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #1a1c22;
+            padding: 5px 15px;
+            border-radius: 30px;
+            border: 1px solid #2a2c32;
+        }
+        .quality-wrap label { font-size: 13px; color: #aaa; }
+        #qualitySlider { width: 100px; accent-color: #d97a2b; cursor: pointer; }
+        #qualityVal { min-width: 40px; font-size: 14px; color: #ddd; }
+
+        .preview-container {
+            width: 90%;
+            max-width: 900px;
+            margin-top: 15px;
+            background: #1a1c22;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #2a2c32;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #preview {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 8px;
+            display: none;
+            object-fit: contain;
+            background: #111;
+        }
+        .placeholder { color: #555; font-size: 16px; padding: 30px 0; }
+
+        #ocrResult {
+            width: 90%;
+            max-width: 900px;
+            margin-top: 20px;
+            background: #1a1c22;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #2a2c32;
+            text-align: left;
+            display: none;
+        }
+        #ocrResult h3 { margin-top: 0; color: #ddd; font-weight: 400; }
+        #ocrText {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: #0e0f12;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #ccc;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        #downloadTxt {
+            margin-top: 10px;
+            background: #3498db;
+            width: auto;
+            padding: 0 25px;
+            height: 40px;
+            font-size: 14px;
+            display: inline-block;
+            line-height: 40px;
+            border-radius: 20px;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+        .footer-note { margin-top: 20px; font-size: 13px; color: #555; }
+        #fileInput { display: none; }  /* скрываем стандартный input */
+    </style>
+</head>
+<body>
+
+    <h2>📷 Сканировщик + OCR</h2>
+    <div id="status">STATUS: IDLE</div>
+
+    <div class="controls">
+        <button id="scan">СКАН</button>
+        <button id="uploadBtn">📂 Загрузить файл</button>
+        <button id="savePng" disabled>💾 PNG</button>
+        <button id="saveJpg" disabled>💾 JPG</button>
+        <button id="ocrBtn" disabled>🔍 Распознать текст</button>
+
+        <div class="quality-wrap">
+            <label for="qualitySlider">Качество JPG</label>
+            <input type="range" id="qualitySlider" min="10" max="100" value="92">
+            <span id="qualityVal">92%</span>
+        </div>
+    </div>
+
+    <div class="preview-container">
+        <img id="preview" alt="Предпросмотр">
+        <div id="placeholder" class="placeholder">Нажмите «СКАН» или «Загрузить файл»</div>
+    </div>
+
+    <div id="ocrResult">
+        <h3>📝 Распознанный текст</h3>
+        <div id="ocrText"></div>
+        <button id="downloadTxt">⬇ Скачать как .txt</button>
+    </div>
+
+    <div class="footer-note">Загрузите изображение или сделайте скриншот, затем распознайте текст или сохраните в PNG/JPG.</div>
+
+    <input type="file" id="fileInput" accept="image/*">
+
+    <script>
+        let capturedCanvas = null;
+        let capturedDataURL = null;
+        let recognizedText = '';
+
+        const statusEl = document.getElementById('status');
+        const previewImg = document.getElementById('preview');
+        const placeholder = document.getElementById('placeholder');
+
+        const scanBtn = document.getElementById('scan');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileInput = document.getElementById('fileInput');
+        const savePngBtn = document.getElementById('savePng');
+        const saveJpgBtn = document.getElementById('saveJpg');
+        const ocrBtn = document.getElementById('ocrBtn');
+        const qualitySlider = document.getElementById('qualitySlider');
+        const qualityVal = document.getElementById('qualityVal');
+
+        const ocrResultDiv = document.getElementById('ocrResult');
+        const ocrTextDiv = document.getElementById('ocrText');
+        const downloadTxtBtn = document.getElementById('downloadTxt');
+
+        function setStatus(state, text) {
+            statusEl.innerText = `STATUS: ${state}${text ? ' | ' + text : ''}`;
+        }
+
+        function showCapturedImage(canvas) {
+            capturedCanvas = canvas;
+            const dataURL = canvas.toDataURL('image/png');
+            capturedDataURL = dataURL;
+
+            previewImg.src = dataURL;
+            previewImg.style.display = 'block';
+            placeholder.style.display = 'none';
+
+            savePngBtn.disabled = false;
+            saveJpgBtn.disabled = false;
+            ocrBtn.disabled = false;
+
+            ocrResultDiv.style.display = 'none';
+            recognizedText = '';
+            setStatus('OK', 'кадр готов');
+        }
+
+        function resetPreview() {
+            capturedCanvas = null;
+            capturedDataURL = null;
+            previewImg.style.display = 'none';
+            placeholder.style.display = 'block';
+            savePngBtn.disabled = true;
+            saveJpgBtn.disabled = true;
+            ocrBtn.disabled = true;
+            ocrResultDiv.style.display = 'none';
+            recognizedText = '';
+            setStatus('IDLE', '');
+        }
+
+        // === Захват экрана ===
+        async function captureScreen() {
+            try {
+                setStatus('WAIT', 'запрос разрешения...');
+                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                await new Promise(resolve => video.onloadedmetadata = resolve);
+                await video.play();
+
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                stream.getTracks().forEach(t => t.stop());
+
+                showCapturedImage(canvas);
+                return canvas;
+            } catch (err) {
+                console.error(err);
+                setStatus('FAIL', 'ошибка захвата');
+                if (err.name !== 'AbortError' && err.name !== 'NotAllowedError') {
+                    alert('Не удалось захватить экран: ' + err.message);
+                }
+                return null;
+            }
+        }
+
+        // === Загрузка файла ===
+        function loadImageFile(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    showCapturedImage(canvas);
+                };
+                img.onerror = function() {
+                    alert('Не удалось загрузить изображение');
+                    resetPreview();
+                };
+                img.src = e.target.result;
+            };
+            reader.onerror = function() {
+                alert('Ошибка чтения файла');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // === Сохранение изображения ===
+        function saveImage(format, quality) {
+            if (!capturedCanvas) {
+                alert('Сначала загрузите или захватите изображение');
+                return;
+            }
+            try {
+                let mimeType, ext;
+                if (format === 'png') { mimeType = 'image/png'; ext = 'png'; }
+                else if (format === 'jpeg') { mimeType = 'image/jpeg'; ext = 'jpg'; }
+                else throw new Error('Неизвестный формат');
+
+                const dataURL = capturedCanvas.toDataURL(mimeType, quality);
+                const link = document.createElement('a');
+                link.download = `изображение_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.${ext}`;
+                link.href = dataURL;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setStatus('OK', `${ext.toUpperCase()} сохранён`);
+            } catch (e) {
+                alert('Ошибка при сохранении: ' + e.message);
+            }
+        }
+
+        // === OCR ===
+        async function recognizeText() {
+            if (!capturedCanvas) {
+                alert('Сначала загрузите или захватите изображение');
+                return;
+            }
+            ocrBtn.disabled = true;
+            setStatus('OCR', 'распознавание...');
+            ocrResultDiv.style.display = 'none';
+
+            try {
+                const result = await Tesseract.recognize(
+                    capturedCanvas,
+                    'rus+eng',
+                    {
+                        logger: (m) => {
+                            if (m.status === 'recognizing text') {
+                                setStatus('OCR', `прогресс: ${Math.round(m.progress * 100)}%`);
+                            }
+                        }
+                    }
+                );
+                recognizedText = result.data.text.trim() || '[Текст не найден]';
+                ocrTextDiv.textContent = recognizedText;
+                ocrResultDiv.style.display = 'block';
+                setStatus('OK', 'текст распознан');
+            } catch (err) {
+                console.error(err);
+                alert('Ошибка распознавания: ' + err.message);
+                setStatus('FAIL', 'ошибка OCR');
+            } finally {
+                ocrBtn.disabled = false;
+            }
+        }
+
+        function downloadText() {
+            if (!recognizedText) {
+                alert('Нет распознанного текста');
+                return;
+            }
+            const blob = new Blob([recognizedText], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = `распознанный_текст_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.txt`;
+            link.href = url;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            setStatus('OK', 'текст сохранён');
+        }
+
+        // === Обработчики ===
+        scanBtn.addEventListener('click', captureScreen);
+        uploadBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                loadImageFile(e.target.files[0]);
+            }
+            fileInput.value = ''; // сброс, чтобы можно было загрузить тот же файл повторно
+        });
+
+        savePngBtn.addEventListener('click', () => saveImage('png', 1));
+        saveJpgBtn.addEventListener('click', () => {
+            const quality = parseInt(qualitySlider.value) / 100;
+            saveImage('jpeg', quality);
+        });
+        ocrBtn.addEventListener('click', recognizeText);
+        downloadTxtBtn.addEventListener('click', downloadText);
+
+        qualitySlider.addEventListener('input', () => {
+            qualityVal.textContent = qualitySlider.value + '%';
+        });
+
+        resetPreview();
+    </script>
+</body>
+</html>
