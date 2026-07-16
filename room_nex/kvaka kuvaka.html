@@ -1,0 +1,518 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>КВАКА и КУВАКА — Секретные истории</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: #dff7ff;
+            font-family: 'Comic Neue', sans-serif;
+            color: #444;
+        }
+        .screen {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .screen.active { display: block; }
+        .card {
+            max-width: 520px;
+            margin: auto;
+            background: white;
+            border-radius: 30px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        h1 {
+            text-align: center;
+            font-size: 42px;
+            margin-top: 0;
+        }
+        .layout {
+            display: flex;
+            gap: 15px;
+        }
+        .icons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .icon-btn {
+            width: 64px;
+            height: 64px;
+            border: none;
+            border-radius: 20px;
+            background: #f7f7f7;
+            font-size: 32px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: 0.2s;
+        }
+        .icon-btn:hover { transform: scale(1.05); }
+        .icon-btn:active { transform: scale(0.95); }
+        .icon-btn.selected { background: #fff6a8; }
+        .main { flex: 1; }
+        .preview {
+            font-size: 80px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        textarea {
+            width: 100%;
+            height: 180px;
+            border: 3px solid #ddd;
+            border-radius: 20px;
+            padding: 15px;
+            font-size: 24px;
+            font-family: 'Comic Neue', sans-serif;
+            resize: none;
+            transition: border-color 0.3s;
+        }
+        textarea:focus {
+            border-color: #ffd18b;
+            outline: none;
+        }
+        .big {
+            width: 100%;
+            margin-top: 15px;
+            padding: 16px;
+            border: none;
+            border-radius: 20px;
+            font-size: 28px;
+            font-family: 'Comic Neue', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: 0.2s;
+        }
+        .big:hover { transform: scale(1.02); }
+        .big:active { transform: scale(0.97); }
+        .green { background: #aef0a6; }
+        .orange { background: #ffd18b; }
+        .blue { background: #b8e8ff; }
+        .pink { background: #ffb8e0; }
+        .purple { background: #d4b8ff; }
+        .tv {
+            background: #666;
+            border-radius: 30px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
+        }
+        .tv-label {
+            color: white;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        .tv-screen {
+            background: #dfffdc;
+            border-radius: 15px;
+            min-height: 180px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 28px;
+            word-break: break-word;
+            gap: 10px;
+        }
+        .secret-box {
+            background: #f0f0f0;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px dashed #aaa;
+        }
+        .secret-box textarea {
+            height: 80px;
+            font-size: 18px;
+            font-family: monospace;
+        }
+        .secret-box label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        /* Окно с кодом */
+        #codePopup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        #codePopup.active {
+            display: flex !important;
+        }
+        #codePopupContent {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: popIn 0.3s ease;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        #codePopupContent h2 { margin-top: 0; color: #444; }
+        #codeDisplay {
+            background: #f0f0f0;
+            border-radius: 15px;
+            padding: 20px;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            margin: 15px 0;
+            border: 2px dashed #aaa;
+            user-select: all;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .buttons-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .buttons-row button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 15px;
+            font-size: 20px;
+            font-family: 'Comic Neue', sans-serif;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .buttons-row button:hover { transform: scale(1.05); }
+        .copy-btn { background: #b8e8ff; }
+        .close-btn { background: #ffb8b8; }
+
+        @media(max-width:500px) {
+            h1 { font-size: 36px; }
+            .layout { flex-direction: column; }
+            .icons { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+            textarea { font-size: 22px; }
+            .preview { font-size: 72px; }
+            .tv-screen { font-size: 24px; }
+            #codePopupContent { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- КВАКА -->
+<div class="screen active" id="kvakaScreen">
+    <div class="card">
+        <h1>🐸 КВАКА</h1>
+        <div class="layout">
+            <div class="icons">
+                <button class="icon-btn selected" onclick="selectSymbol('🐸', this)">🐸</button>
+                <button class="icon-btn" onclick="selectSymbol('🌼', this)">🌼</button>
+                <button class="icon-btn" onclick="selectSymbol('⭐', this)">⭐</button>
+                <button class="icon-btn" onclick="selectSymbol('🎲', this)">🎲</button>
+                <button class="icon-btn" onclick="selectSymbol('🐱', this)">🐱</button>
+                <button class="icon-btn" onclick="selectSymbol('🌈', this)">🌈</button>
+                <button class="icon-btn" onclick="selectSymbol('🦄', this)">🦄</button>
+            </div>
+            <div class="main">
+                <div class="preview" id="kvakaPreview">🐸</div>
+                <textarea id="kvakaText" placeholder="Напиши секретную историю..."></textarea>
+            </div>
+        </div>
+        <button class="big green" onclick="kvaknut()">🐸 КВАКНУТЬ (сохранить)</button>
+        <button class="big purple" onclick="generateSecretCode()">🔐 Создать секретный код</button>
+        <button class="big blue" onclick="goToKuvaka()">🚪 В гости к КУВАКЕ</button>
+    </div>
+</div>
+
+<!-- КУВАКА -->
+<div class="screen" id="kuvakaScreen">
+    <div class="card">
+        <h1>📺 КУВАКА</h1>
+        <div class="preview" id="kuvakaImage">❓</div>
+        <div class="tv">
+            <div class="tv-label">📺 Телевизор КУВАКИ</div>
+            <div class="tv-screen" id="tvScreen">
+                <span>...</span>
+            </div>
+        </div>
+        <div class="secret-box">
+            <label>🔐 Введи секретный код от КВАКИ:</label>
+            <textarea id="secretInput" placeholder="Вставь сюда секретный код..."></textarea>
+            <button class="big pink" onclick="decodeSecret()" style="margin-top:10px;">🔓 РАСШИФРОВАТЬ</button>
+        </div>
+        <button class="big orange" onclick="kuvaknut()">📺 КУВАКНУТЬ</button>
+        <button class="big blue" onclick="goToKvaka()">🚪 К КВАКЕ</button>
+    </div>
+</div>
+
+<!-- Окно с кодом -->
+<div id="codePopup">
+    <div id="codePopupContent">
+        <h2>🔐 СЕКРЕТНЫЙ КОД</h2>
+        <p style="color:#666;font-size:16px;">Скопируй этот код и передай КУВАКЕ:</p>
+        <div id="codeDisplay">...</div>
+        <div class="buttons-row">
+            <button class="copy-btn" onclick="copyCode()">📋 Скопировать</button>
+            <button class="close-btn" onclick="closeCodePopup()">✖ Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== ЗВУКИ =====
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new AudioContext();
+    }
+}
+
+function playSound(frequency, duration, type = 'sine', volume = 0.3) {
+    try {
+        initAudio();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + duration);
+    } catch(e) {}
+}
+
+function soundKvak() {
+    playSound(250, 0.15, 'sawtooth', 0.2);
+    setTimeout(() => playSound(300, 0.12, 'sawtooth', 0.15), 120);
+    setTimeout(() => playSound(200, 0.2, 'sawtooth', 0.2), 250);
+}
+
+function soundKuvak() {
+    playSound(600, 0.1, 'sine', 0.2);
+    setTimeout(() => playSound(800, 0.1, 'sine', 0.2), 100);
+    setTimeout(() => playSound(1000, 0.15, 'sine', 0.2), 200);
+}
+
+function soundSecret() {
+    playSound(440, 0.1, 'sine', 0.15);
+    setTimeout(() => playSound(554, 0.1, 'sine', 0.15), 100);
+    setTimeout(() => playSound(659, 0.1, 'sine', 0.15), 200);
+    setTimeout(() => playSound(880, 0.15, 'sine', 0.2), 300);
+}
+
+function soundDecode() {
+    playSound(880, 0.1, 'sine', 0.2);
+    setTimeout(() => playSound(784, 0.1, 'sine', 0.2), 100);
+    setTimeout(() => playSound(659, 0.1, 'sine', 0.2), 200);
+    setTimeout(() => playSound(523, 0.15, 'sine', 0.2), 300);
+}
+
+function soundClick() {
+    playSound(700, 0.08, 'sine', 0.15);
+}
+
+function soundError() {
+    playSound(300, 0.25, 'sawtooth', 0.15);
+}
+
+function soundCopy() {
+    playSound(1000, 0.08, 'sine', 0.2);
+    setTimeout(() => playSound(1200, 0.08, 'sine', 0.2), 100);
+}
+
+// ===== ШИФРОВАНИЕ (ИСПРАВЛЕНО!) =====
+function encodeText(text, symbol) {
+    // Сначала кодируем в UTF-8, потом в Base64
+    const utf8 = unescape(encodeURIComponent(symbol + '|' + text));
+    return btoa(utf8);
+}
+
+function decodeText(encoded) {
+    try {
+        // Декодируем из Base64 в UTF-8
+        const utf8 = atob(encoded);
+        const decoded = decodeURIComponent(escape(utf8));
+        const parts = decoded.split('|');
+        if (parts.length === 2) {
+            const symbol = parts[0];
+            const text = parts[1];
+            return { symbol, text, success: true };
+        }
+        return { success: false };
+    } catch(e) {
+        console.error('Ошибка расшифровки:', e);
+        return { success: false };
+    }
+}
+
+// ===== СОСТОЯНИЕ =====
+let selectedSymbol = "🐸";
+let lastEncoded = '';
+
+function selectSymbol(symbol, button) {
+    soundClick();
+    selectedSymbol = symbol;
+    document.getElementById("kvakaPreview").textContent = symbol;
+    document.querySelectorAll(".icon-btn").forEach(btn => btn.classList.remove("selected"));
+    button.classList.add("selected");
+}
+
+function kvaknut() {
+    soundKvak();
+    const text = document.getElementById("kvakaText").value.trim();
+    if (text === "") {
+        soundError();
+        alert("🐸 Напиши историю для КВАКИ!");
+        return;
+    }
+    localStorage.setItem("kvakaSymbol", selectedSymbol);
+    localStorage.setItem("kvakaMessage", text);
+    lastEncoded = encodeText(text, selectedSymbol);
+    localStorage.setItem("kvakaEncoded", lastEncoded);
+    alert("🐸 КВАКА спрятала историю! Теперь нажми 'Создать секретный код'");
+}
+
+function generateSecretCode() {
+    const text = document.getElementById("kvakaText").value.trim();
+    if (text === "") {
+        soundError();
+        alert("🐸 Сначала напиши историю!");
+        return;
+    }
+    soundSecret();
+    const encoded = encodeText(text, selectedSymbol);
+    lastEncoded = encoded;
+    localStorage.setItem("kvakaEncoded", encoded);
+    
+    // ПОКАЗЫВАЕМ ОКНО С КОДОМ
+    document.getElementById('codeDisplay').textContent = encoded;
+    document.getElementById('codePopup').classList.add('active');
+}
+
+function closeCodePopup() {
+    soundClick();
+    document.getElementById('codePopup').classList.remove('active');
+}
+
+function copyCode() {
+    const code = document.getElementById('codeDisplay').textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(() => {
+            soundCopy();
+            alert('📋 Код скопирован в буфер обмена!');
+        }).catch(() => {
+            fallbackCopy(code);
+        });
+    } else {
+        fallbackCopy(code);
+    }
+}
+
+function fallbackCopy(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+        document.execCommand('copy');
+        soundCopy();
+        alert('📋 Код скопирован!');
+    } catch(e) {
+        alert('❌ Выдели код вручную и скопируй (Ctrl+C)');
+    }
+    document.body.removeChild(textarea);
+}
+
+function goToKuvaka() {
+    soundClick();
+    document.getElementById("kvakaScreen").classList.remove("active");
+    document.getElementById("kuvakaScreen").classList.add("active");
+    const symbol = localStorage.getItem("kvakaSymbol");
+    document.getElementById("kuvakaImage").textContent = symbol ? symbol : "❓";
+    document.getElementById("tvScreen").innerHTML = '<span>...</span>';
+    document.getElementById("secretInput").value = '';
+}
+
+function goToKvaka() {
+    soundClick();
+    document.getElementById("kuvakaScreen").classList.remove("active");
+    document.getElementById("kvakaScreen").classList.add("active");
+}
+
+function kuvaknut() {
+    soundKuvak();
+    const text = localStorage.getItem("kvakaMessage");
+    const symbol = localStorage.getItem("kvakaSymbol");
+    if (!text) {
+        document.getElementById("tvScreen").innerHTML = '📺 Телевизор молчит...';
+        return;
+    }
+    document.getElementById("tvScreen").innerHTML = symbol + ' ' + text;
+}
+
+function decodeSecret() {
+    const code = document.getElementById("secretInput").value.trim();
+    if (!code) {
+        soundError();
+        alert("🔐 Введи секретный код!");
+        return;
+    }
+    
+    const result = decodeText(code);
+    if (result.success) {
+        soundDecode();
+        document.getElementById("tvScreen").innerHTML = result.symbol + ' ' + result.text;
+        document.getElementById("kuvakaImage").textContent = result.symbol;
+        alert("🔓 Расшифровано! Смотри на телевизор!");
+    } else {
+        soundError();
+        alert("❌ Неверный секретный код! Попробуй ещё раз.");
+        document.getElementById("tvScreen").innerHTML = '❌ Ошибка расшифровки!';
+    }
+}
+
+// ===== ИНИЦИАЛИЗАЦИЯ =====
+document.addEventListener('click', initAudio, { once: true });
+
+document.getElementById('secretInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        decodeSecret();
+    }
+});
+
+document.getElementById('codePopup').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeCodePopup();
+    }
+});
+
+console.log('🐸 КВАКА и КУВАКА загружены!');
+console.log('🔐 Шифрование работает!');
+</script>
+</body>
+</html>
