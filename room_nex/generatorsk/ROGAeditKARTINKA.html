@@ -1,0 +1,698 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROGAedit — редактор страниц</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .toolbar {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 10px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px 14px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .toolbar .brand {
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            margin-right: 20px;
+            color: #f1c40f;
+        }
+
+        .toolbar label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+
+        .toolbar input[type="file"] {
+            display: none;
+        }
+
+        .toolbar .btn {
+            background: #34495e;
+            border: none;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+        .toolbar .btn:hover {
+            background: #3d566e;
+        }
+
+        .toolbar .btn-primary {
+            background: #27ae60;
+        }
+
+        .toolbar .btn-primary:hover {
+            background: #2ecc71;
+        }
+
+        .toolbar .btn-danger {
+            background: #c0392b;
+        }
+
+        .toolbar .btn-danger:hover {
+            background: #e74c3c;
+        }
+
+        .toolbar .btn-warning {
+            background: #f39c12;
+            color: #2c3e50;
+        }
+
+        .toolbar .btn-warning:hover {
+            background: #f1c40f;
+        }
+
+        .toolbar .btn-info {
+            background: #2980b9;
+        }
+
+        .toolbar .btn-info:hover {
+            background: #3498db;
+        }
+
+        .toolbar select, 
+        .toolbar input[type="number"] {
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: none;
+            background: #ecf0f1;
+            font-size: 0.9rem;
+            width: auto;
+        }
+
+        .toolbar input[type="number"].small-input {
+            width: 60px;
+        }
+
+        .toolbar .sep {
+            width: 1px;
+            height: 28px;
+            background: #5d6d7e;
+            display: inline-block;
+        }
+
+        .toolbar .group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .editor-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 30px 20px;
+            background: #d5d8dd;
+        }
+
+        .page-preview {
+            width: 100%;
+            max-width: 800px;
+            background: #ffffff;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            padding: 50px 60px;
+            border-radius: 6px;
+            min-height: 80vh;
+            font-family: 'Georgia', serif;
+            font-size: 18px;
+            line-height: 1.7;
+            color: #1e1e1e;
+            outline: none;
+            transition: box-shadow 0.2s;
+        }
+
+        .page-preview:focus {
+            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.3), 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .page-preview h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 0 0 24px 0;
+            font-family: 'Georgia', serif;
+        }
+
+        .page-preview .dropcap::first-letter {
+            font-size: 3.8rem;
+            float: left;
+            line-height: 1;
+            margin-right: 8px;
+            margin-top: 4px;
+            font-weight: 700;
+            color: #1e1e1e;
+        }
+
+        .page-preview .center {
+            text-align: center;
+        }
+
+        .page-preview .italic {
+            font-style: italic;
+        }
+
+        .page-preview p {
+            margin: 0 0 1.2em 0;
+        }
+
+        .page-preview img {
+            max-width: 100%;
+            height: auto;
+            display: inline-block;
+            margin: 8px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: outline 0.2s;
+        }
+
+        .page-preview img.selected {
+            outline: 3px solid #3498db;
+            outline-offset: 2px;
+        }
+
+        .status-bar {
+            background: #ecf0f1;
+            padding: 6px 20px;
+            font-size: 0.85rem;
+            color: #2c3e50;
+            border-top: 1px solid #bdc3c7;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 600px) {
+            .page-preview {
+                padding: 30px 20px;
+            }
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+            .toolbar .brand {
+                margin-right: 0;
+                text-align: center;
+            }
+            .toolbar .group {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toolbar">
+        <span class="brand">🦌 ROGAedit</span>
+
+        <div class="group">
+            <button class="btn btn-primary" id="saveBtn">💾 Сохранить (page01.html)</button>
+            <button class="btn btn-warning" id="loadBtn">📂 Загрузить</button>
+            <input type="file" id="fileInput" accept=".html,.htm">
+            <button class="btn btn-danger" id="clearBtn">✖ Очистить</button>
+        </div>
+
+        <span class="sep"></span>
+
+        <div class="group">
+            <label>Выравнивание:
+                <select id="alignSelect">
+                    <option value="">—</option>
+                    <option value="left">По левому</option>
+                    <option value="center">По центру</option>
+                    <option value="right">По правому</option>
+                    <option value="justify">По ширине</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="group">
+            <label>Шрифт:
+                <select id="fontSelect">
+                    <option value="Georgia, serif">Georgia (сериф)</option>
+                    <option value="'Segoe UI', Tahoma, sans-serif">Segoe (без засечек)</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="'Courier New', monospace">Courier New</option>
+                    <option value="'Comic Sans MS', cursive">Comic Sans</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="group">
+            <label>Размер:
+                <input type="number" id="fontSizeInput" value="18" min="10" max="40" step="1" class="small-input">
+            </label>
+        </div>
+
+        <span class="sep"></span>
+
+        <div class="group">
+            <button class="btn" id="insertImageBtn">🖼 Вставить картинку</button>
+            <input type="file" id="imageFileInput" accept="image/*" style="display:none;">
+            <button class="btn btn-danger" id="deleteImageBtn">🗑 Удалить картинку</button>
+            <label>Ширина:
+                <input type="number" id="imageWidthInput" value="" min="20" max="800" step="10" class="small-input" style="width:70px;">
+            </label>
+            <button class="btn btn-info" id="applyImageSizeBtn">✓ Применить</button>
+        </div>
+
+        <span class="sep"></span>
+
+        <div class="group">
+            <button class="btn" id="indentBtn">↦ Отступ</button>
+            <button class="btn" id="removeIndentBtn">↤ Убрать отступ</button>
+            <button class="btn btn-danger" id="deleteSelectionBtn">✂ Удалить выделенное</button>
+        </div>
+
+        <div class="group">
+            <button class="btn" id="boldBtn"><b>B</b></button>
+            <button class="btn" id="italicBtn"><i>I</i></button>
+            <button class="btn" id="dropcapBtn">ℬ Буквица</button>
+        </div>
+    </div>
+
+    <div class="editor-wrapper">
+        <div id="editor" class="page-preview" contenteditable="true">
+            <h1>ГЕНЕРАТОР СТРАНИЦЫ С КАРТИНКОЙ</h1>
+
+            <p class="dropcap">Давным-давно лес был очень тихим. Настолько тихим, что птицы боялись петь громко, ручьи журчали шёпотом, а ветер, пролетая между деревьями, вздыхал:</p>
+
+            <p class="center italic">— Никто меня не слышит...</p>
+
+            <p>Тогда старый Дуб сказал ветру:</p>
+
+            <p class="center italic">— Найди того, кто сможет носить твою песню.</p>
+
+            <p>Ветер облетел весь мир. Он свистел в камышах — получался только шелест. Он заглядывал в пещеры — получалось глухое эхо. Он пролетал между скалами — выходил сердитый вой.</p>
+
+            <p>Но песня никак не рождалась.</p>
+
+            <p>И вот однажды ветер увидел молодого оленя. Рога у него были маленькие, совсем простые.</p>
+
+            <p class="center italic">— Позволь мне пожить в них немного, — попросил ветер.</p>
+
+            <p class="center italic">— Живи, — улыбнулся олень.</p>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <span id="statusMsg">Готов к редактированию</span>
+        <span id="charCount">Символов: 0</span>
+    </div>
+
+    <script>
+        (function() {
+            const editor = document.getElementById('editor');
+            const statusMsg = document.getElementById('statusMsg');
+            const charCount = document.getElementById('charCount');
+            let selectedImage = null;
+            let currentImageWidth = null;
+
+            function updateCharCount() {
+                const text = editor.innerText || '';
+                charCount.textContent = 'Символов: ' + text.length;
+            }
+
+            editor.addEventListener('input', updateCharCount);
+            editor.addEventListener('keyup', updateCharCount);
+
+            // ---- Выделение картинки при клике ----
+            editor.addEventListener('click', function(e) {
+                if (e.target.tagName === 'IMG') {
+                    if (selectedImage) {
+                        selectedImage.classList.remove('selected');
+                    }
+                    selectedImage = e.target;
+                    selectedImage.classList.add('selected');
+                    
+                    // Показываем текущую ширину в поле
+                    const width = parseInt(selectedImage.style.width) || parseInt(selectedImage.getAttribute('width')) || selectedImage.naturalWidth || 300;
+                    document.getElementById('imageWidthInput').value = width;
+                    currentImageWidth = width;
+                    
+                    statusMsg.textContent = `🖼 Картинка выделена (ширина: ${width}px)`;
+                } else {
+                    if (selectedImage) {
+                        selectedImage.classList.remove('selected');
+                        selectedImage = null;
+                        document.getElementById('imageWidthInput').value = '';
+                    }
+                }
+            });
+
+            // ---- СОХРАНЕНИЕ ----
+            document.getElementById('saveBtn').addEventListener('click', function() {
+                const htmlContent = editor.innerHTML;
+
+                const fullDoc = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>${document.title || 'Страница'}</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.7;
+            color: #1e1e1e;
+        }
+        h1 {
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .dropcap::first-letter {
+            font-size: 3.8rem;
+            float: left;
+            line-height: 1;
+            margin-right: 8px;
+            margin-top: 4px;
+            font-weight: 700;
+        }
+        .center { text-align: center; }
+        .italic { font-style: italic; }
+        p { margin: 0 0 1.2em 0; }
+        img { max-width: 100%; height: auto; display: inline-block; margin: 8px 4px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    ${htmlContent}
+</body>
+</html>`;
+
+                const fileName = 'page01.html';
+                const blob = new Blob([fullDoc], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                statusMsg.textContent = `✅ Сохранено как "${fileName}"`;
+            });
+
+            // ---- ЗАГРУЗКА ----
+            document.getElementById('loadBtn').addEventListener('click', function() {
+                document.getElementById('fileInput').click();
+            });
+
+            document.getElementById('fileInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    try {
+                        const content = ev.target.result;
+                        const bodyMatch = content.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+                        if (bodyMatch && bodyMatch[1]) {
+                            editor.innerHTML = bodyMatch[1].trim();
+                            statusMsg.textContent = `📂 Загружен: ${file.name}`;
+                            updateCharCount();
+                        } else {
+                            editor.innerHTML = content;
+                            statusMsg.textContent = `⚠ Загружен (без body): ${file.name}`;
+                            updateCharCount();
+                        }
+                    } catch (err) {
+                        statusMsg.textContent = `❌ Ошибка загрузки: ${err.message}`;
+                    }
+                };
+                reader.readAsText(file);
+                e.target.value = '';
+            });
+
+            // ---- ОЧИСТИТЬ ----
+            document.getElementById('clearBtn').addEventListener('click', function() {
+                if (confirm('Очистить весь текст?')) {
+                    editor.innerHTML = '';
+                    selectedImage = null;
+                    updateCharCount();
+                    statusMsg.textContent = '🧹 Страница очищена';
+                }
+            });
+
+            // ---- ВСТАВИТЬ КАРТИНКУ ----
+            const imageFileInput = document.getElementById('imageFileInput');
+            
+            document.getElementById('insertImageBtn').addEventListener('click', function() {
+                imageFileInput.click();
+            });
+
+            imageFileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                if (!file.type.startsWith('image/')) {
+                    statusMsg.textContent = '⚠ Пожалуйста, выберите изображение';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const imgHtml = `<img src="${ev.target.result}" alt="${file.name}" style="max-width: 100%; height: auto; display: inline-block; margin: 8px 4px; border-radius: 4px;" width="300">`;
+                    document.execCommand('insertHTML', false, imgHtml);
+                    statusMsg.textContent = `🖼 Картинка "${file.name}" вставлена (ширина: 300px)`;
+                    updateCharCount();
+                };
+                reader.onerror = function() {
+                    statusMsg.textContent = '❌ Ошибка чтения файла';
+                };
+                reader.readAsDataURL(file);
+                e.target.value = '';
+            });
+
+            // ---- ИЗМЕНЕНИЕ РАЗМЕРА КАРТИНКИ ----
+            document.getElementById('applyImageSizeBtn').addEventListener('click', function() {
+                if (!selectedImage) {
+                    statusMsg.textContent = '⚠ Сначала кликните на картинку, чтобы выделить её';
+                    return;
+                }
+
+                const widthInput = document.getElementById('imageWidthInput');
+                const newWidth = parseInt(widthInput.value);
+
+                if (isNaN(newWidth) || newWidth < 20) {
+                    statusMsg.textContent = '⚠ Введите корректную ширину (минимум 20px)';
+                    return;
+                }
+
+                // Ограничиваем максимальной шириной контейнера
+                const maxWidth = editor.clientWidth - 40;
+                const finalWidth = Math.min(newWidth, maxWidth);
+
+                selectedImage.style.width = finalWidth + 'px';
+                selectedImage.setAttribute('width', finalWidth);
+                selectedImage.style.height = 'auto';
+                
+                currentImageWidth = finalWidth;
+                widthInput.value = finalWidth;
+                
+                statusMsg.textContent = `✅ Ширина картинки изменена на ${finalWidth}px`;
+            });
+
+            // ---- УДАЛИТЬ КАРТИНКУ ----
+            document.getElementById('deleteImageBtn').addEventListener('click', function() {
+                if (!selectedImage) {
+                    statusMsg.textContent = '⚠ Сначала кликните на картинку, чтобы выделить её';
+                    return;
+                }
+
+                if (confirm('Удалить выделенную картинку?')) {
+                    const parent = selectedImage.parentNode;
+                    selectedImage.remove();
+                    selectedImage = null;
+                    document.getElementById('imageWidthInput').value = '';
+                    updateCharCount();
+                    statusMsg.textContent = '🗑 Картинка удалена';
+                }
+            });
+
+            // ---- УДАЛИТЬ ВЫДЕЛЕННЫЙ ТЕКСТ ----
+            document.getElementById('deleteSelectionBtn').addEventListener('click', function() {
+                const selection = window.getSelection();
+                if (selection.isCollapsed) {
+                    statusMsg.textContent = '⚠ Выделите текст, который хотите удалить';
+                    return;
+                }
+
+                if (confirm('Удалить выделенный текст?')) {
+                    document.execCommand('delete', false, null);
+                    updateCharCount();
+                    statusMsg.textContent = '✂ Выделенный текст удалён';
+                }
+            });
+
+            // ---- ВЫРАВНИВАНИЕ ----
+            document.getElementById('alignSelect').addEventListener('change', function() {
+                const val = this.value;
+                if (!val) return;
+                document.execCommand('justify' + (val === 'left' ? 'Left' : val === 'center' ? 'Center' : val === 'right' ? 'Right' : 'Full'));
+                statusMsg.textContent = `Выравнивание: ${val}`;
+                this.value = '';
+            });
+
+            // ---- ШРИФТ ----
+            document.getElementById('fontSelect').addEventListener('change', function() {
+                const font = this.value;
+                if (font) {
+                    document.execCommand('fontName', false, font);
+                    statusMsg.textContent = `Шрифт: ${font}`;
+                }
+            });
+
+            // ---- РАЗМЕР ШРИФТА ----
+            document.getElementById('fontSizeInput').addEventListener('change', function() {
+                const size = parseInt(this.value, 10);
+                if (size >= 10 && size <= 40) {
+                    const sel = window.getSelection();
+                    if (!sel.rangeCount) return;
+                    const range = sel.getRangeAt(0);
+                    if (range.collapsed) {
+                        editor.style.fontSize = size + 'px';
+                    } else {
+                        document.execCommand('fontSize', false, '7');
+                        const fonts = editor.querySelectorAll('font[size="7"]');
+                        fonts.forEach(el => {
+                            el.style.fontSize = size + 'px';
+                            el.removeAttribute('size');
+                        });
+                    }
+                    statusMsg.textContent = `Размер: ${size}px`;
+                }
+            });
+
+            // ---- ОТСТУП ----
+            document.getElementById('indentBtn').addEventListener('click', function() {
+                document.execCommand('indent', false, null);
+                statusMsg.textContent = '↦ Отступ добавлен';
+            });
+
+            document.getElementById('removeIndentBtn').addEventListener('click', function() {
+                document.execCommand('outdent', false, null);
+                statusMsg.textContent = '↤ Отступ убран';
+            });
+
+            // ---- ЖИРНЫЙ / КУРСИВ ----
+            document.getElementById('boldBtn').addEventListener('click', function() {
+                document.execCommand('bold', false, null);
+                statusMsg.textContent = 'Жирный';
+            });
+
+            document.getElementById('italicBtn').addEventListener('click', function() {
+                document.execCommand('italic', false, null);
+                statusMsg.textContent = 'Курсив';
+            });
+
+            // ---- БУКВИЦА ----
+            document.getElementById('dropcapBtn').addEventListener('click', function() {
+                const sel = window.getSelection();
+                if (!sel.rangeCount || sel.isCollapsed) {
+                    const firstP = editor.querySelector('p');
+                    if (firstP) {
+                        if (firstP.classList.contains('dropcap')) {
+                            firstP.classList.remove('dropcap');
+                            statusMsg.textContent = 'ℬ Буквица убрана';
+                        } else {
+                            firstP.classList.add('dropcap');
+                            statusMsg.textContent = 'ℬ Буквица добавлена первому абзацу';
+                        }
+                    } else {
+                        statusMsg.textContent = '⚠ Нет абзаца для буквицы';
+                    }
+                    updateCharCount();
+                    return;
+                }
+
+                const range = sel.getRangeAt(0);
+                const parent = range.commonAncestorContainer;
+                let p = parent.nodeType === 3 ? parent.parentElement : parent;
+                while (p && p.tagName !== 'P') p = p.parentElement;
+                if (p && p.tagName === 'P') {
+                    p.classList.toggle('dropcap');
+                    statusMsg.textContent = p.classList.contains('dropcap') ? 'ℬ Буквица включена' : 'ℬ Буквица выключена';
+                } else {
+                    statusMsg.textContent = '⚠ Выделите абзац для буквицы';
+                }
+                updateCharCount();
+            });
+
+            // ---- Вставка через буфер ----
+            editor.addEventListener('paste', function(e) {
+                const items = e.clipboardData && e.clipboardData.items;
+                if (items) {
+                    for (let item of items) {
+                        if (item.type.startsWith('image/')) {
+                            e.preventDefault();
+                            const file = item.getAsFile();
+                            const reader = new FileReader();
+                            reader.onload = function(ev) {
+                                const img = `<img src="${ev.target.result}" alt="вставленное изображение" style="max-width: 100%; height: auto; display: inline-block; margin: 8px 4px; border-radius: 4px;" width="300">`;
+                                document.execCommand('insertHTML', false, img);
+                                statusMsg.textContent = '🖼 Картинка вставлена из буфера (ширина: 300px)';
+                                updateCharCount();
+                            };
+                            reader.readAsDataURL(file);
+                            break;
+                        }
+                    }
+                }
+            });
+
+            // ---- Горячие клавиши ----
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+Delete или Ctrl+Backspace для удаления выделенного
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'Delete' || e.key === 'Backspace')) {
+                    const selection = window.getSelection();
+                    if (!selection.isCollapsed) {
+                        e.preventDefault();
+                        document.execCommand('delete', false, null);
+                        updateCharCount();
+                        statusMsg.textContent = '✂ Выделенный текст удалён (Ctrl+Delete)';
+                    }
+                }
+            });
+
+            updateCharCount();
+            statusMsg.textContent = '🦌 ROGAedit готов';
+        })();
+    </script>
+
+</body>
+</html>
