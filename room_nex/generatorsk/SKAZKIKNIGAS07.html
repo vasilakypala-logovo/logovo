@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Поющие рога — BOOK ENGINE NEX</title>
+    <title>генератор — BOOK ENGINE NEX</title>
     <style>
         * {
             margin: 0;
@@ -425,9 +425,9 @@
         <div id="cover-container">
             <div id="cover-content">
                 <img id="cover-image" src="" alt="Обложка" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22500%22%3E%3Crect fill=%22%232c1810%22 width=%22400%22 height=%22500%22/%3E%3Ctext x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 fill=%22%23b8a48e%22 font-size=%2230%22 font-family=%22Georgia%22 dy=%22.3em%22%3E🦌%3C/text%3E%3C/svg%3E'">
-                <h1 id="cover-title"><span class="editable-label" data-field="title">ПОЮЩИЕ РОГА</span></h1>
+                <h1 id="cover-title"><span class="editable-label" data-field="title">ГЕНЕРАТОР КНИГИ</span></h1>
                 <p id="cover-subtitle"><span class="editable-label" data-field="subtitle">СБОРНИК СКАЗОК</span></p>
-                <p id="cover-author"><span class="editable-label" data-field="author">Сказочник НЕКС</span></p>
+                <p id="cover-author"><span class="editable-label" data-field="author">ВАСИЛИЙ ЮДОВ</span></p>
                 <div class="edit-hint">💡 Нажмите на название, автора или подзаголовок, чтобы изменить</div>
             </div>
         </div>
@@ -470,7 +470,7 @@
             title: "РЕДАКТОР КНИГИ",
             subtitle: "СБОРНИК СКАЗОК",
             author: "ВАСИЛИЙ ЮДОВ",
-            bookDir: "roga/",
+            bookDir: "skazki/",
             readOnly: false
         };
 
@@ -479,12 +479,12 @@
         // ============================================================
         const TOC_TITLES = [
             '📖 Обложка',
-            'МЕСТО НАСТОЯЩИХ ЗНАКОВ',
-            'ПТИЧЬИ ТРОПИНКИ',
-            'СТАРЫЙ ПЕНЬ И МОЛЧАЛИВЫЕ РОГА',
-            'ТИХАЯ ПОЛЯНА'
+            'НОВАЯ',
+            'НОВАЯ',
+            'НОВАЯ',
+            'НОВАЯ'
 ,
-            'ТАЙНА СТАРОГО ДОЖДЯ'
+            'НОВАЯ'
         ];
         // ============================================================
 
@@ -551,7 +551,7 @@
             }
             
             loadPageWithCheck(index) {
-                if (index > 30) {
+                if (index > 10) {
                     this.finishDetection();
                     return;
                 }
