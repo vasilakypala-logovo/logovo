@@ -40,11 +40,6 @@ html, body {
     border-radius: 50%;
     cursor: pointer;
     z-index: 20;
-
-    /* Для отладки можно временно включить:
-    background: rgba(255, 80, 0, 0.18);
-    box-shadow: 0 0 25px rgba(255,120,0,0.25);
-    */
 }
 
 /* Номер портала внизу */
@@ -126,6 +121,305 @@ html, body {
         0 0 20px rgba(180,220,255,0.9),
         0 0 38px rgba(120,180,255,0.7);
 }
+
+/* ===== ЧАСЫ поверх всего ===== */
+#clockWrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 210px;
+    height: 280px;
+    z-index: 30;
+    pointer-events: auto;
+}
+
+#root {
+    position: relative;
+    width: 210px;
+    height: 280px;
+    background: radial-gradient(ellipse at 50% 43%, #17222d 0%, #06080b 62%, #000 100%);
+    border-radius: 48% / 50%;
+    box-shadow: 0 0 11px rgba(150, 210, 255, .30), inset 0 0 26px rgba(255, 255, 255, .08);
+    cursor: move;
+    overflow: hidden;
+}
+
+#ovalLine {
+    position: absolute;
+    left: 16px;
+    top: 24px;
+    width: 178px;
+    height: 194px;
+    border: 1px solid rgba(225, 245, 255, .70);
+    border-radius: 50%;
+    box-shadow: 0 0 7px rgba(90, 190, 255, .40), inset 0 0 10px rgba(230, 240, 255, .10);
+    pointer-events: none;
+}
+
+/* Инь-Янь */
+#yinYang {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 72px;
+    height: 72px;
+    z-index: 8;
+    cursor: pointer;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.12));
+}
+#yinYang:hover {
+    transform: translate(-50%, -50%) scale(1.08);
+    filter: drop-shadow(0 0 25px rgba(200, 220, 255, 0.25));
+}
+#yinYang:active {
+    transform: translate(-50%, -50%) scale(0.95);
+}
+
+/* Кликабельная зона поверх Инь-Янь — для перехода */
+#clickZone {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 9;
+    background: transparent;
+}
+
+#dateTop {
+    position: absolute;
+    left: 80px;
+    top: 52px;
+    width: 38px;
+    height: 30px;
+    border-radius: 9px;
+    background: rgba(0, 0, 0, .82);
+    box-shadow: 0 0 6px rgba(255, 255, 255, .25), inset 0 0 7px rgba(255, 255, 255, .08);
+    text-align: center;
+    z-index: 10;
+    pointer-events: none;
+}
+#dayNum {
+    font-size: 25px;
+    line-height: 30px;
+    text-shadow: 0 0 7px #fff;
+    font-weight: 500;
+}
+
+.month {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 25px;
+    font-size: 9px;
+    font-weight: bold;
+    color: #f3f6ff;
+    background: rgba(20, 45, 70, .88);
+    border: 1px solid rgba(160, 220, 255, .70);
+    box-shadow: 0 0 5px rgba(70, 180, 255, .45), inset 0 0 7px rgba(255, 255, 255, .15);
+    z-index: 5;
+    pointer-events: none;
+}
+.month.active {
+    background: #ffd51f !important;
+    border: 2px solid #fff8b8;
+    color: #fff;
+    box-shadow: 0 0 10px #fff6a8, 0 0 22px #ffd23f, 0 0 36px rgba(255, 210, 63, .95), inset 0 0 12px rgba(255, 255, 255, .70);
+    text-shadow: 0 0 5px #fff, 0 0 10px #ffd23f;
+    transform: scale(1.10);
+    z-index: 6;
+}
+
+#planet {
+    position: absolute;
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid rgba(255, 255, 255, .95);
+    box-shadow: 0 0 10px #fff, 0 0 20px rgba(190, 230, 255, .9), inset 0 0 4px rgba(255, 255, 255, .8);
+    z-index: 14;
+    cursor: pointer;
+}
+
+#timeBox {
+    position: absolute;
+    left: 56px;
+    top: 235px;
+    width: 98px;
+    height: 31px;
+    background: rgba(0, 0, 0, .88);
+    border-radius: 9px;
+    box-shadow: 0 0 7px rgba(255, 255, 255, .20), inset 0 0 6px rgba(255, 255, 255, .07);
+    text-align: center;
+    z-index: 11;
+    pointer-events: none;
+}
+#time {
+    font-size: 25px;
+    line-height: 31px;
+    color: #43c6ff;
+    text-shadow: 0 0 10px rgba(70, 200, 255, .90);
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+#week {
+    position: absolute;
+    left: 28px;
+    top: 213px;
+    width: 154px;
+    height: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    z-index: 12;
+    pointer-events: none;
+}
+.wday {
+    display: inline-block;
+    width: 22px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    border: 1px solid rgba(220, 220, 220, .36);
+    background: rgba(0, 0, 0, .78);
+    color: #b9b9b9;
+    font-size: 10px;
+    font-weight: bold;
+    box-sizing: border-box;
+}
+.wday.active {
+    background: #22be23;
+    color: #fff;
+    box-shadow: 0 0 7px #4cff4c inset, 0 0 7px #19ff19;
+}
+
+#linksPanel {
+    display: none;
+    position: absolute;
+    left: 7px;
+    top: 9px;
+    width: 398px;
+    height: 402px;
+    background: rgba(2, 4, 7, .98);
+    border: 1px solid rgba(200, 235, 255, .75);
+    border-radius: 13px;
+    box-shadow: 0 0 18px rgba(210, 240, 255, .45);
+    z-index: 40;
+    color: #eee;
+    cursor: default;
+    padding: 8px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+#closeX {
+    position: absolute;
+    right: 6px;
+    top: 5px;
+    width: 23px;
+    height: 21px;
+    line-height: 19px;
+    text-align: center;
+    border: 1px solid #89c5e8;
+    border-radius: 7px;
+    background: #13283a;
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+}
+#linksPanel h3 {
+    margin: 0 28px 6px 0;
+    text-align: center;
+    font-size: 13px;
+    font-weight: normal;
+    color: #fff;
+}
+#linkRows {
+    height: 308px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 3px;
+}
+.linkRow {
+    display: block;
+    margin: 3px 0;
+    height: 22px;
+    white-space: nowrap;
+}
+.linkRow span {
+    display: inline-block;
+    width: 18px;
+    text-align: right;
+    margin-right: 4px;
+    color: #9edcff;
+    font-size: 10px;
+    vertical-align: middle;
+}
+.linkRow label {
+    display: inline-block;
+    color: #cfeeff;
+    font-size: 9px;
+    margin: 0 3px;
+    vertical-align: middle;
+}
+.linkRow input {
+    display: inline-block;
+    background: #0b1118;
+    border: 1px solid #345;
+    color: #fff;
+    border-radius: 4px;
+    padding: 1px 3px;
+    font-size: 10px;
+    height: 16px;
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+.linkName { width: 74px; }
+.linkUrl { width: 190px; }
+.linkRow button {
+    display: inline-block;
+    margin-left: 4px;
+    width: 31px;
+    height: 18px;
+    background: #132437;
+    color: #fff;
+    border: 1px solid #4b83a8;
+    border-radius: 4px;
+    font-size: 9px;
+    padding: 0;
+    vertical-align: middle;
+    cursor: pointer;
+}
+#panelButtons {
+    text-align: center;
+    margin-top: 7px;
+}
+#panelButtons button {
+    margin: 0 3px;
+    padding: 3px 7px;
+    border-radius: 7px;
+    border: 1px solid #7db9dd;
+    background: #10283a;
+    color: #fff;
+    font-size: 10px;
+    cursor: pointer;
+}
+#hint {
+    font-size: 9px;
+    color: #9caebb;
+    text-align: center;
+    margin-top: 5px;
+    line-height: 11px;
+}
+#caption { display: none; }
 </style>
 </head>
 
@@ -141,7 +435,284 @@ html, body {
     ИНОГДА НЕ ТУДА — ЭТО ЕДИНСТВЕННОЕ МЕСТО, ГДЕ <span class="white-word">ТУДА</span>
 </div>
 
+<!-- ===== ЧАСЫ ===== -->
+<div id="clockWrapper">
+    <div id="root">
+        <div id="ovalLine"></div>
+        <div id="dateTop"><div id="dayNum">--</div></div>
+
+        <svg id="yinYang" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <radialGradient id="yinGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.15"/>
+                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+                </radialGradient>
+                <filter id="softGlow">
+                    <feGaussianBlur stdDeviation="1.5" result="blur"/>
+                    <feMerge>
+                        <feMergeNode in="blur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+            <path d="M50 5 A45 45 0 0 1 50 95 A22 22 0 0 1 50 51 A22 22 0 0 0 50 5" fill="#1a1a2e" filter="url(#softGlow)"/>
+            <path d="M50 5 A45 45 0 0 0 50 95 A22 22 0 0 0 50 51 A22 22 0 0 1 50 5" fill="#f0f4ff" filter="url(#softGlow)"/>
+            <circle cx="50" cy="73" r="7" fill="#1a1a2e" opacity="0.95"/>
+            <circle cx="50" cy="27" r="7" fill="#f0f4ff" opacity="0.95"/>
+            <circle cx="50" cy="50" r="45" fill="url(#yinGlow)" opacity="0.5"/>
+            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(180, 210, 255, 0.08)" stroke-width="0.5"/>
+        </svg>
+
+        <!-- Клик по этой зоне запускает переход, как в программе -->
+        <div id="clickZone" title="Открыть портал"></div>
+
+        <div id="caption"></div>
+        <div id="planet" title="Ссылки"></div>
+        <div id="timeBox"><div id="time">--:--</div></div>
+        <div id="week"></div>
+
+        <div id="linksPanel">
+            <div id="closeX" onclick="hidePanel()">×</div>
+            <h3>12 ссылок</h3>
+            <div id="linkRows"></div>
+            <div id="hint">Пустые ячейки можно заполнять и очищать.</div>
+            <div id="panelButtons">
+                <button onclick="saveConfig()">Сохранить</button>
+                <button onclick="hidePanel()">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+(function() {
+    // ========== Конфигурация и хранилище ==========
+    const STORAGE_KEY = 'nex_clock_config';
+    const monthLabels = ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮН','ИЮЛ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'];
+    const weekLabels = ['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'];
+
+    let cfg = {
+        links: ['','','','','','','','','','','',''],
+        names: ['','','','','','','','','','','',''],
+        x: null,
+        y: null
+    };
+
+    function loadConfig() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed.links && parsed.links.length) cfg.links = parsed.links;
+                if (parsed.names && parsed.names.length) cfg.names = parsed.names;
+                if (parsed.x !== undefined) cfg.x = parsed.x;
+                if (parsed.y !== undefined) cfg.y = parsed.y;
+            }
+        } catch (e) {}
+        if (cfg.x !== null && cfg.y !== null) {
+            try { window.moveTo(cfg.x, cfg.y); } catch(e) {}
+        }
+    }
+
+    function saveConfig() {
+        for (let i = 0; i < 12; i++) {
+            const nameEl = document.getElementById('name' + i);
+            const linkEl = document.getElementById('link' + i);
+            if (nameEl) cfg.names[i] = nameEl.value;
+            if (linkEl) cfg.links[i] = linkEl.value;
+        }
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+        } catch(e) {}
+    }
+
+    // ========== Инициализация элементов часов ==========
+    function createMonths() {
+        const root = document.getElementById('root');
+        const colors = ['#6ec1ff','#8ad1ff','#6bff9a','#b6ff6b','#fff36b','#ffc36b','#ff9a6b','#ff6b6b','#ff6bd6','#c96bff','#6b8cff','#6bdcff'];
+        const cx = 105, cy = 122, rx = 82, ry = 91;
+        for (let i = 0; i < 12; i++) {
+            const a = (-60 + i * 30) * Math.PI / 180;
+            const d = document.createElement('div');
+            d.className = 'month';
+            d.id = 'm' + i;
+            d.textContent = monthLabels[i];
+            d.style.left = (cx + rx * Math.cos(a) - 12) + 'px';
+            d.style.top = (cy + ry * Math.sin(a) - 12) + 'px';
+            d.style.background = colors[i];
+            root.appendChild(d);
+        }
+    }
+
+    function createWeek() {
+        const w = document.getElementById('week');
+        for (let i = 0; i < 7; i++) {
+            const d = document.createElement('div');
+            d.className = 'wday';
+            d.id = 'w' + i;
+            d.textContent = weekLabels[i];
+            w.appendChild(d);
+        }
+    }
+
+    function createLinks() {
+        const r = document.getElementById('linkRows');
+        for (let i = 0; i < 12; i++) {
+            const row = document.createElement('div');
+            row.className = 'linkRow';
+            row.innerHTML = '<span>' + (i+1) + '</span><label>имя</label><input class="linkName" id="name' + i + '" value=""><label>ссылка</label><input class="linkUrl" id="link' + i + '" value=""><button onclick="window.openLink(' + i + ')">ОК</button>';
+            r.appendChild(row);
+        }
+    }
+
+    function updateClock() {
+        const d = new Date();
+        document.getElementById('dayNum').textContent = d.getDate();
+        document.getElementById('time').textContent = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+        for (let i = 0; i < 12; i++) {
+            const el = document.getElementById('m' + i);
+            if (el) el.className = 'month' + (i === d.getMonth() ? ' active' : '');
+        }
+        const wd = (d.getDay() + 6) % 7;
+        for (let i = 0; i < 7; i++) {
+            const el = document.getElementById('w' + i);
+            if (el) el.className = 'wday' + (i === wd ? ' active' : '');
+        }
+    }
+
+    // ========== Анимация планеты ==========
+    let t = 0;
+    function movePlanet() {
+        t += 0.014;
+        const cx = 105, cy = 122, rx = 88, ry = 98;
+        const wobble = 4 * Math.sin(t * 3.1) + 2 * Math.cos(t * 5.7);
+        const x = cx + (rx + wobble) * Math.cos(t) - 9;
+        const y = cy + (ry + 3 * Math.sin(t * 2.3)) * Math.sin(t) - 9;
+        const p = document.getElementById('planet');
+        if (p) {
+            p.style.left = x + 'px';
+            p.style.top = y + 'px';
+        }
+    }
+
+    // ========== Панель ссылок ==========
+    window.showPanel = function() {
+        try { window.resizeTo(430, 455); } catch(e) {}
+        document.body.style.width = '430px';
+        document.body.style.height = '455px';
+        document.body.style.overflow = 'visible';
+        const rt = document.getElementById('root');
+        rt.style.width = '430px';
+        rt.style.height = '455px';
+        rt.style.overflow = 'visible';
+        rt.style.borderRadius = '0';
+        for (let i = 0; i < 12; i++) {
+            const nameEl = document.getElementById('name' + i);
+            const linkEl = document.getElementById('link' + i);
+            if (nameEl) nameEl.value = cfg.names[i] || '';
+            if (linkEl) linkEl.value = cfg.links[i] || '';
+        }
+        document.getElementById('linksPanel').style.display = 'block';
+    };
+
+    window.hidePanel = function() {
+        saveConfig();
+        document.getElementById('linksPanel').style.display = 'none';
+        document.body.style.width = '210px';
+        document.body.style.height = '280px';
+        document.body.style.overflow = 'hidden';
+        const rt = document.getElementById('root');
+        rt.style.width = '210px';
+        rt.style.height = '280px';
+        rt.style.overflow = '';
+        rt.style.borderRadius = '48% / 50%';
+        try { window.resizeTo(210, 280); } catch(e) {}
+    };
+
+    window.openLink = function(i) {
+        saveConfig();
+        const u = cfg.links[i];
+        if (u) {
+            try {
+                window.open(u, '_blank');
+            } catch(e) {
+                location.href = u;
+            }
+        }
+    };
+
+    // ========== Перетаскивание окна ==========
+    let dragging = false, ox = 0, oy = 0;
+    const rootEl = document.getElementById('root');
+    rootEl.addEventListener('mousedown', function(e) {
+        const el = e.target;
+        if (el && (el.tagName === 'INPUT' || el.tagName === 'BUTTON' || el.id === 'closeX' ||
+            el.closest && el.closest('#linksPanel'))) {
+            return;
+        }
+        dragging = true;
+        ox = e.screenX - window.screenLeft;
+        oy = e.screenY - window.screenTop;
+    });
+
+    document.addEventListener('mouseup', function() {
+        if (dragging) {
+            dragging = false;
+            cfg.x = window.screenLeft;
+            cfg.y = window.screenTop;
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg)); } catch(e) {}
+        }
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (dragging) {
+            window.moveTo(e.screenX - ox, e.screenY - oy);
+        }
+    });
+
+    // ========== События ==========
+    document.getElementById('planet').addEventListener('click', function(e) {
+        showPanel();
+        e.stopPropagation();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') hidePanel();
+    });
+
+    // ===== КЛИК ПО ИНЬ-ЯНЬ (clickZone) — ЗАПУСКАЕТ ПЕРЕХОД, КАК В ПРОГРАММЕ =====
+    document.getElementById('clickZone').addEventListener('click', function(e) {
+        // Запускаем ту же логику, что и у fire-zone
+        const fireZone = document.getElementById('fire-zone');
+        if (fireZone && fireZone.onclick) {
+            fireZone.onclick.call(fireZone, e);
+        }
+        e.stopPropagation();
+    });
+
+    // ========== Запуск часов ==========
+    window.onload = function() {
+        try { window.resizeTo(210, 280); } catch(e) {}
+        loadConfig();
+        createMonths();
+        createWeek();
+        createLinks();
+        updateClock();
+        movePlanet();
+        setInterval(updateClock, 1000);
+        setInterval(movePlanet, 30);
+    };
+
+    window.openLink = window.openLink;
+    window.showPanel = window.showPanel;
+    window.hidePanel = window.hidePanel;
+    window.saveConfig = saveConfig;
+})();
+</script>
+
+<script>
+// ===== Исходная логика портала (немного адаптирована) =====
 const fireZone = document.getElementById("fire-zone");
 const text = document.getElementById("aphorism");
 const portalNumber = document.getElementById("portal-number");
