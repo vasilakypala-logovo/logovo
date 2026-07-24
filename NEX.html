@@ -182,7 +182,7 @@ body:after{
 
 #caption{
     width:100%;
-    height:160px;
+    height:120px;
     resize:vertical;
     border:1px solid rgba(190,205,255,.22);
     border-radius:3px;
@@ -250,6 +250,89 @@ button:active{transform:translateY(1px);}
     line-height:1.35;
     text-align:center;
     color:rgba(220,228,255,.48);
+}
+
+/* ===== МИНИАТЮРЫ ВНИЗУ ===== */
+#thumbsBar{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    height:80px;
+    z-index:25;
+    background:linear-gradient(0deg, rgba(0,0,0,.88) 0%, rgba(0,0,0,.60) 70%, transparent 100%);
+    padding:8px 12px 10px 12px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scroll-behavior:smooth;
+}
+
+#thumbsBar::-webkit-scrollbar{
+    height:4px;
+}
+#thumbsBar::-webkit-scrollbar-track{
+    background:rgba(255,255,255,.05);
+    border-radius:2px;
+}
+#thumbsBar::-webkit-scrollbar-thumb{
+    background:rgba(200,215,255,.25);
+    border-radius:2px;
+}
+
+.thumb-item{
+    flex:0 0 auto;
+    width:56px;
+    height:56px;
+    border-radius:4px;
+    overflow:hidden;
+    cursor:pointer;
+    border:2px solid rgba(190,205,255,.12);
+    transition:border 0.2s, transform 0.2s, box-shadow 0.2s;
+    background:rgba(0,0,0,.5);
+    position:relative;
+}
+
+.thumb-item:hover{
+    border-color:rgba(190,205,255,.4);
+    transform:scale(1.08);
+    box-shadow:0 0 16px rgba(120,160,255,.2);
+}
+
+.thumb-item.active{
+    border-color:rgba(220,240,255,.8);
+    box-shadow:0 0 20px rgba(120,180,255,.4), inset 0 0 20px rgba(120,180,255,.15);
+    transform:scale(1.05);
+}
+
+.thumb-item img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+
+.thumb-item .thumb-num{
+    position:absolute;
+    bottom:0;
+    right:0;
+    background:rgba(0,0,0,.7);
+    color:rgba(220,228,255,.7);
+    font-size:8px;
+    font-family:Arial,sans-serif;
+    padding:0 4px;
+    border-radius:2px 0 0 0;
+    pointer-events:none;
+}
+
+.thumb-loading{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:rgba(220,228,255,.3);
+    font-size:12px;
 }
 
 /* ЛУПА */
@@ -352,20 +435,28 @@ button:active{transform:translateY(1px);}
     }
     .frame{
         max-width:94vw;
-        max-height:56vh;
+        max-height:50vh;
         padding:16px;
     }
     #mainImage{
         max-width:calc(94vw - 32px);
-        max-height:calc(56vh - 32px);
+        max-height:calc(50vh - 32px);
     }
     .side-plate{
         width:min(94vw,540px);
         min-height:0;
-        max-height:33vh;
+        max-height:30vh;
         padding:12px;
     }
-    #caption{height:82px;}
+    #caption{height:72px;}
+    #thumbsBar{
+        height:56px;
+        padding:4px 8px 6px 8px;
+    }
+    .thumb-item{
+        width:40px;
+        height:40px;
+    }
 }
 </style>
 </head>
@@ -404,6 +495,9 @@ button:active{transform:translateY(1px);}
     </aside>
 </main>
 
+<!-- МИНИАТЮРЫ -->
+<div id="thumbsBar"></div>
+
 <div class="zoomLayer" id="zoomLayer">
     <img id="zoomImg" alt="">
     <div class="zoomTools">
@@ -435,7 +529,7 @@ button:active{transform:translateY(1px);}
     // ============================================================
     const REPO_OWNER = 'vasilakypala-logovo';
     const REPO_NAME = 'logovo';
-    const DATA_FILE = 'nex_data.json';   // будет рядом с NEX.html
+    const DATA_FILE = 'nex_data.json';
     const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE}`;
 
     // ============================================================
@@ -447,8 +541,9 @@ button:active{transform:translateY(1px);}
     const EXTENSIONS = ["jpg","JPG","jpeg","JPEG","png","PNG","webp","WEBP"];
 
     let index = 1;
-    let captions = {};          // { "01": "текст", "02": "текст", ... }
+    let captions = {};
     let isSaving = false;
+    let thumbCache = {};
 
     // DOM
     const mainImage = document.getElementById("mainImage");
@@ -460,6 +555,7 @@ button:active{transform:translateY(1px);}
     const resetBtn = document.getElementById("resetBtn");
     const jumpInput = document.getElementById("jumpInput");
     const jumpBtn = document.getElementById("jumpBtn");
+    const thumbsBar = document.getElementById("thumbsBar");
 
     const zoomLayer = document.getElementById("zoomLayer");
     const zoomImg = document.getElementById("zoomImg");
@@ -488,10 +584,8 @@ button:active{transform:translateY(1px);}
             });
 
             if (response.status === 404) {
-                // Файла нет – создаём пустые данные и сохраняем
                 captions = {};
                 await saveToGitHub(true);
-                // После создания загружаем локальные данные (если есть)
                 loadFromLocalStorage();
                 applyCurrent();
                 return;
@@ -509,13 +603,10 @@ button:active{transform:translateY(1px);}
             const parsed = JSON.parse(content);
             captions = parsed.captions || {};
 
-            // Сохраняем в localStorage как резерв
             localStorage.setItem(STORAGE_PREFIX + 'all', JSON.stringify(captions));
-
             applyCurrent();
         } catch (e) {
             console.error('Ошибка загрузки с GitHub:', e);
-            // Пытаемся загрузить из localStorage
             loadFromLocalStorage();
             applyCurrent();
             showError('⚠️ Не удалось загрузить данные с GitHub, использована локальная копия');
@@ -574,13 +665,10 @@ button:active{transform:translateY(1px);}
 
             if (!response.ok) throw new Error(`Ошибка ${response.status}`);
 
-            // Обновляем localStorage
             localStorage.setItem(STORAGE_PREFIX + 'all', JSON.stringify(captions));
-
             if (!silent) showError('✅ Данные сохранены на GitHub');
         } catch (e) {
             console.error('Ошибка сохранения на GitHub:', e);
-            // Сохраняем хотя бы в localStorage
             localStorage.setItem(STORAGE_PREFIX + 'all', JSON.stringify(captions));
             if (!silent) showError('❌ Ошибка сохранения на GitHub, данные сохранены локально');
         }
@@ -636,11 +724,80 @@ button:active{transform:translateY(1px);}
         probe.src = path;
     }
 
+    // ---------- МИНИАТЮРЫ ----------
+    function buildThumbs() {
+        thumbsBar.innerHTML = '';
+        for (let i = 1; i <= TOTAL; i++) {
+            const div = document.createElement('div');
+            div.className = 'thumb-item';
+            div.dataset.index = i;
+            div.innerHTML = `<div class="thumb-loading">●</div><div class="thumb-num">${pad(i)}</div>`;
+            div.addEventListener('click', function() {
+                show(i);
+            });
+            thumbsBar.appendChild(div);
+        }
+        // загружаем миниатюры асинхронно
+        for (let i = 1; i <= TOTAL; i++) {
+            loadThumb(i);
+        }
+        updateThumbActive();
+    }
+
+    function loadThumb(num) {
+        const div = thumbsBar.children[num - 1];
+        if (!div) return;
+        const img = div.querySelector('img');
+        if (img) return; // уже загружено
+
+        const key = pad(num);
+        // пробуем найти изображение
+        let extIndex = 0;
+        function tryLoadThumb(extIdx) {
+            if (extIdx >= EXTENSIONS.length) {
+                div.innerHTML = `<div class="thumb-loading">✕</div><div class="thumb-num">${key}</div>`;
+                return;
+            }
+            const path = FOLDER + "/" + key + "." + EXTENSIONS[extIdx];
+            const probe = new Image();
+            probe.onload = function() {
+                const newImg = document.createElement('img');
+                newImg.src = path;
+                newImg.alt = key;
+                newImg.loading = 'lazy';
+                div.innerHTML = '';
+                div.appendChild(newImg);
+                const numLabel = document.createElement('div');
+                numLabel.className = 'thumb-num';
+                numLabel.textContent = key;
+                div.appendChild(numLabel);
+            };
+            probe.onerror = function() {
+                tryLoadThumb(extIdx + 1);
+            };
+            probe.src = path;
+        }
+        tryLoadThumb(0);
+    }
+
+    function updateThumbActive() {
+        const items = thumbsBar.querySelectorAll('.thumb-item');
+        items.forEach((el, i) => {
+            el.classList.toggle('active', (i + 1) === index);
+        });
+        // скролл к активной
+        const active = thumbsBar.querySelector('.thumb-item.active');
+        if (active) {
+            active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+        }
+    }
+
     // ---------- НАВИГАЦИЯ ----------
     function applyCurrent() {
         jumpInput.value = index;
         loadCaption();
         tryLoadImage(index, 0);
+        updateThumbActive();
     }
 
     function show(num) {
@@ -670,10 +827,9 @@ button:active{transform:translateY(1px);}
     resetBtn.onclick = resetCaption;
     jumpBtn.onclick = jump;
 
-    // Автосохранение при вводе
     caption.addEventListener('input', saveCaption);
     window.addEventListener('beforeunload', function() {
-        saveCaption(); // последнее сохранение перед закрытием
+        saveCaption();
     });
 
     jumpInput.addEventListener("keydown", function(e) {
@@ -810,6 +966,7 @@ button:active{transform:translateY(1px);}
     }, { passive: true });
 
     // ---------- СТАРТ ----------
+    buildThumbs();
     loadFromGitHub();
 })();
 </script>
