@@ -237,6 +237,92 @@
             padding-top: 10px;
         }
 
+        /* ===== МИНИАТЮРЫ ВНИЗУ ===== */
+        #thumbsBar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            z-index: 25;
+            background: linear-gradient(0deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.60) 70%, transparent 100%);
+            padding: 8px 12px 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-behavior: smooth;
+        }
+
+        #thumbsBar::-webkit-scrollbar {
+            height: 4px;
+        }
+        #thumbsBar::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 2px;
+        }
+        #thumbsBar::-webkit-scrollbar-thumb {
+            background: rgba(200, 180, 160, 0.25);
+            border-radius: 2px;
+        }
+
+        .thumb-item {
+            flex: 0 0 auto;
+            width: 56px;
+            height: 56px;
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid rgba(200, 160, 120, 0.12);
+            transition: border 0.2s, transform 0.2s, box-shadow 0.2s;
+            background: rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .thumb-item:hover {
+            border-color: rgba(200, 160, 120, 0.4);
+            transform: scale(1.08);
+            box-shadow: 0 0 16px rgba(180, 140, 80, 0.2);
+        }
+
+        .thumb-item.active {
+            border-color: rgba(220, 200, 170, 0.8);
+            box-shadow: 0 0 20px rgba(200, 160, 120, 0.4), inset 0 0 20px rgba(200, 160, 120, 0.15);
+            transform: scale(1.05);
+        }
+
+        .thumb-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .thumb-item .thumb-num {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: rgba(0,0,0,0.7);
+            color: rgba(220, 200, 180, 0.7);
+            font-size: 8px;
+            font-family: Arial, sans-serif;
+            padding: 0 4px;
+            border-radius: 2px 0 0 0;
+            pointer-events: none;
+        }
+
+        .thumb-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(220, 200, 180, 0.3);
+            font-size: 12px;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ЛУПА */
         .zoom-layer {
             position: fixed;
             inset: 0;
@@ -380,6 +466,14 @@
             .zoom-close-hint {
                 display: none;
             }
+            #thumbsBar {
+                height: 60px;
+                padding: 4px 8px 6px 8px;
+            }
+            .thumb-item {
+                width: 44px;
+                height: 44px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -403,6 +497,14 @@
             .controls button {
                 padding: 6px 10px;
                 font-size: 12px;
+            }
+            #thumbsBar {
+                height: 50px;
+                padding: 4px 6px 4px 6px;
+            }
+            .thumb-item {
+                width: 36px;
+                height: 36px;
             }
         }
     </style>
@@ -442,6 +544,9 @@
         </section>
     </main>
 
+    <!-- МИНИАТЮРЫ -->
+    <div id="thumbsBar"></div>
+
     <!-- лупа -->
     <div class="zoom-layer" id="zoomLayer">
         <img id="zoomImg" alt="">
@@ -474,7 +579,7 @@
             // ============================================================
             const REPO_OWNER = 'vasilakypala-logovo';
             const REPO_NAME = 'logovo';
-            const DATA_FILE = 'gallery6_data.json';   // будет рядом с gallery6.html
+            const DATA_FILE = 'gallery6_data.json';
             const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE}`;
 
             // ============================================================
@@ -485,8 +590,8 @@
             const EXTENSIONS = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG", "webp", "WEBP"];
 
             let currentIndex = 1;
-            let titlesData = {};   // { "001": "Название", ... }
-            let storiesData = {};  // { "001": "Описание", ... }
+            let titlesData = {};
+            let storiesData = {};
             let isSaving = false;
 
             // DOM-элементы
@@ -495,6 +600,7 @@
             const story = document.getElementById('story');
             const errorBox = document.getElementById('errorBox');
             const counterDisplay = document.getElementById('counterDisplay');
+            const thumbsBar = document.getElementById('thumbsBar');
 
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
@@ -531,11 +637,9 @@
                     });
 
                     if (response.status === 404) {
-                        // Файла нет – создаём пустые данные и сохраняем
                         titlesData = {};
                         storiesData = {};
                         await saveToGitHub(true);
-                        // После создания загружаем локальные данные (если есть)
                         loadFromLocalStorage();
                         applyCurrent();
                         return;
@@ -554,14 +658,12 @@
                     titlesData = parsed.titles || {};
                     storiesData = parsed.stories || {};
 
-                    // Сохраняем в localStorage как резерв
                     localStorage.setItem('gallery_titles', JSON.stringify(titlesData));
                     localStorage.setItem('gallery_stories', JSON.stringify(storiesData));
 
                     applyCurrent();
                 } catch (e) {
                     console.error('Ошибка загрузки с GitHub:', e);
-                    // Пытаемся загрузить из localStorage
                     loadFromLocalStorage();
                     applyCurrent();
                     showError('Не удалось загрузить данные с GitHub, использована локальная копия');
@@ -622,14 +724,12 @@
 
                     if (!response.ok) throw new Error(`Ошибка ${response.status}`);
 
-                    // Обновляем localStorage
                     localStorage.setItem('gallery_titles', JSON.stringify(titlesData));
                     localStorage.setItem('gallery_stories', JSON.stringify(storiesData));
 
                     if (!silent) showError('✅ Данные сохранены на GitHub');
                 } catch (e) {
                     console.error('Ошибка сохранения на GitHub:', e);
-                    // Сохраняем хотя бы в localStorage
                     localStorage.setItem('gallery_titles', JSON.stringify(titlesData));
                     localStorage.setItem('gallery_stories', JSON.stringify(storiesData));
                     if (!silent) showError('❌ Ошибка сохранения на GitHub, данные сохранены локально');
@@ -649,11 +749,10 @@
                 const newTitle = workTitle.value;
                 const newStory = story.value;
 
-                // Обновляем, только если данные изменились
                 if (titlesData[key] !== newTitle || storiesData[key] !== newStory) {
                     titlesData[key] = newTitle;
                     storiesData[key] = newStory;
-                    saveToGitHub(false);  // сохраняем на GitHub
+                    saveToGitHub(false);
                 }
             }
 
@@ -694,12 +793,80 @@
                 tryLoad(list, 0);
             }
 
+            // ---------- МИНИАТЮРЫ ----------
+            function buildThumbs() {
+                thumbsBar.innerHTML = '';
+                for (let i = 1; i <= TOTAL; i++) {
+                    const div = document.createElement('div');
+                    div.className = 'thumb-item';
+                    div.dataset.index = i;
+                    div.innerHTML = `<div class="thumb-loading">●</div><div class="thumb-num">${pad3(i)}</div>`;
+                    div.addEventListener('click', function() {
+                        goTo(i);
+                    });
+                    thumbsBar.appendChild(div);
+                }
+                // загружаем миниатюры асинхронно
+                for (let i = 1; i <= TOTAL; i++) {
+                    loadThumb(i);
+                }
+                updateThumbActive();
+            }
+
+            function loadThumb(num) {
+                const div = thumbsBar.children[num - 1];
+                if (!div) return;
+                const img = div.querySelector('img');
+                if (img) return;
+
+                const key = pad3(num);
+                let extIndex = 0;
+
+                function tryLoadThumb(extIdx) {
+                    if (extIdx >= EXTENSIONS.length) {
+                        div.innerHTML = `<div class="thumb-loading">✕</div><div class="thumb-num">${key}</div>`;
+                        return;
+                    }
+                    const path = FOLDER + '/' + key + '.' + EXTENSIONS[extIdx];
+                    const probe = new Image();
+                    probe.onload = function() {
+                        const newImg = document.createElement('img');
+                        newImg.src = path;
+                        newImg.alt = key;
+                        newImg.loading = 'lazy';
+                        div.innerHTML = '';
+                        div.appendChild(newImg);
+                        const numLabel = document.createElement('div');
+                        numLabel.className = 'thumb-num';
+                        numLabel.textContent = key;
+                        div.appendChild(numLabel);
+                    };
+                    probe.onerror = function() {
+                        tryLoadThumb(extIdx + 1);
+                    };
+                    probe.src = path;
+                }
+                tryLoadThumb(0);
+            }
+
+            function updateThumbActive() {
+                const items = thumbsBar.querySelectorAll('.thumb-item');
+                items.forEach((el, i) => {
+                    el.classList.toggle('active', (i + 1) === currentIndex);
+                });
+                const active = thumbsBar.querySelector('.thumb-item.active');
+                if (active) {
+                    active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+                }
+            }
+
             // ---------- НАВИГАЦИЯ ----------
             function applyCurrent() {
                 jumpInput.value = currentIndex;
                 counterDisplay.textContent = currentIndex + ' / ' + TOTAL;
                 loadText();
                 loadImage(currentIndex);
+                updateThumbActive();
             }
 
             function goTo(num) {
@@ -720,11 +887,10 @@
             saveBtn.onclick = function() { saveText(); };
             resetBtn.onclick = resetText;
 
-            // Автосохранение при вводе
             workTitle.addEventListener('input', saveText);
             story.addEventListener('input', saveText);
             window.addEventListener('beforeunload', function() {
-                saveText(); // последнее сохранение перед закрытием
+                saveText();
             });
 
             jumpBtn.onclick = function() {
@@ -735,7 +901,6 @@
                 if (e.key === 'Enter') jumpBtn.click();
             });
 
-            // Клавиши
             document.addEventListener('keydown', function(e) {
                 if (zoomLayer.classList.contains('open')) {
                     if (e.key === 'Escape') closeZoom();
@@ -746,7 +911,6 @@
                 if (e.key === 'ArrowLeft') prev();
             });
 
-            // Колёсико
             document.addEventListener('wheel', function(e) {
                 if (zoomLayer.classList.contains('open')) return;
                 if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
@@ -846,13 +1010,8 @@
             }, { passive: true });
 
             // ---------- СТАРТ ----------
-            // Загружаем данные с GitHub, затем применяем текущую работу
-            loadFromGitHub().then(() => {
-                // уже вызван applyCurrent внутри loadFromGitHub
-            }).catch(() => {
-                // если совсем ничего не загрузилось, показываем первую работу
-                goTo(1);
-            });
+            buildThumbs();
+            loadFromGitHub();
 
         })();
     </script>
