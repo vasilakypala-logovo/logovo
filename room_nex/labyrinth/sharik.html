@@ -23,7 +23,6 @@
       font-size: 22px;
       text-align: center;
       pointer-events: none;
-      transition: opacity 2s ease, color 1.5s ease;
       cursor: default;
       user-select: none;
       background: transparent;
@@ -67,7 +66,6 @@
 
   let pulses = [];
   let time = 0;
-  let startTime = Date.now();
   let messageShown = false;
   let linkReady = false;
 
@@ -161,12 +159,14 @@
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // через ~3 минуты появляется "граница территории"
-    if (Date.now() - startTime > 180000) {
+    // ════════════ ПОЯВЛЕНИЕ ЧЕРЕЗ 3 СЕКУНДЫ ════════════
+    if (Date.now() - startTime > 3000 && !messageShown) {
       showExitMessage();
     }
   }
 
+  // Запуск анимации
+  let startTime = Date.now();
   animate();
 </script>
 
