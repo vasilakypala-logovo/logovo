@@ -52,6 +52,90 @@ body{font-family:Arial,sans-serif;background:#0b0c0f;color:#ddd;overflow:hidden;
 #githubSettings button:hover{background:#3a4a3a}
 #githubSettings .close{position:absolute;top:5px;right:10px;background:none;border:none;color:#888;font-size:20px;cursor:pointer}
 #githubSettings .close:hover{color:#fff}
+
+/* ===== БЕЛАЯ ПЛАНЕТКА ===== */
+#planetBtn {
+    position: fixed;
+    right: 20px;
+    bottom: 80px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffffff, #c8d0d8);
+    border: 2px solid rgba(255,255,255,0.4);
+    cursor: pointer;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 
+        0 0 30px rgba(255,255,255,0.15),
+        inset 0 -8px 20px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-size: 24px;
+    color: #2a3a4a;
+    user-select: none;
+}
+#planetBtn:hover {
+    transform: scale(1.08);
+    box-shadow: 
+        0 0 50px rgba(255,255,255,0.25),
+        inset 0 -8px 20px rgba(0,0,0,0.15);
+    border-color: rgba(255,255,255,0.7);
+}
+#planetBtn:active { transform: scale(0.92); }
+/* Кольца планеты (декоративные) */
+#planetBtn::before {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 50%;
+    transform: rotate(-20deg);
+    pointer-events: none;
+}
+#planetBtn::after {
+    content: '🌫️';
+    font-size: 22px;
+    filter: drop-shadow(0 0 6px rgba(255,255,255,0.3));
+}
+#planetBtn .tooltip {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    background: rgba(0,0,0,0.85);
+    color: #ddd;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    font-family: Arial, sans-serif;
+    border: 1px solid #333;
+}
+#planetBtn:hover .tooltip {
+    opacity: 1;
+}
+
+@media(max-width:768px){
+    #planetBtn {
+        width: 48px;
+        height: 48px;
+        right: 12px;
+        bottom: 70px;
+    }
+    #planetBtn::before {
+        width: 62px;
+        height: 16px;
+    }
+    #planetBtn::after {
+        font-size: 18px;
+    }
+}
 </style>
 </head>
 <body>
@@ -100,6 +184,11 @@ body{font-family:Arial,sans-serif;background:#0b0c0f;color:#ddd;overflow:hidden;
         ⚙️ GitHub
     </button>
 </div>
+
+<!-- ===== БЕЛАЯ ПЛАНЕТКА ===== -->
+<a id="planetBtn" href="tumanicsechin.html" title="Перейти в Туман">
+    <span class="tooltip">🌫️ Туман</span>
+</a>
 
 <script>
 // ===== НАСТРОЙКИ =====
