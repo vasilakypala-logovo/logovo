@@ -39,7 +39,6 @@ body {
     position: relative;
 }
 
-/* декоративная линия сверху */
 .nav-container::before {
     content: '';
     position: absolute;
@@ -71,7 +70,6 @@ h2 {
     margin-bottom: 25px;
 }
 
-/* форма */
 .form-row {
     display: flex;
     flex-wrap: wrap;
@@ -130,7 +128,6 @@ h2 {
     box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
 }
 
-/* статус */
 .status-bar {
     display: flex;
     justify-content: space-between;
@@ -155,7 +152,6 @@ h2 {
 .status-bar .status-msg.success { color: #6fb07a; }
 .status-bar .status-msg.error { color: #b06f6f; }
 
-/* таблица */
 .table-wrap {
     border-radius: 14px;
     overflow: hidden;
@@ -203,7 +199,6 @@ tr td:first-child {
     font-size: 14px;
 }
 
-/* пустое состояние */
 .empty-state {
     text-align: center;
     padding: 40px 20px;
@@ -212,7 +207,6 @@ tr td:first-child {
     letter-spacing: 2px;
 }
 
-/* кнопка назад */
 .back-link {
     display: inline-block;
     margin-top: 20px;
@@ -231,7 +225,6 @@ tr td:first-child {
     background: rgba(255, 255, 255, 0.02);
 }
 
-/* кнопки действий внизу */
 .actions {
     display: flex;
     gap: 12px;
@@ -320,11 +313,11 @@ const T4 = 'erm81Uf8qd';
 const GITHUB_TOKEN = T1 + T2 + T3 + T4;
 
 // ============================================================
-// 🔐 ПУТЬ К ХРАНИЛИЩУ
+// 🔐 ПУТЬ К ХРАНИЛИЩУ НАВИГАТОРА (ОТДЕЛЬНЫЙ ФАЙЛ!)
 // ============================================================
 const REPO_OWNER = 'vasilakypala-logovo';
 const REPO_NAME = 'logovo';
-const FILE_PATH = 'room_nex/bukibuk/bukibak_data.json';
+const FILE_PATH = 'room_nex/bukibuk/navigator_data.json';   // ← ОТДЕЛЬНЫЙ файл!
 const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
 
 // ============================================================
@@ -366,7 +359,6 @@ function add() {
         return;
     }
 
-    // проверяем уникальность номера
     if (data.some(item => item.num === n)) {
         setStatus(`номер ${n} уже существует`, 'error');
         return;
@@ -401,7 +393,7 @@ function setStatus(msg, type) {
 }
 
 // ============================================================
-// 💾 СОХРАНИТЬ В GITHUB
+// 💾 СОХРАНИТЬ В GITHUB (ОТДЕЛЬНЫЙ ФАЙЛ НАВИГАТОРА)
 // ============================================================
 async function saveToGitHub() {
     if (data.length === 0) {
@@ -414,7 +406,6 @@ async function saveToGitHub() {
     try {
         const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
 
-        // сначала пробуем получить текущий sha
         let sha = null;
         try {
             const res = await fetch(API_URL, {
@@ -456,7 +447,7 @@ async function saveToGitHub() {
 }
 
 // ============================================================
-// 📂 ЗАГРУЗИТЬ С GITHUB
+// 📂 ЗАГРУЗИТЬ С GITHUB (ОТДЕЛЬНЫЙ ФАЙЛ НАВИГАТОРА)
 // ============================================================
 async function loadFromGitHub() {
     setStatus('загрузка...', '');
@@ -468,7 +459,7 @@ async function loadFromGitHub() {
 
         if (!response.ok) {
             if (response.status === 404) {
-                setStatus('файл ещё не создан', '');
+                setStatus('файл навигатора ещё не создан', '');
                 return;
             }
             throw new Error(`ошибка ${response.status}`);
