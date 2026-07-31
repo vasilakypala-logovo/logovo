@@ -112,12 +112,44 @@ input,textarea{width:100%;border:1px solid rgba(215,184,102,.35);background:rgba
 input[type="file"]{padding:8px}textarea{height:220px;resize:vertical;line-height:1.45}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.previewBox{display:flex;justify-content:center;align-items:flex-start;overflow:auto;min-height:720px}canvas{max-width:100%;height:auto;background:#eee;border-radius:8px;box-shadow:0 24px 70px rgba(0,0,0,.55)}.note{margin-top:12px;font-size:13px;opacity:.7;line-height:1.35}#imgStatus{margin-top:6px;font-size:13px;opacity:.72}
 @media(max-width:900px){.cert-grid{grid-template-columns:1fr}.code-box{position:static;margin:12px auto}.safe-shell{margin:8px}.controls{display:grid}.counter{width:100%}}
 
-/* ===== КНОПКА-ПЛАНЕТКА ===== */
-.planet-nav {
+/* ===== КНОПКА-ПЛАНЕТКА С ПОДПИСЯМИ ===== */
+.planet-wrapper {
   position: fixed;
   bottom: 30px;
   right: 30px;
   z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* подписи */
+.planet-label {
+  font-family: Georgia, serif;
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: rgba(207, 214, 210, 0.85);
+  text-shadow: 0 0 20px rgba(180, 220, 210, 0.15);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2px 12px;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(207, 214, 210, 0.15);
+  white-space: nowrap;
+}
+.planet-label-top {
+  margin-bottom: 2px;
+}
+.planet-label-bottom {
+  margin-top: 6px;
+  font-size: 11px;
+  opacity: 0.7;
+  letter-spacing: 2px;
+}
+
+/* сама планета */
+.planet-nav {
   width: 68px;
   height: 68px;
   border-radius: 50%;
@@ -148,7 +180,7 @@ input[type="file"]{padding:8px}textarea{height:220px;resize:vertical;line-height
     inset 0 8px 20px rgba(255,255,255,0.3);
   border-color: rgba(215, 184, 102, 0.7);
 }
-/* "кольцо" вокруг планеты */
+/* кольцо */
 .planet-nav::before {
   content: '';
   position: absolute;
@@ -167,9 +199,13 @@ input[type="file"]{padding:8px}textarea{height:220px;resize:vertical;line-height
   z-index: 2;
   transform: translateY(2px);
 }
+
 @media (max-width: 600px) {
-  .planet-nav { width: 56px; height: 56px; font-size: 20px; bottom: 18px; right: 18px; }
+  .planet-wrapper { bottom: 18px; right: 18px; }
+  .planet-nav { width: 56px; height: 56px; font-size: 20px; }
   .planet-nav::before { width: 72px; height: 24px; top: 16px; left: -8px; }
+  .planet-label { font-size: 10px; padding: 1px 8px; letter-spacing: 2px; }
+  .planet-label-bottom { font-size: 9px; }
 }
 </style>
 </head>
@@ -201,10 +237,14 @@ input[type="file"]{padding:8px}textarea{height:220px;resize:vertical;line-height
   <footer>Важно: браузер на сайте не записывает файл прямо в GitHub-папку. Поэтому порядок простой: сейф скачивает PNG наружу, Вы загружаете его в папку <b>pspt</b> на сайте, а кнопка просмотра читает уже опубликованные файлы <b>pspt/0001.png</b>, <b>pspt/0002.png</b> и дальше.</footer>
 </div>
 
-<!-- ===== КНОПКА-ПЛАНЕТКА ===== -->
-<a href="navigat.html" class="planet-nav" id="planetNav" title="Открыть навигатор">
-  <span>✦</span>
-</a>
+<!-- ===== КНОПКА-ПЛАНЕТКА С ПОДПИСЯМИ ===== -->
+<div class="planet-wrapper">
+  <div class="planet-label planet-label-top">НАВИГАТОР</div>
+  <a href="navigat.html" class="planet-nav" id="planetNav" title="Открыть навигатор">
+    <span>✦</span>
+  </a>
+  <div class="planet-label planet-label-bottom">СЕЙФА</div>
+</div>
 
 <div class="modal" id="certModal" aria-hidden="true">
   <div class="modal-card">
