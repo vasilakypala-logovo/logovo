@@ -268,7 +268,7 @@ tr td:first-child {
 <div class="nav-container">
 
     <h2>✦ НАВИГАТОР СЕЙФА</h2>
-    <div class="subtitle">— артефакты в папке pspt —</div>
+    <div class="subtitle">— артефакты в папке pspt (сначала новые) —</div>
 
     <div class="form-row">
         <label for="num">№</label>
@@ -317,7 +317,7 @@ const GITHUB_TOKEN = T1 + T2 + T3 + T4;
 // ============================================================
 const REPO_OWNER = 'vasilakypala-logovo';
 const REPO_NAME = 'logovo';
-const FILE_PATH = 'room_nex/bukibuk/navigator_data.json';   // ← ОТДЕЛЬНЫЙ файл!
+const FILE_PATH = 'room_nex/bukibuk/navigator_data.json';
 const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
 
 // ============================================================
@@ -326,7 +326,7 @@ const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/content
 let data = [];
 
 // ============================================================
-// 📌 ОТРИСОВКА
+// 📌 ОТРИСОВКА (В ОБРАТНОМ ПОРЯДКЕ — СНАЧАЛА НОВЫЕ)
 // ============================================================
 function draw() {
     let html = `<tr><th>№</th><th>Название</th></tr>`;
@@ -334,7 +334,10 @@ function draw() {
     if (data.length === 0) {
         html += `<tr><td colspan="2" class="empty-state">— пока нет записей —</td></tr>`;
     } else {
-        data.forEach(a => {
+        // ⬇️ ВАЖНО: создаём КОПИЮ массива и разворачиваем
+        const reversed = [...data].reverse();
+        
+        reversed.forEach(a => {
             html += `
             <tr ondblclick="openArt('${a.num}')">
                 <td>${a.num}</td>
@@ -376,10 +379,9 @@ function add() {
 }
 
 // ============================================================
-// 🖱 ОТКРЫТЬ PNG (правильная механика из рабочего файла)
+// 🖱 ОТКРЫТЬ PNG
 // ============================================================
 function openArt(n) {
-    // ФОРМИРУЕМ ИМЯ ФАЙЛА КАК В РАБОЧЕМ ПРИМЕРЕ
     let file = "pspt/" + String(n).padStart(4, "0") + ".png";
     window.open(file, "_blank");
 }
@@ -394,7 +396,7 @@ function setStatus(msg, type) {
 }
 
 // ============================================================
-// 💾 СОХРАНИТЬ В GITHUB (ОТДЕЛЬНЫЙ ФАЙЛ НАВИГАТОРА)
+// 💾 СОХРАНИТЬ В GITHUB
 // ============================================================
 async function saveToGitHub() {
     if (data.length === 0) {
@@ -448,7 +450,7 @@ async function saveToGitHub() {
 }
 
 // ============================================================
-// 📂 ЗАГРУЗИТЬ С GITHUB (ОТДЕЛЬНЫЙ ФАЙЛ НАВИГАТОРА)
+// 📂 ЗАГРУЗИТЬ С GITHUB
 // ============================================================
 async function loadFromGitHub() {
     setStatus('загрузка...', '');
