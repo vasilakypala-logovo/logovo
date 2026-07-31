@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Навигатор Сейфа</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:#ececec;
+    margin:20px;
+}
+
+input{
+    padding:5px;
+    font-size:16px;
+}
+
+button{
+    padding:6px 12px;
+    font-size:16px;
+}
+
+table{
+    margin-top:20px;
+    border-collapse:collapse;
+    width:100%;
+}
+
+th,td{
+    border:1px solid #999;
+    padding:6px;
+}
+
+tr:hover{
+    background:#ffffcc;
+    cursor:pointer;
+}
+</style>
+
+</head>
+<body>
+
+<h2>НАВИГАТОР СЕЙФА</h2>
+
+Номер
+<input id="num" size="6">
+
+Название
+<input id="name" size="40">
+
+<button onclick="add()">Сохранить</button>
+
+<table id="tbl">
+<tr>
+<th>№</th>
+<th>Название</th>
+</tr>
+</table>
+
+<script>
+
+let data=[];
+
+function add(){
+
+    let n=document.getElementById("num").value.trim();
+    let t=document.getElementById("name").value.trim();
+
+    if(n=="" || t=="") return;
+
+    data.push({
+        num:n,
+        title:t
+    });
+
+    data.sort((a,b)=>Number(a.num)-Number(b.num));
+
+    draw();
+
+    num.value="";
+    name.value="";
+}
+
+function draw(){
+
+    let html="<tr><th>№</th><th>Название</th></tr>";
+
+    data.forEach(a=>{
+
+        html+=`
+        <tr ondblclick="openArt('${a.num}')">
+            <td>${a.num}</td>
+            <td>${a.title}</td>
+        </tr>`;
+    });
+
+    tbl.innerHTML=html;
+}
+
+function openArt(n){
+
+    let file = "pspt/" + String(n).padStart(4,"0") + ".png";
+
+    window.open(file,"_blank");
+
+}
+
+</script>
+
+</body>
+</html>
