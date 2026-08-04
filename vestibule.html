@@ -65,7 +65,59 @@ body {
 }
 
 /* Кликабельная зона поверх пятна */
-.portal {
+.portal 
+    .plaque {
+    position: absolute;
+    top: 52%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+
+    padding: 10px 34px;
+
+    font-family: Georgia, serif;
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 2px;
+
+    color: #f7d97a;
+
+    background:
+        linear-gradient(
+            180deg,
+            #b97733 0%,
+            #8c5320 45%,
+            #6b3c14 100%
+        );
+
+    border: 2px solid #d3a05d;
+    border-radius: 5px;
+
+    box-shadow:
+        0 0 14px rgba(255,210,120,0.28),
+        inset 0 1px 2px rgba(255,255,255,0.35),
+        inset 0 -2px 4px rgba(0,0,0,0.45);
+
+    text-shadow:
+        0 0 3px rgba(255,235,170,0.7);
+
+    cursor: pointer;
+    user-select: none;
+    transition: all .25s ease;
+}
+
+.plaque:hover{
+    transform:translate(-50%,-50%) scale(1.05);
+    box-shadow:
+        0 0 24px rgba(255,220,120,.55),
+        inset 0 1px 3px rgba(255,255,255,.45),
+        inset 0 -2px 5px rgba(0,0,0,.45);
+}
+
+.plaque:active{
+    transform:translate(-50%,-50%) scale(.98);
+}
+    {
     position: absolute;
     top: 52%;
     left: 50%;
@@ -181,8 +233,9 @@ body {
     <div class="mist"></div>
 
     <div class="bust"></div>
-    <div class="portal" onclick="enterHall()"></div>
-    <div class="question-mark">?</div>
+    <div class="plaque" onclick="enterHall()">
+    ДОБРОГО ЗДРАВИЯ!
+</div>
 
     <div class="title">ЛОГОВО ИСКУССТВЕННОГО ИНТЕЛЛЕКТА</div>
     <div class="quote" id="quote"></div>
@@ -193,7 +246,7 @@ body {
 </div>
 
 <script>
-const text = "Все начинается не с картины — Оно начинается с момента, когда ты решил войти";
+const text = "ПЕРВЫЙ ЗАКОН ЛОГОВА: Зашел — поздоровайся!";
 let i = 0;
 
 function typeWriter() {
