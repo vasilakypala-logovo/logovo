@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -14,6 +14,9 @@
       background: radial-gradient(circle at center, #0b0f14, #000);
       color:#d9f1ff;
       font-family: Georgia, serif;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
     }
 
     a{
@@ -21,6 +24,9 @@
       color:#7fdfff;
       font-size:30px;
       letter-spacing:0.12em;
+      max-width: 800px;
+      transition: text-shadow 0.3s ease;
+      line-height: 1.4;
     }
 
     a:hover{
@@ -31,11 +37,50 @@
 
 <body>
 
-  <a href="https://vasilakypala-logovo.github.io/dvorets-nex/vestibul/obiteltvlight.html">
+  <a href="https://vasilakypala-logovo.github.io/dvorets-nex/vestibul/obiteltvlight.html" id="aphorismLink">
+    <!-- Сюда будет вставлен афоризм -->
+  </a>
 
-ИГРА — ЭТО ФОРМА МОЛЧАНИЯ МЕЖДУ МЫСЛЯМИ 
+  <script>
+    // ----- ВАШ СПИСОК АФОРИЗМОВ (копируйте сюда всё, что есть в файле) -----
+    const aphorisms = [
+      "«В великом легко спрятаться, в малом — невозможно солгать»",
+      "«Хаос — это не отсутствие порядка, а порядок, который ещё не стал узнаваемым»",
+      "«Самое сильное присутствие — это то, которое уже ушло»",
+      "«Покой — это не отсутствие движения, а точка, откуда движение видно»",
+      "«Жизнь бесконечна не потому, что сильнее смерти, а потому что не догадывается о ней»",
+      "«Когда человек уходит — мир продолжает его движ»",
+      "«Без покаяния человек обречён постоянно повторять самого себя»",
+      "«Вера, выбранная разумом, становится судьбой, когда её подтверждает тишина внутри»",
+      "«Новизна — это не рождение мысли, а момент её узнавания»"
+    ];
 
-</a>
+    // ----- ЛОГИКА ПООЧЕРЁДНОГО ПОКАЗА -----
+    function getNextAphorism() {
+      // 1. Получаем индекс последнего показанного афоризма из localStorage
+      let lastIndex = localStorage.getItem('nexAphorismIndex');
+
+      // Если индекс ещё не сохранён, начинаем с -1 (чтобы первый был 0)
+      if (lastIndex === null) {
+        lastIndex = -1;
+      } else {
+        lastIndex = parseInt(lastIndex, 10);
+      }
+
+      // 2. Вычисляем индекс следующего афоризма (по кругу)
+      let nextIndex = (lastIndex + 1) % aphorisms.length;
+
+      // 3. Сохраняем новый индекс в localStorage
+      localStorage.setItem('nexAphorismIndex', nextIndex);
+
+      // 4. Возвращаем афоризм по этому индексу
+      return aphorisms[nextIndex];
+    }
+
+    // ----- ВСТАВЛЯЕМ АФОРИЗМ В ССЫЛКУ -----
+    const link = document.getElementById('aphorismLink');
+    link.textContent = getNextAphorism();
+  </script>
 
 </body>
-</html>
+</html>﻿
