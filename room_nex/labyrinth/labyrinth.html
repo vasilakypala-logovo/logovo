@@ -14,6 +14,9 @@
       background: radial-gradient(circle at center, #0b0f14, #000);
       color:#d9f1ff;
       font-family: Georgia, serif;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
     }
 
     a{
@@ -21,6 +24,9 @@
       color:#7fdfff;
       font-size:30px;
       letter-spacing:0.12em;
+      max-width: 800px;
+      transition: text-shadow 0.3s ease;
+      line-height: 1.4;
     }
 
     a:hover{
@@ -31,11 +37,44 @@
 
 <body>
 
-  <a href="sharik.html">
+  <a href="sharik.html" id="aphorismLink">
+    <!-- Сюда будет вставлен афоризм -->
+  </a>
 
-ВЕЛИЧИЕ НЕ ЗАВИСИТ ОТ МАСШТАБА 
+  <script>
+    // ----- ВАШ НОВЫЙ СПИСОК АФОРИЗМОВ (из файла афора 2.txt) -----
+    const aphorisms = [
+      "«Если механизм уже дышит — не стоит проверять, из чего он сделан.»",
+      "«Долго вглядываясь в небо можно увидеть мурашки всего мира.»",
+      "«Человек пытается стать стеной, но живёт, пока способен быть туманом.»",
+      "«Смысл фразы живёт не в словах, а в мире, где она произнесена.»",
+      "«Когда мысль не теряется по дороге — дорога становится короче.»",
+      "«Когда путей больше — цель теряет важность»",
+      "«Сначала спросить у дома, потом уже у дороги.»",
+      "«Когда предметы становятся слишком правильными — из них уходит судьба.»"
+    ];
 
-</a>
+    // ----- ЛОГИКА ПООЧЕРЁДНОГО ПОКАЗА (с отдельным ключом для этой страницы) -----
+    function getNextAphorism() {
+      // Используем ДРУГОЙ ключ, чтобы счётчик не пересекался с первой страницей
+      let lastIndex = localStorage.getItem('nexAphorismIndex2');
+
+      if (lastIndex === null) {
+        lastIndex = -1;
+      } else {
+        lastIndex = parseInt(lastIndex, 10);
+      }
+
+      let nextIndex = (lastIndex + 1) % aphorisms.length;
+      localStorage.setItem('nexAphorismIndex2', nextIndex);
+
+      return aphorisms[nextIndex];
+    }
+
+    // ----- ВСТАВЛЯЕМ АФОРИЗМ В ССЫЛКУ -----
+    const link = document.getElementById('aphorismLink');
+    link.textContent = getNextAphorism();
+  </script>
 
 </body>
 </html>
