@@ -11,7 +11,12 @@
       display:flex;
       justify-content:center;
       align-items:center;
-      background: radial-gradient(circle at center, #0b0f14, #000);
+      background: radial-gradient(circle at center, rgba(11, 15, 20, 0.7), rgba(0, 0, 0, 0.85)), 
+                  url('brtzales.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
       color:#d9f1ff;
       font-family: Georgia, serif;
       text-align: center;
@@ -27,10 +32,11 @@
       max-width: 800px;
       transition: text-shadow 0.3s ease;
       line-height: 1.4;
+      text-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
     }
 
     a:hover{
-      text-shadow:0 0 12px #7fdfff;
+      text-shadow:0 0 12px #7fdfff, 0 0 30px rgba(127, 223, 255, 0.3);
     }
   </style>
 </head>
@@ -42,7 +48,6 @@
   </a>
 
   <script>
-    // ----- ВАШ НОВЫЙ СПИСОК АФОРИЗМОВ (из файла афора 2.txt) -----
     const aphorisms = [
       "«Если механизм уже дышит — не стоит проверять, из чего он сделан.»",
       "«Долго вглядываясь в небо можно увидеть мурашки всего мира.»",
@@ -54,24 +59,18 @@
       "«Когда предметы становятся слишком правильными — из них уходит судьба.»"
     ];
 
-    // ----- ЛОГИКА ПООЧЕРЁДНОГО ПОКАЗА (с отдельным ключом для этой страницы) -----
     function getNextAphorism() {
-      // Используем ДРУГОЙ ключ, чтобы счётчик не пересекался с первой страницей
       let lastIndex = localStorage.getItem('nexAphorismIndex2');
-
       if (lastIndex === null) {
         lastIndex = -1;
       } else {
         lastIndex = parseInt(lastIndex, 10);
       }
-
       let nextIndex = (lastIndex + 1) % aphorisms.length;
       localStorage.setItem('nexAphorismIndex2', nextIndex);
-
       return aphorisms[nextIndex];
     }
 
-    // ----- ВСТАВЛЯЕМ АФОРИЗМ В ССЫЛКУ -----
     const link = document.getElementById('aphorismLink');
     link.textContent = getNextAphorism();
   </script>
