@@ -296,6 +296,7 @@ tr td:first-child {
         <button onclick="saveToGitHub()">💾 Сохранить на сайт</button>
         <button onclick="loadFromGitHub()">📂 Загрузить с сайта</button>
         <button onclick="clearAll()">✕ Очистить список</button>
+        <button onclick="testOpen()">🧪 Тест открытия</button>
     </div>
 
     <a href="index.html" class="back-link">← в Сейф</a>
@@ -313,7 +314,7 @@ const T4 = 'erm81Uf8qd';
 const GITHUB_TOKEN = T1 + T2 + T3 + T4;
 
 // ============================================================
-// 🔐 ПУТЬ К ХРАНИЛИЩУ НАВИГАТОРА (ОТДЕЛЬНЫЙ ФАЙЛ!)
+// 🔐 ПУТЬ К ХРАНИЛИЩУ НАВИГАТОРА
 // ============================================================
 const REPO_OWNER = 'vasilakypala-logovo';
 const REPO_NAME = 'logovo';
@@ -326,28 +327,162 @@ const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/content
 let data = [];
 
 // ============================================================
-// 📌 ОТРИСОВКА (В ОБРАТНОМ ПОРЯДКЕ — СНАЧАЛА НОВЫЕ)
+// 📌 ОТРИСОВКА
 // ============================================================
 function draw() {
-    let html = `<tr><th>№</th><th>Название</th></tr>`;
+    let html = `<tr><th>№</th><th>Название</th><th>Действие</th></tr>`;
 
     if (data.length === 0) {
-        html += `<tr><td colspan="2" class="empty-state">— пока нет записей —</td></tr>`;
+        html += `<tr><td colspan="3" class="empty-state">— пока нет записей —</td></tr>`;
     } else {
-        // ⬇️ ВАЖНО: создаём КОПИЮ массива и разворачиваем
         const reversed = [...data].reverse();
         
         reversed.forEach(a => {
             html += `
-            <tr ondblclick="openArt('${a.num}')">
+            <tr>
                 <td>${a.num}</td>
                 <td>${a.title}</td>
+                <td>
+                    <button onclick="openArt('${a.num}')" style="
+                        padding: 4px 12px;
+                        font-size: 12px;
+                        background: rgba(215, 184, 102, 0.15);
+                        border: 1px solid rgba(215, 184, 102, 0.3);
+                        border-radius: 6px;
+                        color: #e0dbce;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        font-family: 'Georgia', serif;
+                    " onmouseover="this.style.background='rgba(215, 184, 102, 0.25)'" 
+                       onmouseout="this.style.background='rgba(215, 184, 102, 0.15)'">
+                        📂 Открыть
+                    </button>
+                </td>
             </tr>`;
         });
     }
 
     document.getElementById('tbl').innerHTML = html;
     document.getElementById('countDisplay').textContent = `записей: ${data.length}`;
+}
+
+// ============================================================
+// 🖱 ОТКРЫТЬ PNG
+// ============================================================
+function openArt(n) {
+    const paddedNum = String(n).padStart(4, "0");
+    const filename = `${paddedNum}.png`;
+    
+    setStatus(`открываем ${filename}...`, '');
+    
+    // СПОСОБ 1: Открываем через новое окно с изображением
+    const win = window.open('', '_blank');
+    if (win) {
+        win.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>${filename}</title>
+                <style>
+                    body {
+                        margin: 0;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        min-height: 100vh;
+                        background: #0a0a0a;
+                        font-family: monospace;
+                    }
+                    img {
+                        max-width: 95vw;
+                        max-height: 95vh;
+                        box-shadow: 0 0 60px rgba(0,0,0,0.9);
+                        border: 1px solid #333;
+                    }
+                    .error {
+                        color: #ff6b6b;
+                        padding: 40px;
+                        text-align: center;
+                        line-height: 2;
+                    }
+                    .info {
+                        position: fixed;
+                        bottom: 20px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        color: #555;
+                        font-size: 12px;
+                        background: rgba(0,0,0,0.8);
+                        padding: 8px 16px;
+                        border-radius: 8px;
+                        letter-spacing: 1px;
+                    }
+                </style>
+            </head>
+            <body>
+                <img id="img" src="pspt/${filename}" 
+                     alt="${filename}"
+                     onerror="document.body.innerHTML='<div class=\\'error\\'>❌ Файл не найден<br><br>📁 pspt/${filename}<br><br>💡 Проверьте:<br>1. Существует ли папка pspt<br>2. Есть ли в ней файл ${filename}<br>3. Открывайте через локальный сервер</div>'">
+                <div class="info">${filename}</div>
+                <script>
+                    // Проверка загрузки через 3 секунды
+                    setTimeout(() => {
+                        const img = document.getElementById('img');
+                        if (img && !img.complete) {
+                            document.body.innerHTML = '<div class=\\'error\\'>⚠️ Изображение не загрузилось<br><br>pspt/${filename}<br><br>Попробуйте открыть через локальный сервер</div>';
+                        }
+                    }, 3000);
+                <\/script>
+            </body>
+            </html>
+        `);
+        win.document.close();
+        setStatus(`открыт ${filename}`, 'success');
+    } else {
+        // СПОСОБ 2: Если блокировка всплывающих окон
+        setStatus('разрешите всплывающие окна', 'error');
+        
+        // СПОСОБ 3: Открываем в текущем окне
+        const currentWin = window.open(`pspt/${filename}`, '_self');
+        if (!currentWin) {
+            // СПОСОБ 4: Скачивание
+            const link = document.createElement('a');
+            link.href = `pspt/${filename}`;
+            link.download = filename;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setStatus(`скачивание ${filename}`, '');
+        }
+    }
+}
+
+// ============================================================
+// 🧪 ТЕСТОВАЯ ФУНКЦИЯ
+// ============================================================
+function testOpen() {
+    // Пробуем открыть тестовый файл
+    const testNum = '0001';
+    const testFile = `pspt/${testNum}.png`;
+    
+    setStatus('тест открытия...', '');
+    
+    // Проверяем существование файла
+    fetch(testFile, { method: 'HEAD' })
+        .then(response => {
+            if (response.ok) {
+                setStatus(`✅ файл ${testFile} найден`, 'success');
+                openArt('0001');
+            } else {
+                setStatus(`❌ файл ${testFile} не найден (код ${response.status})`, 'error');
+                alert(`Файл не найден!\n\nПроверьте:\n1. Папка pspt существует\n2. В ней есть файл ${testFile}\n3. Вы открываете через сервер (не просто файл)\n\nСейчас сервер: ${window.location.protocol}//${window.location.host}`);
+            }
+        })
+        .catch(error => {
+            setStatus(`❌ ошибка: ${error.message}`, 'error');
+            alert(`Ошибка доступа!\n\n${error.message}\n\nВозможно, файл нужно открывать через локальный сервер.\n\nСоздайте сервер командой:\npython -m http.server 8000`);
+        });
 }
 
 // ============================================================
@@ -376,14 +511,6 @@ function add() {
     document.getElementById('num').value = '';
     document.getElementById('name').value = '';
     document.getElementById('num').focus();
-}
-
-// ============================================================
-// 🖱 ОТКРЫТЬ PNG
-// ============================================================
-function openArt(n) {
-    let file = "pspt/" + String(n).padStart(4, "0") + ".png";
-    window.open(file, "_blank");
 }
 
 // ============================================================
