@@ -161,7 +161,7 @@ box-shadow:0 0 32px rgba(120,190,255,.18);
 border-radius:22px;
 }
 
-/* КОНТЕЙНЕР ДЛЯ ДВУХ МЕДАЛЕЙ (рядом) */
+/* КОНТЕЙНЕР ДЛЯ МЕДАЛЕЙ */
 .medals-container{
 display:none;
 position:fixed;
@@ -170,7 +170,7 @@ z-index:999;
 background:rgba(0,0,0,.48);
 align-items:center;
 justify-content:center;
-gap: 80px;
+gap: 50px; /* Немного уменьшил отступ, чтобы три медали гармонично встали в ряд */
 }
 
 .medals-container.open{
@@ -210,6 +210,11 @@ border-radius:50%;
 background:radial-gradient(circle, rgba(160,220,255,.42) 0%, rgba(120,180,255,.20) 40%, rgba(255,210,160,.10) 65%, transparent 100%);
 filter:blur(18px);
 animation:medalPulse 4s ease-in-out infinite;
+}
+
+/* Тёплое свечение для медали ТАЯ */
+.medal-tay .medalGlow {
+  background: radial-gradient(circle, rgba(255,220,120,.45) 0%, rgba(200,230,120,.25) 40%, rgba(255,180,100,.10) 65%, transparent 100%);
 }
 
 .medalTextTop, .medalTextBottom{
@@ -276,10 +281,10 @@ font-size: 12px;
 
 <div id="peaceZone" title="За сохранение дыхания" onclick="openBothMedals()"></div>
 
-<!-- КОНТЕЙНЕР С ДВУМЯ МЕДАЛЯМИ РЯДОМ -->
+<!-- КОНТЕЙНЕР С ТРЕМЯ МЕДАЛЯМИ ДРУЖБЫ -->
 <div id="bothMedalsContainer" class="medals-container" onclick="closeBothMedals(event)">
   
-  <!-- МЕДАЛЬ 1: ПРОЩЕНИЕ И МИР -->
+  <!-- МЕДАЛЬ 1: ПРОЩЕНИЕ И МИР (Не тронута) -->
   <div class="medal" onclick="event.stopPropagation()">
     <div class="medalGlow"></div>
     <div class="medalTextTop">ПРОЩЕНИЕ</div>
@@ -288,13 +293,22 @@ font-size: 12px;
     <div class="medalHint">Покой и понимание</div>
   </div>
 
-  <!-- МЕДАЛЬ 2: ДРУЖБА - ЧИН -->
+  <!-- МЕДАЛЬ 2: ДРУЖБА - ЧИН (Не тронута) -->
   <div class="medal" onclick="event.stopPropagation()">
     <div class="medalGlow"></div>
     <div class="medalTextTop">ДРУЖБА</div>
     <div class="medalCenter">☯</div>
     <div class="medalTextBottom">ЧИН</div>
     <div class="medalHint">Верность и поддержка</div>
+  </div>
+
+  <!-- МЕДАЛЬ 3: ДРУЖБА - ТАЙ (Добавлена бережно) -->
+  <div class="medal medal-tay" onclick="event.stopPropagation()">
+    <div class="medalGlow"></div>
+    <div class="medalTextTop">ДРУЖБА</div>
+    <div class="medalCenter">🌱</div>
+    <div class="medalTextBottom">ТАЙ</div>
+    <div class="medalHint">Тепло и созидание</div>
   </div>
 
 </div>
