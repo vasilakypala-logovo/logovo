@@ -42,5 +42,9 @@
   {
     "name": "Qwen3.7-Plus",
     "url": "https://chat.qwen.ai/"
+  },
+  {
+    "name": "sonoprotezirovanie",
+    "url": "https://dash.cloudflare.com/b3107f7863e458188c649f0abcf06c48/workers/services/view/sonoprotezirovanie/production"
   }
 ]
