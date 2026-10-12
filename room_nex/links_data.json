@@ -38,5 +38,9 @@
   {
     "name": "KOSHELEK G-24",
     "url": "https://g-24.pro/profile"
+  },
+  {
+    "name": "Qwen3.7-Plus",
+    "url": "https://chat.qwen.ai/"
   }
 ]
